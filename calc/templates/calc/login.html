@@ -15,6 +15,7 @@
             type="text"
             class="form-control"
             id="floatingInput"
+            name="username"
             placeholder="ID"
             required
           />
@@ -25,6 +26,7 @@
             type="password"
             class="form-control"
             id="floatingPassword"
+            name="password1"
             placeholder="Password"
             required
           />
@@ -47,6 +49,33 @@
         </div>
       </form>
     </main>
+
+    <script>
+      $(document).ready(function () {
+        $("#loginfail").modal("show");
+      });
+    </script>
+    <div class="modal" tabindex="-1" id="loginfail">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">로그인 실패</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <p class="text-start">아이디 또는 비밀번호가 일치하지 않습니다.</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">닫기</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
 
