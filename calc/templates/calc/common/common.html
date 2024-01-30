@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    {% include 'calc/head.html' %}
+    <title>승진 점수 계산기</title>
+  </head>
+
+  <body>
+    <div class="row g-0">
+
+      <div class="col-3">
+        <div class="d-flex flex-nowrap">{% include 'calc/sidebar.html' %}</div>
+      </div>
+
+      <div class="col-9">
+        <div class="p-5">
+          <div class="mb-4">
+            <ul class="nav nav-fill nav-underline">
+
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'calc:cc' %}">경력평정</a>
+              </li>
+
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'calc:cw' %}">근무성적평정</a>
+              </li>
+
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'calc:ct' %}">연수성적평정</a>
+              </li>
+
+            </ul>
+          </div>
+          <div class="">위에서 해당 탭을 클릭해 주세요.</div>
+        </div>
+      </div>
+
+    </div>
+  </body>
+
+</html>

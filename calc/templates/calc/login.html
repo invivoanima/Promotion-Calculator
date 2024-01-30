@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
   <head>
     {% include 'calc/head.html' %}
     <title>승진 점수 계산기</title>
   </head>
+
   <body class="d-flex align-items-center py-4 bg-body-tertiary">
     <main class="form-signin w-100 m-auto">
       <form method="POST">
@@ -11,25 +13,11 @@
         <h1 class="h3 mb-3 fw-normal">로그인</h1>
 
         <div class="form-floating">
-          <input
-            type="text"
-            class="form-control"
-            id="floatingInput"
-            name="username"
-            placeholder="ID"
-            required
-          />
+          <input type="text" class="form-control" id="floatingInput" name="username" placeholder="ID" required="required"/>
           <label for="floatingInput">ID</label>
         </div>
         <div class="form-floating">
-          <input
-            type="password"
-            class="form-control"
-            id="floatingPassword"
-            name="password1"
-            placeholder="Password"
-            required
-          />
+          <input type="password" class="form-control" id="floatingPassword" name="password1" placeholder="Password" required="required"/>
           <label for="floatingPassword">Password</label>
         </div>
         <div class="flex row">
@@ -39,10 +27,7 @@
             </button>
           </div>
           <div class="col">
-            <button
-              class="btn btn-primary w-100 py-2"
-              onclick="location.href='/signup'"
-            >
+            <button class="btn btn-primary w-100 py-2" onclick="location.href='/register'">
               회원가입
             </button>
           </div>
@@ -50,33 +35,37 @@
       </form>
     </main>
 
-    <script>
-      $(document).ready(function () {
-        $("#loginfail").modal("show");
-      });
-    </script>
-    <div class="modal" tabindex="-1" id="loginfail">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">로그인 실패</h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            ></button>
+    {% if messages %}
+      {% for message in messages %}
+        {% if message.tags == 'error' %}
+          <script>
+            $(document).ready(function () {
+              $("#loginfail").modal("show");
+            });
+          </script>
+          <div class="modal" tabindex="-1" id="loginfail">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">로그인 실패</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <p class="text-start">아이디 또는 비밀번호가 일치하지 않습니다.</p>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                    닫기
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="modal-body">
-            <p class="text-start">아이디 또는 비밀번호가 일치하지 않습니다.</p>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">닫기</button>
-          </div>
-        </div>
-      </div>
-    </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
   </body>
+
 </html>
 
 <style>
@@ -100,8 +89,7 @@
     background-color: rgba(0, 0, 0, 0.1);
     border: solid rgba(0, 0, 0, 0.15);
     border-width: 1px 0;
-    box-shadow: inset 0 0.5em 1.5em rgba(0, 0, 0, 0.1),
-      inset 0 0.125em 0.5em rgba(0, 0, 0, 0.15);
+    box-shadow: inset 0 0.5em 1.5em rgba(0, 0, 0, 0.1), inset 0 0.125em 0.5em rgba(0, 0, 0, 0.15);
   }
 
   .b-example-vr {
@@ -158,8 +146,8 @@
     display: block !important;
   }
 
-  html,
-  body {
+  body,
+  html {
     height: 100%;
   }
 

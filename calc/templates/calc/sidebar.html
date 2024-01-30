@@ -1,18 +1,12 @@
-<div
-  class="d-flex flex-column flex-shrink-0 p-3 text-bg-dark"
-  style="width: 280px; height: 100vh"
->
-  <a
-    href="/main"
-    class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none"
-  >
+<div class="d-flex flex-column flex-shrink-0 p-3 text-bg-dark" style="width: 280px; height: 100vh">
+  <a href="/main" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
     <svg class="bi pe-none me-2" width="40" height="32">
-      <use xlink:href="#bootstrap" />
+      <use xlink:href="#bootstrap"/>
     </svg>
     <i class="bi bi-graph-up-arrow fs-2" width="40" height="32"></i>
     <span class="fs-4">승진점수계산기</span>
   </a>
-  <hr />
+  <hr/>
   <ul class="nav nav-pills flex-column mb-auto text-start">
     <li class="nav-item">
       <a href="/main" class="nav-link active" aria-current="page">
@@ -21,7 +15,7 @@
       </a>
     </li>
     <li>
-      <a href="#" class="nav-link text-white">
+      <a href="/common" class="nav-link text-white">
         <i class="bi bi-pen"></i>
         공통점수 입력
       </a>
@@ -33,46 +27,72 @@
       </a>
     </li>
     {% if request.user.is_authenticated %}
-    <li>
-      <a href="#" class="nav-link text-white">
-        <i class="bi bi-reception-4"></i>
-        점수 비교
-      </a>
-    </li>
-    <li>
-      <a href="#" class="nav-link text-white">
-        <i class="bi bi-file-spreadsheet-fill"></i>
-        내 점수 모아보기
-      </a>
-    </li>
-    <li>
-      <a href="#" class="nav-link text-white">
-        <i class="bi bi-globe"></i>
-        지역 설정
-      </a>
-    </li>
-    <li>
-      <a href="#" class="nav-link text-white">
-        <i class="bi bi-box-arrow-right"></i>
-        로그아웃
-      </a>
-    </li>
+      <li>
+        <a href="#" class="nav-link text-white">
+          <i class="bi bi-reception-4"></i>
+          점수 비교
+        </a>
+      </li>
+      <li>
+        <a href="#" class="nav-link text-white">
+          <i class="bi bi-file-spreadsheet-fill"></i>
+          내 점수 모아보기
+        </a>
+      </li>
+      <li>
+        <a href="#" class="nav-link text-white">
+          <i class="bi bi-globe"></i>
+          지역 설정
+        </a>
+      </li>
+      <li>
+        <a href="/logout" class="nav-link text-white">
+          <i class="bi bi-box-arrow-right"></i>
+          로그아웃
+        </a>
+      </li>
     {% endif %}
   </ul>
   {% if not request.user.is_authenticated %}
-  <hr />
-  로그인을 하면 자신이 입력한 점수를 저장할 수 있습니다.
-  <hr />
+    <hr/>
+    로그인을 하면 자신이 입력한 점수를 저장할 수 있습니다.
+    <hr/>
   {% endif %}
   <div class="container">
     {% if request.user.is_authenticated %}
-    <a
-      class="d-flex justify-content-center align-items-center text-white text-decoration-none"
-    >
-      <strong>mdo</strong>
-    </a>
+      <a class="d-flex justify-content-center align-items-center text-white text-decoration-none">
+        <strong>환영합니다,
+          {{ user.username }}님!</strong><br>
+      </a>
     {% else %}
-    <a class="d-flex justify-content-center align-items-center text-white text-decoration-none" href="/login"><strong>로그인하기</strong></a>
+      <a class="d-flex justify-content-center align-items-center text-white text-decoration-none" href="/login">
+        <strong>로그인하기</strong>
+      </a>
     {% endif %}
+
+    <div class="d-flex justify-content-center align-items-center mt-1">
+      <div class="input-group mb-3 w-75">
+        <select class="form-select" id="area_select" name="area_select">
+          <option value="nonselect">지역 선택</option>
+          <option value="seoul" {% if area.area == "seoul" %} selected="selected" {% endif %}>서울</option>
+          <option value="busan" {% if area.area == "busan" %} selected="selected" {% endif %}>부산</option>
+          <option value="daegu" {% if area.area == "daegu" %} selected="selected" {% endif %}>대구</option>
+          <option value="incheon" {% if area.area == "incheon" %} selected="selected" {% endif %}>인천</option>
+          <option value="gwangju" {% if area.area == "gwangju" %} selected="selected" {% endif %}>광주</option>
+          <option value="daejeon" {% if area.area == "daejeon" %} selected="selected" {% endif %}>대전</option>
+          <option value="ulsan" {% if area.area == "ulsan" %} selected="selected" {% endif %}>울산</option>
+          <option value="sejong" {% if area.area == "sejong" %} selected="selected" {% endif %}>세종</option>
+          <option value="gyeongi" {% if area.area == "gyeongi" %} selected="selected" {% endif %}>경기도</option>
+          <option value="gangwon" {% if area.area == "gangwon" %} selected="selected" {% endif %}>강원도</option>
+          <option value="chungbuk" {% if area.area == "chungbuk" %} selected="selected" {% endif %}>충청북도</option>
+          <option value="chungnam" {% if area.area == "chungnam" %} selected="selected" {% endif %}>충청남도</option>
+          <option value="jeonbuk" {% if area.area == "jeonbuk" %} selected="selected" {% endif %}>전라북도</option>
+          <option value="jeonnam" {% if area.area == "jeonnam" %} selected="selected" {% endif %}>전라남도</option>
+          <option value="gyeongbuk" {% if area.area == "gyeongbuk" %} selected="selected" {% endif %}>경상북도</option>
+          <option value="gyeongnam" {% if area.area == "gyeongnam" %} selected="selected" {% endif %}>경상남도</option>
+          <option value="jeju" {% if area.area == "jeju" %} selected="selected" {% endif %}>제주도</option>
+        </select>
+      </div>
+    </div>
   </div>
 </div>

@@ -1,28 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
+
   <head>
     {% include 'calc/head.html' %}
     <title>승진 점수 계산기</title>
   </head>
+
   <body>
     <div class="px-4 py-5 my-5 text-center">
       <h1 class="display-5 fw-bold text-body-emphasis">승진 점수 계산기</h1>
       <br>
       <div class="col-lg-6 mx-auto">
         <p class="lead mb-4">
-          비록 승진 자리는 좁아지고, 관리자의 근무 요건은 옛날 같지 않지만
-          그럼에도 불구하고 승진을 꿈꾸는 선생님들을 돕기 위해 제작하였습니다.
+          비록 승진 자리는 좁아지고, 관리자의 근무 요건은 옛날 같지 않지만 그럼에도 불구하고 승진을 꿈꾸는 선생님들을 돕기 위해 제작하였습니다.
         </p>
         <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
           <button type="button" class="btn btn-primary btn-lg px-4 gap-3" onclick="location.href='/main'">
             메인화면으로
           </button>
-          <button type="button" class="btn btn-outline-secondary btn-lg px-4">
+          <button type="button" class="btn btn-outline-secondary btn-lg px-4" onclick="location.href='/register'">
             회원가입
           </button>
         </div>
       </div>
     </div>
   </body>
+
 </html>
 `
