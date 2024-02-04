@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib import auth
 from django.contrib.auth.models import User
 from django.contrib import messages
-from .models import Profile, Common_Career
+from .models import *
 import re
 
 def welcome(request) :
@@ -16,7 +16,7 @@ def main(request) :
         }
         return render(request, "calc/main.html", datas)
     else :
-        return render(request, "calc/main.html", datas)
+        return render(request, "calc/main.html")
     
 
 def login(request) :
@@ -102,9 +102,10 @@ def common_career(request) :
                 editdata.career_month = request.POST["career_month"]
             else :
                 editdata.career_month = 0
+            if request.POST["career_memo"] != '' :
+                editdata.career_memo = request.POST["career_memo"]
             editdata.save()
             return redirect("calc:cc")
-
 
         area = Profile.objects.get(user__username=request.user.username)
         try :
@@ -120,7 +121,84 @@ def common_career(request) :
     return render(request, "calc/common/common_career.html", datas)
 
 def common_workperformance(request) :
-    return render(request, "calc/common/common_wp.html")
+    if request.user.is_authenticated :
+
+        if request.method == "POST" :
+            editdata = Common_WorkPerformance.objects.get(user__username = request.user.username)
+            if request.POST['wp_late_1'] != '' :
+                editdata.wp_late_1 = request.POST['wp_late_1']
+            else :
+                editdata.wp_late_1 = 0
+            if request.POST['wp_late_2'] != '' :
+                editdata.wp_late_2 = request.POST['wp_late_2']
+            else :
+                editdata.wp_late_2 = 0
+            if request.POST['wp_late_3'] != '' :
+                editdata.wp_late_3 = request.POST['wp_late_3']
+            else :
+                editdata.wp_late_3 = 0
+            if request.POST['wp_late_4'] != '' :
+                editdata.wp_late_4 = request.POST['wp_late_4']
+            else :
+                editdata.wp_late_4 = 0
+            if request.POST['wp_late_5'] != '' :
+                editdata.wp_late_5 = request.POST['wp_late_5']
+            else :
+                editdata.wp_late_5 = 0
+            editdata.wp_memo =request.POST['wp_memo']
+            editdata.save()
+            return redirect("calc:cw")
+
+        area = Profile.objects.get(user__username=request.user.username)
+        try :
+            point = Common_WorkPerformance.objects.get(user__username=request.user.username)
+        except :
+            user = User.objects.get(username=request.user.username)
+            Common_WorkPerformance.objects.create(user=user)
+            point = Common_WorkPerformance.objects.get(user__username=request.user.username)
+        datas = {
+            'area' : area,
+            'point' : point,
+        }
+    return render(request, "calc/common/common_wp.html", datas)
 
 def common_training(request) :
     return render(request, "calc/common/common_training.html")
+
+
+
+
+
+
+
+def area(request) :
+    if request.user.is_authenticated :
+        area = Profile.objects.get(user__username=request.user.username)
+        
+        datas = {
+            'area' : area,
+        }
+        return render(request, "calc/area/area.html", datas)
+    
+    return render(request, "calc/area/area.html")
+
+
+def area_common(request, areaname) : 
+    if request.user.is_authenticated :
+        area = Profile.objects.get(user__username=request.user.username)
+        datas = {
+            'area' : area,
+        }
+        return render(request, f'calc/area/{areaname}/jn_common.html', datas)
+    
+
+
+
+def area_diff(request, areaname) :
+    if request.user.is_authenticated :
+        area = Profile.objects.get(user__username=request.user.username)
+        datas = {
+            'area' : area,
+        }
+        return render(request, f"calc/area/{areaname}/jn_diff.html", datas)
+    

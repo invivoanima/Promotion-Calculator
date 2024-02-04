@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    {% include 'calc/head.html' %}
+    <title>승진 점수 계산기</title>
+  </head>
+
+  <body>
+    <div class="row g-0">
+
+      <div class="col-3">
+        <div class="d-flex flex-nowrap">{% include 'calc/sidebar.html' %}</div>
+      </div>
+
+      <div class="col-9">
+        <div class="p-5">
+          <div class="mb-4">
+            <ul class="nav nav-fill nav-underline">
+
+              <li class="nav-item">
+                <a class="nav-link active" href="/area/{{area.area}}/common">공통가산점</a>
+              </li>
+
+              <li class="nav-item">
+                <a class="nav-link" href="/area/{{area.area}}/diff">선택가산점</a>
+              </li>
+
+            </ul>
+          </div>
+
+          <form class="plus_form" method="POST">
+            {% csrf_token %}
+            <p class="h2 mb-5">공통가산점(3.3점)</p>
+            <div class="accordion mb-2" id="plus_group">
+              <div class="accordion-item">
+                <h2 class="accordion-header row">
+                  <div class="col-1">
+                    <button class="accordion-button collapsed h-100" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne"></button>
+                  </div>
+                  <div class="col-9 align-self-center p-2">
+                    <p class="h5 text-start">연구학교 근무경력(1.0점)</p>
+                  </div>
+                  <div class="col-2 align-self-center">
+                    <p id="research_school_total" class="h5">0</p>
+                  </div>
+                </h2>
+                <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse">
+                  <div class="accordion-body">
+                    <table class="table align-middle">
+                      <thead>
+                        <tr>
+                          <th class="col-6">세부 항목</th>
+                          <th class="col-5">개월수</th>
+                          <th class="col-1">점수</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>
+                            <p class="h5">교육부장관 지정 연구학교(시범, 실험학교 포함)</p>
+                            <p class="h6">월 0.018점</p>
+                          </td>
+                          <td>
+                            <div class="row justify-content-center">
+                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="research_school_year" name="research_school_year">
+                              <p class="w-auto">년</p>
+                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.career_month }}" {% endif %} class="form-control w-25 p-1" id="research_school_month" name="research_school_month">
+                              <p class="w-auto">월</p>
+                            </div>
+                          </td>
+                          <td>
+                            <p class="h6" id="research_school_point">0</p>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div class="row w-100 justify-content-center">
+                      <div class="mb-3 w-75">
+                        <label for="exampleFormControlTextarea1" class="form-label">개인 메모</label>
+                        <textarea class="form-control" id="research_school_memo" name="research_school_memo" rows="3"></textarea>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <h2 class="accordion-header row">
+                  <div class="col-1">
+                    <button class="accordion-button collapsed h-100" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="true" aria-controls="panelsStayOpen-collapseTwo"></button>
+                  </div>
+                  <div class="col-9 align-self-center p-2">
+                    <p class="h5 text-start">재외국인교육기관 파견근무 경력(0.5점)</p>
+                  </div>
+                  <div class="col-2 align-self-center">
+                    <p id="foreign_school_total" class="h5">0</p>
+                  </div>
+                </h2>
+                <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse">
+                  <div class="accordion-body">
+                    <table class="table align-middle">
+                      <thead>
+                        <tr>
+                          <th class="col-6">세부 항목</th>
+                          <th class="col-5">개월수</th>
+                          <th class="col-1">점수</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>
+                            <p class="h5">재외국인교육기관 파견근무경력</p>
+                            <p class="h6">월 0.015점</p>
+                          </td>
+                          <td>
+                            <div class="row justify-content-center">
+                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="foreign_school_year" name="foreign_year">
+                              <p class="w-auto">년</p>
+                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.career_month }}" {% endif %} class="form-control w-25 p-1" id="foreign_school_month" name="foreign_month">
+                              <p class="w-auto">월</p>
+                            </div>
+                          </td>
+                          <td>
+                            <p class="h6" id="foreign_school_point">0</p>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div class="row w-100 justify-content-center">
+                      <div class="mb-3 w-75">
+                        <label for="exampleFormControlTextarea1" class="form-label">개인 메모</label>
+                        <textarea class="form-control" id="foreign_school_memo" name="foreign_school_memo" rows="3"></textarea>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <h2 class="accordion-header row">
+                  <div class="col-1">
+                    <button class="accordion-button collapsed h-100" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseThree" aria-expanded="true" aria-controls="panelsStayOpen-collapseThree"></button>
+                  </div>
+                  <div class="col-9 align-self-center p-2">
+                    <p class="h5 text-start">연수이수학점실적(0.8점)</p>
+                  </div>
+                  <div class="col-2 align-self-center">
+                    <p id="lecture_total" class="h5">0</p>
+                  </div>
+                </h2>
+                <div id="panelsStayOpen-collapseThree" class="accordion-collapse collapse">
+                  <div class="accordion-body">
+                    <table class="table align-middle">
+                      <thead>
+                        <tr>
+                          <th class="col-7">세부 항목</th>
+                          <th class="col-4">연도별이수시간</th>
+                          <th class="col-1">점수</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>
+                            <p class="h5">NEIS 인사기록에 등재되어 학점으로 관리되는 직무연수 실적</p>
+                            <p class="h6">연도별 누적 시간, 1학점(15시간)당 0.02점, 연도별 상한점 0.08점</p>
+                          </td>
+                          <td class="class">
+                            <div class="col">
+                              <div class="row justify-content-center align-text-middle">
+                                <p class="w-auto align-text-middle m-0">1.
+                                </p><input type="number" min="0" max="400" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="lecture1_point" name="lecture1_point">
+                              </div>
+                              <div class="row justify-content-center align-text-middle">
+                                <p class="w-auto align-text-middle m-0">2.
+                                </p><input type="number" min="0" max="400" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="lecture2_point" name="lecture2_point">
+                              </div>
+                              <div class="row justify-content-center align-text-middle">
+                                <p class="w-auto align-text-middle m-0">3.
+                                </p><input type="number" min="0" max="400" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="lecture3_point" name="lecture3_point">
+                              </div>
+                              <div class="row justify-content-center align-text-middle">
+                                <p class="w-auto align-text-middle m-0">4.
+                                </p><input type="number" min="0" max="400" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="lecture4_point" name="lecture4_point">
+                              </div>
+                              <div class="row justify-content-center align-text-middle">
+                                <p class="w-auto align-text-middle m-0">5.
+                                </p><input type="number" min="0" max="400" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="lecture5_point" name="lecture5_point">
+                              </div>
+                              <div class="row justify-content-center align-text-middle">
+                                <p class="w-auto align-text-middle m-0">6.
+                                </p><input type="number" min="0" max="400" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="lecture6_point" name="lecture6_point">
+                              </div>
+                              <div class="row justify-content-center align-text-middle">
+                                <p class="w-auto align-text-middle m-0">7.
+                                </p><input type="number" min="0" max="400" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="lecture7_point" name="lecture7_point">
+                              </div>
+                              <div class="row justify-content-center align-text-middle">
+                                <p class="w-auto align-text-middle m-0">8.
+                                </p><input type="number" min="0" max="400" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="lecture8_point" name="lecture8_point">
+                              </div>
+                              <div class="row justify-content-center align-text-middle">
+                                <p class="w-auto align-text-middle m-0">9.
+                                </p><input type="number" min="0" max="400" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="lecture9_point" name="lecture9_point">
+                              </div>
+                              <div class="row justify-content-center align-text-middle">
+                                <p class="w-auto align-text-middle m-0">10.
+                                </p><input type="number" min="0" max="400" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="lecture10_point" name="lecture10_point">
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            <p class="h6" id="lecture_point">0</p>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div class="row w-100 justify-content-center">
+                      <div class="mb-3 w-75">
+                        <label for="exampleFormControlTextarea1" class="form-label">개인 메모</label>
+                        <textarea class="form-control" id="lecture_memo" name="lecture_memo" rows="3"></textarea>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <h2 class="accordion-header row">
+                  <div class="col-1">
+                    <button class="accordion-button collapsed h-100" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseFour" aria-expanded="true" aria-controls="panelsStayOpen-collapseFour"></button>
+                  </div>
+                  <div class="col-9 align-self-center p-2">
+                    <p class="h5 text-start">학교폭력의 예방 및 대응 관련 실적(1점)</p>
+                  </div>
+                  <div class="col-2 align-self-center">
+                    <p id="violence_total" class="h5">0</p>
+                  </div>
+                </h2>
+                <div id="panelsStayOpen-collapseFour" class="accordion-collapse collapse">
+                  <div class="accordion-body">
+                    <table class="table align-middle">
+                      <thead>
+                        <tr>
+                          <th class="col-6">세부 항목</th>
+                          <th class="col-5">횟수</th>
+                          <th class="col-1">점수</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>
+                            <p class="h5">학교폭력예방 관련 가산점</p>
+                            <p class="h6">연 0.1점</p>
+                          </td>
+                          <td>
+                            <div class="row justify-content-center">
+                              <input type="number" min="0" max="10" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="violence_count" name="violence_count">
+                              <p class="w-auto"></p>
+                            </div>
+                          </td>
+                          <td>
+                            <p class="h6" id="violence_point">0</p>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div class="row w-100 justify-content-center">
+                      <div class="mb-3 w-75">
+                        <label for="exampleFormControlTextarea1" class="form-label">개인 메모</label>
+                        <textarea class="form-control" id="violence_memo" name="violence_memo" rows="3"></textarea>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-8"></div>
+              <div class="col-2">
+                <p class="h2">합계</p>
+              </div>
+              <div class="col-2">
+                <p id="total" class="h2 text-center mb-3">0</p>
+              </div>
+            </div>
+            <button class="btn btn-primary">저장하기</button>
+            <button type="button" class="btn btn-secondary" onclick="career_input_check()">계산하기</button>
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </body>
+
+</html>
+
+<script>
+  window.onload = function () {
+    calc_career()
+  };
+
+  function career_input_check() {
+    var check_year = document
+      .getElementById("career_year")
+      .value
+    var check_month = document
+      .getElementById("career_month")
+      .value;
+    if (check_year >= 0 && check_year <= 40 && check_month >= 0 && check_month <= 12) {
+      calc_career()
+    } else {
+      document
+        .getElementById("total")
+        .innerHTML = "error"
+    }
+  }
+
+  function form_reset() {
+    document
+      .getElementById("career_total")
+      .innerHTML = "0"
+    document
+      .getElementById("0to15y_to_month")
+      .innerHTML = "0"
+    document
+      .getElementById("0to15y_point")
+      .innerHTML = "0"
+    document
+      .getElementById("over15y_to_month")
+      .innerHTML = "0"
+    document
+      .getElementById("over15y_point")
+      .innerHTML = "0"
+    document
+      .getElementById("total")
+      .innerHTML = "0"
+  }
+
+  function calc_career() {
+    form_reset()
+    var check_year = document
+      .getElementById("career_year")
+      .value
+    var check_month = document
+      .getElementById("career_month")
+      .value
+    var total_month = Number(check_year) * 12 + Number(check_month)
+    if (total_month > 240) {
+      total_month = 240
+    }
+    if (total_month == 240) {
+      document
+        .getElementById("0to15y_to_month")
+        .innerHTML = "180"
+      document
+        .getElementById("0to15y_point")
+        .innerHTML = "64"
+      document
+        .getElementById("over15y_to_month")
+        .innerHTML = "60"
+      document
+        .getElementById("over15y_point")
+        .innerHTML = "6"
+      document
+        .getElementById("career_total")
+        .innerHTML = "70"
+    } else if (total_month > 180 && total_month < 240) {
+      document
+        .getElementById("0to15y_to_month")
+        .innerHTML = "180"
+      document
+        .getElementById("0to15y_point")
+        .innerHTML = "64"
+      var over15y_month = total_month - 180
+      var over15y_month_point = (over15y_month * 0.1000).toFixed(4)
+      document
+        .getElementById("over15y_to_month")
+        .innerHTML = over15y_month
+      document
+        .getElementById("over15y_point")
+        .innerHTML = (over15y_month * 0.1000).toFixed(4)
+      document
+        .getElementById("career_total")
+        .innerHTML = (64 + Number(over15y_month_point)).toFixed(4)
+    } else if (total_month == 180) {
+      document
+        .getElementById("0to15y_to_month")
+        .innerHTML = "180"
+      document
+        .getElementById("0to15y_point")
+        .innerHTML = "64"
+      document
+        .getElementById("career_total")
+        .innerHTML = "64"
+      document
+        .getElementById("total")
+        .innerHTML = "64"
+    } else {
+      document
+        .getElementById("0to15y_to_month")
+        .innerHTML = total_month
+      document
+        .getElementById("0to15y_point")
+        .innerHTML = (total_month * 0.3555).toFixed(4)
+      document
+        .getElementById("total")
+        .innerHTML = (total_month * 0.3555).toFixed(4)
+      document
+        .getElementById("career_total")
+        .innerHTML = (total_month * 0.3555).toFixed(4)
+    }
+  }
+</script>

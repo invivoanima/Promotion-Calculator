@@ -34,6 +34,7 @@
           </div>
           <form class="wp_form" method="POST">
             {% csrf_token %}
+            <p class="h2 mb-5">근무성적평정(100점)</p>
             <div class="accordion mb-2" id="wp_group">
               <div class="accordion-item">
                 <h2 class="accordion-header row">
@@ -49,11 +50,11 @@
                 </h2>
                 <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse">
                   <div class="accordion-body">
-                    <table class="table">
+                    <table class="table align-middle">
                       <thead>
                         <tr>
                           <th scope="col">최근 5년간 근무성적평정점(최근 순서대로 입력)</th>
-                          <th scope="col">점수</th>
+                          <th scope="col">원점수</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -62,7 +63,7 @@
                             <p class="h5">당해년도</p>
                           </td>
                           <td class="d-flex justify-content-center">
-                            <input type="number" min="0" max="100" {% if request.user.is_authenticated %} value="{{ point.career_month }}" {% endif %} class="form-control w-50 p-1" id="wp_late_1" name="wp_late_1">
+                            <input type="number" min="0" max="100" {% if request.user.is_authenticated %} value="{{ point.wp_late_1 }}" {% endif %} class="form-control w-50 p-1" id="wp_late_1" name="wp_late_1">
                           </td>
                         </tr>
                         <tr>
@@ -70,7 +71,7 @@
                             <p class="h5">직전년도</p>
                           </td>
                           <td class="d-flex justify-content-center">
-                            <input type="number" min="0" max="100" {% if request.user.is_authenticated %} value="{{ point.career_month }}" {% endif %} class="form-control w-50 p-1" id="wp_late_2" name="wp_late_2">
+                            <input type="number" min="0" max="100" {% if request.user.is_authenticated %} value="{{ point.wp_late_2 }}" {% endif %} class="form-control w-50 p-1" id="wp_late_2" name="wp_late_2">
                           </td>
                         </tr>
                         <tr>
@@ -78,7 +79,7 @@
                             <p class="h5">3년전</p>
                           </td>
                           <td class="d-flex justify-content-center">
-                            <input type="number" min="0" max="100" {% if request.user.is_authenticated %} value="{{ point.career_month }}" {% endif %} class="form-control w-50 p-1" id="wp_late_3" name="wp_late_3">
+                            <input type="number" min="0" max="100" {% if request.user.is_authenticated %} value="{{ point.wp_late_3 }}" {% endif %} class="form-control w-50 p-1" id="wp_late_3" name="wp_late_3">
                           </td>
                         </tr>
                         <tr>
@@ -86,7 +87,7 @@
                             <p class="h5">4년전</p>
                           </td>
                           <td class="d-flex justify-content-center">
-                            <input type="number" min="0" max="100" {% if request.user.is_authenticated %} value="{{ point.career_month }}" {% endif %} class="form-control w-50 p-1" id="wp_late_4" name="wp_late_4">
+                            <input type="number" min="0" max="100" {% if request.user.is_authenticated %} value="{{ point.wp_late_4 }}" {% endif %} class="form-control w-50 p-1" id="wp_late_4" name="wp_late_4">
                           </td>
                         </tr>
                         <tr>
@@ -94,11 +95,17 @@
                             <p class="h5">5년전</p>
                           </td>
                           <td class="d-flex justify-content-center">
-                            <input type="number" min="0" max="100" {% if request.user.is_authenticated %} value="{{ point.career_month }}" {% endif %} class="form-control w-50 p-1" id="wp_late_5" name="wp_late_5">
+                            <input type="number" min="0" max="100" {% if request.user.is_authenticated %} value="{{ point.wp_late_5 }}" {% endif %} class="form-control w-50 p-1" id="wp_late_5" name="wp_late_5">
                           </td>
                         </tr>
                       </tbody>
                     </table>
+                    <div class="row w-100 justify-content-center">
+                      <div class="mb-3 w-75">
+                        <label for="exampleFormControlTextarea1" class="form-label">개인 메모</label>
+                        <textarea class="form-control" id="wp_memo" name="wp_memo" rows="3">{{ point.wp_memo }}</textarea>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

@@ -13,4 +13,8 @@ urlpatterns = [
     path('common/career', views.common_career, name="cc"),
     path('common/wp', views.common_workperformance, name="cw"),
     path('common/training', views.common_training, name="ct"),
+
+    path('area/', views.area, name='area'),
+    path('area/<str:areaname>/common', views.area_common, name='ac'),
+    path('area/<str:areaname>/diff', views.area_diff, name="ad")
 ]

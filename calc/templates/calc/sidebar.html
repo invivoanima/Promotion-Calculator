@@ -1,4 +1,4 @@
-<div class="d-flex flex-column flex-shrink-0 p-3 text-bg-dark" style="width: 280px; height: 100vh">
+<div class="d-flex flex-column flex-shrink-0 p-3 text-bg-dark position-fixed" style="width: 280px; height: 100vh">
   <a href="/main" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
     <svg class="bi pe-none me-2" width="40" height="32">
       <use xlink:href="#bootstrap"/>
@@ -9,21 +9,21 @@
   <hr/>
   <ul class="nav nav-pills flex-column mb-auto text-start">
     <li class="nav-item">
-      <a href="/main" class="nav-link active" aria-current="page">
+      <a href="/main" class="nav-link text-white" aria-current="page">
         <i class="bi bi-house"></i>
         처음으로
       </a>
     </li>
     <li>
-      <a href="/common" class="nav-link text-white">
+      <a href="/common" class="nav-link text-white {% if request.path == '/common/' %}active{% endif %}">
         <i class="bi bi-pen"></i>
         공통점수 입력
       </a>
     </li>
     <li>
-      <a href="#" class="nav-link text-white">
+      <a href="/area/" class="nav-link text-white {% if request.path == '/area/' %}active{% endif %}">
         <i class="bi bi-pen"></i>
-        지역별 점수 입력
+        가산점 입력
       </a>
     </li>
     {% if request.user.is_authenticated %}
@@ -64,35 +64,55 @@
         <strong>환영합니다,
           {{ user.username }}님!</strong><br>
       </a>
+      <a>
+        <strong>지역:
+          {% if area.area == "seoul" %}서울{% endif %}
+          {% if area.area == "busan" %}부산{% endif %}
+          {% if area.area == "daegu" %}대구{% endif %}
+          {% if area.area == "incheon" %}인천{% endif %}
+          {% if area.area == "gwangju" %}광주{% endif %}
+          {% if area.area == "daejeon" %}대전{% endif %}
+          {% if area.area == "ulsan" %}울산{% endif %}
+          {% if area.area == "sejong" %}세종{% endif %}
+          {% if area.area == "gyeongi" %}경기도{% endif %}
+          {% if area.area == "gangwon" %}강원도{% endif %}
+          {% if area.area == "chungbuk" %}충청북도{% endif %}
+          {% if area.area == "chungnam" %}충청남도{% endif %}
+          {% if area.area == "jeonbuk" %}전라북도{% endif %}
+          {% if area.area == "jeonnam" %}전라남도{% endif %}
+          {% if area.area == "gyeongbuk" %}경상북도{% endif %}
+          {% if area.area == "gyeongnam" %}경상남도{% endif %}
+          {% if area.area == "jeju" %}제주도{% endif %}
+        </strong>
+      </a>
     {% else %}
       <a class="d-flex justify-content-center align-items-center text-white text-decoration-none" href="/login">
         <strong>로그인하기</strong>
       </a>
-    {% endif %}
-
-    <div class="d-flex justify-content-center align-items-center mt-1">
-      <div class="input-group mb-3 w-75">
-        <select class="form-select" id="area_select" name="area_select">
-          <option value="nonselect">지역 선택</option>
-          <option value="seoul" {% if area.area == "seoul" %} selected="selected" {% endif %}>서울</option>
-          <option value="busan" {% if area.area == "busan" %} selected="selected" {% endif %}>부산</option>
-          <option value="daegu" {% if area.area == "daegu" %} selected="selected" {% endif %}>대구</option>
-          <option value="incheon" {% if area.area == "incheon" %} selected="selected" {% endif %}>인천</option>
-          <option value="gwangju" {% if area.area == "gwangju" %} selected="selected" {% endif %}>광주</option>
-          <option value="daejeon" {% if area.area == "daejeon" %} selected="selected" {% endif %}>대전</option>
-          <option value="ulsan" {% if area.area == "ulsan" %} selected="selected" {% endif %}>울산</option>
-          <option value="sejong" {% if area.area == "sejong" %} selected="selected" {% endif %}>세종</option>
-          <option value="gyeongi" {% if area.area == "gyeongi" %} selected="selected" {% endif %}>경기도</option>
-          <option value="gangwon" {% if area.area == "gangwon" %} selected="selected" {% endif %}>강원도</option>
-          <option value="chungbuk" {% if area.area == "chungbuk" %} selected="selected" {% endif %}>충청북도</option>
-          <option value="chungnam" {% if area.area == "chungnam" %} selected="selected" {% endif %}>충청남도</option>
-          <option value="jeonbuk" {% if area.area == "jeonbuk" %} selected="selected" {% endif %}>전라북도</option>
-          <option value="jeonnam" {% if area.area == "jeonnam" %} selected="selected" {% endif %}>전라남도</option>
-          <option value="gyeongbuk" {% if area.area == "gyeongbuk" %} selected="selected" {% endif %}>경상북도</option>
-          <option value="gyeongnam" {% if area.area == "gyeongnam" %} selected="selected" {% endif %}>경상남도</option>
-          <option value="jeju" {% if area.area == "jeju" %} selected="selected" {% endif %}>제주도</option>
-        </select>
+      <div class="d-flex justify-content-center align-items-center mt-1">
+        <div class="input-group mb-3 w-75">
+          <select class="form-select" id="area_select" name="area_select">
+            <option value="nonselect">지역 선택</option>
+            <option value="seoul" {% if area.area == "seoul" %} selected="selected" {% endif %}>서울</option>
+            <option value="busan" {% if area.area == "busan" %} selected="selected" {% endif %}>부산</option>
+            <option value="daegu" {% if area.area == "daegu" %} selected="selected" {% endif %}>대구</option>
+            <option value="incheon" {% if area.area == "incheon" %} selected="selected" {% endif %}>인천</option>
+            <option value="gwangju" {% if area.area == "gwangju" %} selected="selected" {% endif %}>광주</option>
+            <option value="daejeon" {% if area.area == "daejeon" %} selected="selected" {% endif %}>대전</option>
+            <option value="ulsan" {% if area.area == "ulsan" %} selected="selected" {% endif %}>울산</option>
+            <option value="sejong" {% if area.area == "sejong" %} selected="selected" {% endif %}>세종</option>
+            <option value="gyeongi" {% if area.area == "gyeongi" %} selected="selected" {% endif %}>경기도</option>
+            <option value="gangwon" {% if area.area == "gangwon" %} selected="selected" {% endif %}>강원도</option>
+            <option value="chungbuk" {% if area.area == "chungbuk" %} selected="selected" {% endif %}>충청북도</option>
+            <option value="chungnam" {% if area.area == "chungnam" %} selected="selected" {% endif %}>충청남도</option>
+            <option value="jeonbuk" {% if area.area == "jeonbuk" %} selected="selected" {% endif %}>전라북도</option>
+            <option value="jeonnam" {% if area.area == "jeonnam" %} selected="selected" {% endif %}>전라남도</option>
+            <option value="gyeongbuk" {% if area.area == "gyeongbuk" %} selected="selected" {% endif %}>경상북도</option>
+            <option value="gyeongnam" {% if area.area == "gyeongnam" %} selected="selected" {% endif %}>경상남도</option>
+            <option value="jeju" {% if area.area == "jeju" %} selected="selected" {% endif %}>제주도</option>
+          </select>
+        </div>
       </div>
-    </div>
+    {% endif %}
   </div>
 </div>
