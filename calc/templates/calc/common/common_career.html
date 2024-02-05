@@ -32,7 +32,7 @@
 
             </ul>
           </div>
-          <form class="career_form" method="POST">
+          <form class="career_form" method="POST" onsubmit="career_input_check();">
             {% csrf_token %}
             <p class="h2 mb-5">경력평정(70점)</p>
             <div class="accordion mb-2" id="career_group">
@@ -111,6 +111,7 @@
                   <p id="total" class="h2 text-center mb-3">0</p>
                 </div>
               </div>
+              <input style="display: none;" type="text" id="hidden_total" name="hidden_total">
               <button class="btn btn-primary">저장하기</button>
               <button type="button" class="btn btn-secondary" onclick="career_input_check()">계산하기</button>
             </form>
@@ -138,6 +139,9 @@
       } else {
         document
           .getElementById("total")
+          .innerHTML = "error"
+        document
+          .getElementById("career_total")
           .innerHTML = "error"
       }
     }
@@ -236,5 +240,11 @@
           .getElementById("career_total")
           .innerHTML = (total_month * 0.3555).toFixed(4)
       }
+      document
+        .getElementById("hidden_total")
+        .value = document
+        .getElementById("total")
+        .innerHTML
+      return true;
     }
   </script>

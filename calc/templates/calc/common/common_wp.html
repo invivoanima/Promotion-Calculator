@@ -32,7 +32,7 @@
 
             </ul>
           </div>
-          <form class="wp_form" method="POST">
+          <form class="wp_form" method="POST" onsubmit="wp_input_check();">
             {% csrf_token %}
             <p class="h2 mb-5">근무성적평정(100점)</p>
             <div class="accordion mb-2" id="wp_group">
@@ -45,7 +45,7 @@
                     <p class="h5 text-start">최근 5년간 근무성적평정</p>
                   </div>
                   <div class="col-2 align-self-center">
-                    <p id="career_total" class="h5">0</p>
+                    <p id="wp_total" class="h5">0</p>
                   </div>
                 </h2>
                 <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse">
@@ -98,6 +98,9 @@
                             <input type="number" min="0" max="100" {% if request.user.is_authenticated %} value="{{ point.wp_late_5 }}" {% endif %} class="form-control w-50 p-1" id="wp_late_5" name="wp_late_5">
                           </td>
                         </tr>
+                        <tr class="table-group-divider">
+                          <td colspan="2">최근 5년간의 근무성적평정 중에서 유리한 3년을 선택하여, 가장 최근의 성적은 34/100, 나머지 성적은 33/100을 곱하여 합산합니다.</td>
+                        </tr>
                       </tbody>
                     </table>
                     <div class="row w-100 justify-content-center">
@@ -119,8 +122,9 @@
                 <p id="total" class="h2 text-center mb-3">0</p>
               </div>
             </div>
+            <input style="display: none;" type="text" id="hidden_total" name="hidden_total">
             <button class="btn btn-primary">저장하기</button>
-            <button type="button" class="btn btn-secondary" onclick="career_input_check()">계산하기</button>
+            <button class="btn btn-secondary" onclick="wp_input_check()">계산하기</button>
           </form>
         </div>
       </div>
@@ -129,3 +133,83 @@
   </body>
 
 </html>
+
+<script>
+  window.onload = function () {
+    calc_wp()
+  };
+
+  function form_reset() {
+    document
+      .getElementById("wp_total")
+      .innerHTML = "0"
+    document
+      .getElementById("total")
+      .innerHTML = "0"
+  }
+
+  function wp_input_check() {
+    var check_wp_late_1 = Number(document.getElementById("wp_late_1").value)
+    var check_wp_late_2 = Number(document.getElementById("wp_late_2").value)
+    var check_wp_late_3 = Number(document.getElementById("wp_late_3").value)
+    var check_wp_late_4 = Number(document.getElementById("wp_late_4").value)
+    var check_wp_late_5 = Number(document.getElementById("wp_late_5").value)
+
+    if ((check_wp_late_1 >= 0 && check_wp_late_1 <= 100) && (check_wp_late_2 >= 0 && check_wp_late_2 <= 100) && (check_wp_late_3 >= 0 && check_wp_late_3 <= 100) && (check_wp_late_4 >= 0 && check_wp_late_4 <= 100) && (check_wp_late_5 >= 0 && check_wp_late_5 <= 100)) {
+      calc_wp()
+    } else {
+      document
+        .getElementById("wp_total")
+        .innerHTML = "error"
+      document
+        .getElementById("total")
+        .innerHTML = "error"
+    }
+  }
+
+  function calc_wp() {
+    form_reset()
+    input_list = [0, 0, 0, 0, 0]
+    input_list[0] = {
+      order: 1,
+      point: Number(document.getElementById("wp_late_1").value)
+    }
+    input_list[1] = {
+      order: 2,
+      point: Number(document.getElementById("wp_late_2").value)
+    }
+    input_list[2] = {
+      order: 3,
+      point: Number(document.getElementById("wp_late_3").value)
+    }
+    input_list[3] = {
+      order: 4,
+      point: Number(document.getElementById("wp_late_4").value)
+    }
+    input_list[4] = {
+      order: 5,
+      point: Number(document.getElementById("wp_late_5").value)
+    }
+    input_list.sort((a, b) => b.point - a.point)
+    input_list.pop()
+    input_list.pop()
+    input_list.sort((a, b) => a.order - b.order)
+    point1 = input_list[0].point * 34 / 100
+    point2 = input_list[1].point * 33 / 100
+    point3 = input_list[2].point * 33 / 100
+    totalpoint = point1 + point2 + point3
+    document
+      .getElementById("wp_total")
+      .innerHTML = totalpoint.toFixed(4)
+    document
+      .getElementById("total")
+      .innerHTML = totalpoint.toFixed(4)
+
+    document
+      .getElementById("hidden_total")
+      .value = document
+      .getElementById("total")
+      .innerHTML
+    return true;
+  }
+</script>

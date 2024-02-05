@@ -105,6 +105,9 @@ def common_career(request) :
             if request.POST["career_memo"] != '' :
                 editdata.career_memo = request.POST["career_memo"]
             editdata.save()
+            totaldata = Profile.objects.get(user__username = request.user.username)
+            totaldata.point_cc = float(request.POST['hidden_total'])
+            totaldata.save()
             return redirect("calc:cc")
 
         area = Profile.objects.get(user__username=request.user.username)
@@ -145,8 +148,11 @@ def common_workperformance(request) :
                 editdata.wp_late_5 = request.POST['wp_late_5']
             else :
                 editdata.wp_late_5 = 0
-            editdata.wp_memo =request.POST['wp_memo']
+            editdata.wp_memo = request.POST['wp_memo']
             editdata.save()
+            totaldata = Profile.objects.get(user__username = request.user.username)
+            totaldata.point_cw = float(request.POST['hidden_total'])
+            totaldata.save()
             return redirect("calc:cw")
 
         area = Profile.objects.get(user__username=request.user.username)
@@ -163,7 +169,40 @@ def common_workperformance(request) :
     return render(request, "calc/common/common_wp.html", datas)
 
 def common_training(request) :
-    return render(request, "calc/common/common_training.html")
+    if request.user.is_authenticated :
+
+        if request.method == "POST" :
+            editdata = Common_Training.objects.get(user__username = request.user.username)
+            editdata.grade1teacher_result = request.POST["grade1teacher_result"]
+            editdata.grade1teacher_memo = request.POST["grade1teacher_memo"]
+            editdata.training_first = request.POST["training_first"]
+            editdata.training_second = request.POST["training_second"]
+            editdata.training_memo = request.POST["training_memo"]
+            editdata.research_contest_point = request.POST["research_contest_point"]
+            editdata.degree_point = request.POST["degree_point"]
+            editdata.research_memo = request.POST["research_memo"]
+            editdata.save()
+            totaldata = Profile.objects.get(user__username = request.user.username)
+            totaldata.point_ct = float(request.POST['hidden_total'])
+            totaldata.save()
+            return redirect("calc:ct")
+        
+        area = Profile.objects.get(user__username=request.user.username)
+        try :
+            point = Common_Training.objects.get(user__username=request.user.username)
+        except :
+            user = User.objects.get(username=request.user.username)
+            Common_Training.objects.create(user=user)
+            point = Common_Training.objects.get(user__username=request.user.username)
+        datas = {
+            'area' : area,
+            'point' : point,
+        }
+    return render(request, "calc/common/common_training.html", datas)
+
+
+
+
 
 
 
