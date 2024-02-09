@@ -12,8 +12,60 @@
         <div class="d-flex flex-nowrap">{% include 'calc/sidebar.html' %}</div>
       </div>
       <div class="col-9">
-        <div class="m-6 w-100 h-100">
-          <p class="h2">공지사항</p>
+        <div class="p-5">
+          <div class="m-6 w-100 h-100">
+            <p class="h2">공지사항</p>
+            <br>
+            <br>
+            <div class="row justify-content-center">
+              <table class="table w-75">
+                <thead>
+                  <tr>
+                    <th scope="col" class="col-1">#</th>
+                    <th scope="col" class="col-7">제목</th>
+                    <th scope="col" class="col-4">날짜</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for row in notice %}
+                    <tr>
+
+                      <div class="modal" tabindex="-1" id="notice_modal_{{ row.id }}">
+                        <div class="modal-dialog modal-dialog-centered">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <h5 class="modal-title">{{ row.title }}</h5>
+                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                              <p class="text-start" id="modal_content">{{ row.content }}</p>
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                                닫기
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <th scope="row">{{ row.id }}</th>
+                      <td>
+                        <span id="title_modal_{{ row.id }}">{{ row.title }}</span>
+                      </td>
+                      <td>{{ row.date|date:'Y-m-d H:i' }}</td>
+                    </tr>
+
+                    <script type="text/javascript">
+                      $('#title_modal_{{ row.id }}').on('click', () => {
+                        $('#notice_modal_{{ row.id }}').modal('show');
+                      });
+                    </script>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -40,7 +92,7 @@
 
 </html>
 
-<script>
+<script type="text/javascript">
   $(document).ready(function () {
     $("#notification").modal("show");
   });

@@ -14,148 +14,198 @@
       </div>
 
       <div class="col-9">
-        <div class="p-5">
-          <div class="mb-4">
-            <ul class="nav nav-fill nav-underline">
+        {% if request.user.is_authenticated %}
+          <div class="p-5">
+            <div class="mb-4">
+              <ul class="nav nav-fill nav-underline">
 
-              <li class="nav-item">
-                <a class="nav-link" href="/area/{{area.area}}/common">공통가산점</a>
-              </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/area/{{area.area}}/common">공통가산점</a>
+                </li>
 
-              <li class="nav-item">
-                <a class="nav-link" href="/area/{{area.area}}/diff">선택가산점</a>
-              </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/area/{{area.area}}/diff">선택가산점</a>
+                </li>
 
-            </ul>
+              </ul>
+            </div>
+
+            <div class="">
+              <p>위에서 해당 탭을 클릭해 주세요.</p>
+              <p>가산점은 전 지역이 동일하게 받는 공통가산점과, 지역마다 다른 선택가산점이 있습니다.</p>
+              <p>공통 가산점은 지역별로 가산점 항목은 동일하나, 점수 배정이 지역별로 차이가 있습니다.</p>
+            </div>
+
           </div>
-
-          <div class="">
-            <p>위에서 해당 탭을 클릭해 주세요.</p>
-            <p>가산점은 전 지역이 동일하게 받는 공통가산점과, 지역마다 다른 선택가산점이 있습니다.</p>
-            <p>공통 가산점은 지역별로 가산점 항목은 동일하나, 점수 배정이 지역별로 차이가 있습니다.</p>
-          </div>
-
         </div>
-      </div>
+      {% else %}
+        <div class="p-5">
+          <div class="row w-75">
+            <table class="table">
+              <tbody>
+                <tr>
+                  <th scope="row" clsss="col-4">
+                    <p class="h3">공통가산점</p>
+                  </th>
+                  <td class="col-8 w-auto row justify-content-center">
+                    <div class="w-75 row justify-content-center">
+                      <table class="w-100">
+                        <tbody class="">
+                          <tr>
+                            <th>
+                              <s>서울</s>
+                            </th>
+                            <th>
+                              <s>부산</s>
+                            </th>
+                            <th>
+                              <s>대구</s>
+                            </th>
+                            <th>
+                              <s>인천</s>
+                            </th>
+                            <th>
+                              <s>광주</s>
+                            </th>
+                          </tr>
+                          <tr>
+                            <th>
+                              <s>대전</s>
+                            </th>
+                            <th>
+                              <s>울산</s>
+                            </th>
+                            <th>
+                              <s>세종</s>
+                            </th>
+                            <th>
+                              <s>인천</s>
+                            </th>
+                          </tr>
+                          <tr>
+                            <th>
+                              <s>경기도</s>
+                            </th>
+                            <th>
+                              <s>강원도</s>
+                            </th>
+                            <th>
+                              <s>충청북도</s>
+                            </th>
+                            <th>
+                              <s>충청남도</s>
+                            </th>
+                            <th>
+                              <s>전라북도</s>
+                            </th>
+                          </tr>
+                          <tr>
+                            <th>
+                              <a href="/area/jeonnam/common">전라남도</a>
+                            </th>
+                            <th>
+                              <s>경상북도</s>
+                            </th>
+                            <th>
+                              <s>경상남도</s>
+                            </th>
+                            <th>
+                              <s>제주도</s>
+                            </th>
+                            <th></th>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+
+                  </td>
+                </tr>
+                <tr>
+                  <th scope="row">
+                    <p class="h3">선택가산점</p>
+                  </th>
+                  <td class="col-8 w-auto row justify-content-center">
+                    <div class="w-75 row justify-content-center">
+                      <table class="w-100">
+                        <tbody class="">
+                          <tr>
+                            <th>
+                              <s>서울</s>
+                            </th>
+                            <th>
+                              <s>부산</s>
+                            </th>
+                            <th>
+                              <s>대구</s>
+                            </th>
+                            <th>
+                              <s>인천</s>
+                            </th>
+                            <th>
+                              <s>광주</s>
+                            </th>
+                          </tr>
+                          <tr>
+                            <th>
+                              <s>대전</s>
+                            </th>
+                            <th>
+                              <s>울산</s>
+                            </th>
+                            <th>
+                              <s>세종</s>
+                            </th>
+                            <th>
+                              <s>인천</s>
+                            </th>
+                          </tr>
+                          <tr>
+                            <th>
+                              <s>경기도</s>
+                            </th>
+                            <th>
+                              <s>강원도</s>
+                            </th>
+                            <th>
+                              <s>충청북도</s>
+                            </th>
+                            <th>
+                              <s>충청남도</s>
+                            </th>
+                            <th>
+                              <s>전라북도</s>
+                            </th>
+                          </tr>
+                          <tr>
+                            <th>
+                              <a href="/area/jeonnam/diff">전라남도</a>
+                            </th>
+                            <th>
+                              <s>경상북도</s>
+                            </th>
+                            <th>
+                              <s>경상남도</s>
+                            </th>
+                            <th>
+                              <s>제주도</s>
+                            </th>
+                            <th></th>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      {% endif %}
+
     </div>
   </body>
 
 </html>
 
-<script>
-  window.onload = function () {
-    calc_career()
-  };
-
-  function career_input_check() {
-    var check_year = document
-      .getElementById("career_year")
-      .value
-    var check_month = document
-      .getElementById("career_month")
-      .value;
-    if (check_year >= 0 && check_year <= 40 && check_month >= 0 && check_month <= 12) {
-      calc_career()
-    } else {
-      document
-        .getElementById("total")
-        .innerHTML = "error"
-    }
-  }
-
-  function form_reset() {
-    document
-      .getElementById("career_total")
-      .innerHTML = "0"
-    document
-      .getElementById("0to15y_to_month")
-      .innerHTML = "0"
-    document
-      .getElementById("0to15y_point")
-      .innerHTML = "0"
-    document
-      .getElementById("over15y_to_month")
-      .innerHTML = "0"
-    document
-      .getElementById("over15y_point")
-      .innerHTML = "0"
-    document
-      .getElementById("total")
-      .innerHTML = "0"
-  }
-
-  function calc_career() {
-    form_reset()
-    var check_year = document
-      .getElementById("career_year")
-      .value
-    var check_month = document
-      .getElementById("career_month")
-      .value
-    var total_month = Number(check_year) * 12 + Number(check_month)
-    if (total_month > 240) {
-      total_month = 240
-    }
-    if (total_month == 240) {
-      document
-        .getElementById("0to15y_to_month")
-        .innerHTML = "180"
-      document
-        .getElementById("0to15y_point")
-        .innerHTML = "64"
-      document
-        .getElementById("over15y_to_month")
-        .innerHTML = "60"
-      document
-        .getElementById("over15y_point")
-        .innerHTML = "6"
-      document
-        .getElementById("career_total")
-        .innerHTML = "70"
-    } else if (total_month > 180 && total_month < 240) {
-      document
-        .getElementById("0to15y_to_month")
-        .innerHTML = "180"
-      document
-        .getElementById("0to15y_point")
-        .innerHTML = "64"
-      var over15y_month = total_month - 180
-      var over15y_month_point = (over15y_month * 0.1000).toFixed(4)
-      document
-        .getElementById("over15y_to_month")
-        .innerHTML = over15y_month
-      document
-        .getElementById("over15y_point")
-        .innerHTML = (over15y_month * 0.1000).toFixed(4)
-      document
-        .getElementById("career_total")
-        .innerHTML = (64 + Number(over15y_month_point)).toFixed(4)
-    } else if (total_month == 180) {
-      document
-        .getElementById("0to15y_to_month")
-        .innerHTML = "180"
-      document
-        .getElementById("0to15y_point")
-        .innerHTML = "64"
-      document
-        .getElementById("career_total")
-        .innerHTML = "64"
-      document
-        .getElementById("total")
-        .innerHTML = "64"
-    } else {
-      document
-        .getElementById("0to15y_to_month")
-        .innerHTML = total_month
-      document
-        .getElementById("0to15y_point")
-        .innerHTML = (total_month * 0.3555).toFixed(4)
-      document
-        .getElementById("total")
-        .innerHTML = (total_month * 0.3555).toFixed(4)
-      document
-        .getElementById("career_total")
-        .innerHTML = (total_month * 0.3555).toFixed(4)
-    }
-  }
-</script>
+<script></script>

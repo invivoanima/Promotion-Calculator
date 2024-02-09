@@ -58,10 +58,26 @@ class Common_Training(models.Model) :
 class Area_Common(models.Model) :
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     area = models.TextField()
-    research_school_career = models.IntegerField()
-    overseas_citizen_institution = models.IntegerField()
-    training_year = models.IntegerField()
-    school_violence = models.IntegerField()
+    research_school_year = models.IntegerField(default=0)
+    research_school_month = models.IntegerField(default=0)
+    research_school_memo = models.TextField(default='')
+    foreign_school_year = models.IntegerField(default=0)
+    foreign_school_month = models.IntegerField(default=0)
+    foreign_school_memo = models.TextField(default='')
+    lecture1_point = models.IntegerField(default=0)
+    lecture2_point = models.IntegerField(default=0)
+    lecture3_point = models.IntegerField(default=0)
+    lecture4_point = models.IntegerField(default=0)
+    lecture5_point = models.IntegerField(default=0)
+    lecture6_point = models.IntegerField(default=0)
+    lecture7_point = models.IntegerField(default=0)
+    lecture8_point = models.IntegerField(default=0)
+    lecture9_point = models.IntegerField(default=0)
+    lecture10_point = models.IntegerField(default=0)
+    lecture_memo = models.TextField(default='')
+    violence_count = models.IntegerField(default=0)
+    violence_memo = models.TextField(default='')
+
 
 
 class area_area(models.Model) :

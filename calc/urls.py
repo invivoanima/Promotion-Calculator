@@ -8,6 +8,8 @@ urlpatterns = [
     path('login/', views.login, name='login'),
     path('logout/', views.logout, name='logout'),
     path('register/', views.register, name='register'),
+    path('area_change/', views.area_change, name="area_change"),
+    path('error/', views.error, name='error'),
 
     path('common/', views.common, name='common'),
     path('common/career', views.common_career, name="cc"),
@@ -16,5 +18,8 @@ urlpatterns = [
 
     path('area/', views.area, name='area'),
     path('area/<str:areaname>/common', views.area_common, name='ac'),
-    path('area/<str:areaname>/diff', views.area_diff, name="ad")
+    path('area/<str:areaname>/diff', views.area_diff, name="ad"),
+    path('area/common', views.area_common),
+    path('area/diff', views.area_diff),
+
 ]

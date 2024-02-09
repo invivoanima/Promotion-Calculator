@@ -15,23 +15,27 @@
 
       <div class="col-9">
         <div class="p-5">
-          <div class="mb-4">
-            <ul class="nav nav-fill nav-underline">
+          {% if request.user.is_authenticated %}
+            <div class="mb-4">
+              <ul class="nav nav-fill nav-underline">
 
-              <li class="nav-item">
-                <a class="nav-link" href="/area/{{area.area}}/common">공통가산점</a>
-              </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/area/{{area.area}}/common">공통가산점</a>
+                </li>
 
-              <li class="nav-item">
-                <a class="nav-link active" href="/area/{{area.area}}/diff">선택가산점</a>
-              </li>
+                <li class="nav-item">
+                  <a class="nav-link active" href="/area/{{area.area}}/diff">선택가산점</a>
+                </li>
 
-            </ul>
-          </div>
+              </ul>
+            </div>
+          {% endif %}
 
           <form class="plus_area_form" method="POST">
             {% csrf_token %}
-            <p class="h2 mb-5">선택가산점(10점)</p>
+            <p class="h2 mb-5">
+              {% if not request.user.is_authenticated %}전남
+              {% endif %}선택가산점(10점)</p>
             <div class="accordion mb-2" id="plus_area_group">
               <div class="accordion-item">
                 <h2 class="accordion-header row">

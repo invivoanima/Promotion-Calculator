@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.template import TemplateDoesNotExist
 from django.contrib import auth
 from django.contrib.auth.models import User
 from django.contrib import messages
@@ -9,13 +10,19 @@ def welcome(request) :
     return render(request, 'calc/index.html')
 
 def main(request) :
+    notice = Notice.objects.all().order_by('-date')
+
     if request.user.is_authenticated :
         area = Profile.objects.get(user__username=request.user.username)
         datas = {
             'area': area,
+            'notice' : notice,
         }
         return render(request, "calc/main.html", datas)
     else :
+        datas = {
+            'notice' : notice,
+        }
         return render(request, "calc/main.html")
     
 
@@ -67,6 +74,31 @@ def register(request) :
 
 
     return render(request, "calc/register.html")
+
+def area_change(request) :
+    if request.user.is_authenticated:
+        area = Profile.objects.get(user__username=request.user.username)
+
+        if request.method == "POST" :
+            area.area = request.POST['area_change']
+            area.save()
+            redirect("calc:area_change")
+        
+        datas = {
+            'area' : area,
+        }
+        return render(request, "calc/area_change.html", datas)
+    
+    else :
+        return render(request, "calc/area_change.html")
+    
+def error(request):
+    area = Profile.objects.get(user__username=request.user.username)
+    datas ={
+        'area' : area
+    }
+    return render(request, "calc/error.html", datas)
+
     
 
 def logout(request) : 
@@ -87,7 +119,7 @@ def common(request) :
         }
         return render(request, "calc/common/common.html", datas)
     else :
-        return render(request, "calc/common/common.html", datas)
+        return render(request, "calc/common/common.html")
 
 def common_career(request) :
     if request.user.is_authenticated :
@@ -121,7 +153,10 @@ def common_career(request) :
             'area': area,
             'point' : point,
         }
-    return render(request, "calc/common/common_career.html", datas)
+        return render(request, "calc/common/common_career.html", datas)
+    
+    else: 
+        return render(request, "calc/common/common_career.html")
 
 def common_workperformance(request) :
     if request.user.is_authenticated :
@@ -166,7 +201,10 @@ def common_workperformance(request) :
             'area' : area,
             'point' : point,
         }
-    return render(request, "calc/common/common_wp.html", datas)
+        return render(request, "calc/common/common_wp.html", datas)
+    
+    else:
+        return render(request, "calc/common/common_wp.html")
 
 def common_training(request) :
     if request.user.is_authenticated :
@@ -198,7 +236,10 @@ def common_training(request) :
             'area' : area,
             'point' : point,
         }
-    return render(request, "calc/common/common_training.html", datas)
+        return render(request, "calc/common/common_training.html", datas)
+    
+    else :
+        return render(request, "calc/common/common_training.html")
 
 
 
@@ -222,13 +263,57 @@ def area(request) :
     return render(request, "calc/area/area.html")
 
 
+
 def area_common(request, areaname) : 
     if request.user.is_authenticated :
+        if request.method == "POST" :
+            editdata = Area_Common.objects.get(user__username=request.user.username)
+            editdata.area = areaname
+            editdata.research_school_year = request.POST["research_school_year"]
+            editdata.research_school_month = request.POST["research_school_month"]
+            editdata.research_school_memo = request.POST["research_school_memo"]
+            editdata.foreign_school_year = request.POST["foreign_school_year"]
+            editdata.foreign_school_month = request.POST["foreign_school_month"]
+            editdata.foreign_school_memo = request.POST["foreign_school_memo"]
+            editdata.lecture1_point = request.POST["lecture1_point"]
+            editdata.lecture2_point = request.POST["lecture2_point"]
+            editdata.lecture3_point = request.POST["lecture3_point"]
+            editdata.lecture4_point = request.POST["lecture4_point"]
+            editdata.lecture5_point = request.POST["lecture5_point"]
+            editdata.lecture6_point = request.POST["lecture6_point"]
+            editdata.lecture7_point = request.POST["lecture7_point"]
+            editdata.lecture8_point = request.POST["lecture8_point"]
+            editdata.lecture9_point = request.POST["lecture9_point"]
+            editdata.lecture10_point = request.POST["lecture10_point"]
+            editdata.lecture_memo = request.POST["lecture_memo"]
+            editdata.violence_count = request.POST["violence_count"]
+            editdata.violence_memo = request.POST["violence_memo"]
+            editdata.save()
+            total_editdata = Profile.objects.get(user__username=request.user.username)
+            total_editdata.point_ac = float(request.POST["hidden_total"])
+            total_editdata.save()
+
+            return redirect(f'../{total_editdata.area}/common')
+        
         area = Profile.objects.get(user__username=request.user.username)
+        try:
+            point = Area_Common.objects.get(user__username=request.user.username)
+            return render(request, f'calc/area/{areaname}/common.html', {'area' : area, 'point' : point})
+        except TemplateDoesNotExist :
+            return redirect("calc:error")            
+        except : 
+            user = User.objects.get(username=request.user.username)
+            Area_Common.objects.create(user=user)
+            point = Area_Common.objects.get(user__username=request.user.username)
+
         datas = {
             'area' : area,
+            'point' : point,
         }
-        return render(request, f'calc/area/{areaname}/jn_common.html', datas)
+        return render(request, f'calc/area/{areaname}/common.html', datas)
+    
+    else :
+        return render(request, f'calc/area/{areaname}/common.html')
     
 
 
@@ -239,5 +324,8 @@ def area_diff(request, areaname) :
         datas = {
             'area' : area,
         }
-        return render(request, f"calc/area/{areaname}/jn_diff.html", datas)
+        return render(request, f"calc/area/{areaname}/diff.html", datas)
+    
+    else :
+        return render(request, f"calc/area/{areaname}/diff.html")
     
