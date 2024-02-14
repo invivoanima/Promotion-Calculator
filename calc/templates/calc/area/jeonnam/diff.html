@@ -820,7 +820,7 @@
               </div>
             </div>
             <button class="btn btn-primary">저장하기</button>
-            <button type="button" class="btn btn-secondary" onclick="career_input_check()">계산하기</button>
+            <button type="button" class="btn btn-secondary" onclick="area_diff_input_check()">계산하기</button>
           </form>
 
         </div>
@@ -832,118 +832,54 @@
 
 <script>
   window.onload = function () {
-    calc_career()
+    calc_area_diff()
   };
 
-  function career_input_check() {
-    var check_year = document
-      .getElementById("career_year")
-      .value
-    var check_month = document
-      .getElementById("career_month")
-      .value;
-    if (check_year >= 0 && check_year <= 40 && check_month >= 0 && check_month <= 12) {
-      calc_career()
-    } else {
-      document
-        .getElementById("total")
-        .innerHTML = "error"
-    }
+  function area_diff_input_check() {
+    calc_area_diff()
   }
 
   function form_reset() {
-    document
-      .getElementById("career_total")
-      .innerHTML = "0"
-    document
-      .getElementById("0to15y_to_month")
-      .innerHTML = "0"
-    document
-      .getElementById("0to15y_point")
-      .innerHTML = "0"
-    document
-      .getElementById("over15y_to_month")
-      .innerHTML = "0"
-    document
-      .getElementById("over15y_point")
-      .innerHTML = "0"
-    document
-      .getElementById("total")
-      .innerHTML = "0"
+    var reset_list = ["outside_school_total", 
+    "island_ga_point","island_na_point", "island_da_point","island_ra_point",
+    "mountain_ga_point","mountain_na_point", "mountain_da_point","mountain_ra_point",
+    "rural_total","rural_1_point","rural_2_point","rural_3_point","rural_add_point",
+    "high_teacher_total","high_teacher_point","high_teacher_add_point",
+    "research_school_area_total","research_school_area_point","research_school_area2_point",
+    "etc_total","double_class_point","cyber_point","genius_point","intern_point",
+    "scout_point","competition_point","cert_point","edupower_point","openclass_add_point",
+    "high_teacher_add_plus_point",
+    "openclass_total","openclass_point",
+    "living_total","living_solo_point","living_family_point",
+    "total"]
+
+    for (var i = 0; i < reset_list.length; i++) {
+      document.getElementById(reset_list[i]).innerHTML = "0";
+    }
   }
 
-  function calc_career() {
+  function calc_area_diff() {
     form_reset()
-    var check_year = document
-      .getElementById("career_year")
-      .value
-    var check_month = document
-      .getElementById("career_month")
-      .value
-    var total_month = Number(check_year) * 12 + Number(check_month)
-    if (total_month > 240) {
-      total_month = 240
-    }
-    if (total_month == 240) {
-      document
-        .getElementById("0to15y_to_month")
-        .innerHTML = "180"
-      document
-        .getElementById("0to15y_point")
-        .innerHTML = "64"
-      document
-        .getElementById("over15y_to_month")
-        .innerHTML = "60"
-      document
-        .getElementById("over15y_point")
-        .innerHTML = "6"
-      document
-        .getElementById("career_total")
-        .innerHTML = "70"
-    } else if (total_month > 180 && total_month < 240) {
-      document
-        .getElementById("0to15y_to_month")
-        .innerHTML = "180"
-      document
-        .getElementById("0to15y_point")
-        .innerHTML = "64"
-      var over15y_month = total_month - 180
-      var over15y_month_point = (over15y_month * 0.1000).toFixed(4)
-      document
-        .getElementById("over15y_to_month")
-        .innerHTML = over15y_month
-      document
-        .getElementById("over15y_point")
-        .innerHTML = (over15y_month * 0.1000).toFixed(4)
-      document
-        .getElementById("career_total")
-        .innerHTML = (64 + Number(over15y_month_point)).toFixed(4)
-    } else if (total_month == 180) {
-      document
-        .getElementById("0to15y_to_month")
-        .innerHTML = "180"
-      document
-        .getElementById("0to15y_point")
-        .innerHTML = "64"
-      document
-        .getElementById("career_total")
-        .innerHTML = "64"
-      document
-        .getElementById("total")
-        .innerHTML = "64"
-    } else {
-      document
-        .getElementById("0to15y_to_month")
-        .innerHTML = total_month
-      document
-        .getElementById("0to15y_point")
-        .innerHTML = (total_month * 0.3555).toFixed(4)
-      document
-        .getElementById("total")
-        .innerHTML = (total_month * 0.3555).toFixed(4)
-      document
-        .getElementById("career_total")
-        .innerHTML = (total_month * 0.3555).toFixed(4)
-    }
+
+    var island_ga_year = document.getElementById("island_ga_year").value
+    var island_na_year = document.getElementById("island_na_year").value
+    var island_da_year = document.getElementById("island_da_year").value
+    var island_ra_year = document.getElementById("island_ra_year").value
+    var island_ga_month = document.getElementById("island_ga_month").value
+    var island_na_month = document.getElementById("island_na_month").value
+    var island_da_month = document.getElementById("island_da_month").value
+    var island_ra_month = document.getElementById("island_ra_month").value
+    var mountain_ga_year = document.getElementById("mountain_ga_year").value
+    var mountain_na_year = document.getElementById("mountain_na_year").value
+    var mountain_da_year = document.getElementById("mountain_da_year").value
+    var mountain_ra_year = document.getElementById("mountain_ra_year").value
+    var mountain_ga_month = document.getElementById("mountain_ga_month").value
+    var mountain_na_month = document.getElementById("mountain_na_month").value
+    var mountain_da_month = document.getElementById("mountain_da_month").value
+    var mountain_ra_month = document.getElementById("mountain_ra_month").value
+
+    var island_ga_point = Number(island_ga_year) * 0.167 * 12 + Number(island_ga_month) * 0.167
+    document.getElementById("island_ga_point").innerHTML = island_ga_point.toFixed(4)
+
   }
 </script>
