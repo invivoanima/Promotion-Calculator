@@ -1,0 +1,102 @@
+<div class="d-flex flex-column flex-shrink-0 p-3 text-bg-dark position-fixed" style="width: 280px; height: 100vh">
+  <a href="/main" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+    <svg class="bi pe-none me-2" width="40" height="32">
+      <use xlink:href="#bootstrap"/>
+    </svg>
+    <i class="bi bi-graph-up-arrow fs-2" width="40" height="32"></i>
+    <span class="fs-4">승진점수계산기</span>
+  </a>
+  <hr/>
+  <ul class="nav nav-pills flex-column mb-auto text-start">
+    <li class="nav-item">
+      <a href="/main" class="nav-link text-white" aria-current="page">
+        <i class="bi bi-house"></i>
+        처음으로
+      </a>
+    </li>
+    <li>
+      <a href="/common" class="nav-link text-white {% if request.path == '/common/' %}active{% endif %}">
+        <i class="bi bi-pen"></i>
+        공통점수
+        {% if request.user.is_authenticated %}입력{% else %}계산{% endif %}
+      </a>
+    </li>
+    <li>
+      <a href="/area/" class="nav-link text-white {% if request.path == '/area/' %}active{% endif %}">
+        <i class="bi bi-pen"></i>
+        가산점
+        {% if request.user.is_authenticated %}입력{% else %}계산{% endif %}
+      </a>
+    </li>
+    {% if request.user.is_authenticated %}
+      <li>
+        <a href="/area/{{ area.area }}/refdata" class="nav-link text-white">
+          <i class="bi bi-box-fill"></i>
+          인사관련 자료
+        </a>
+      </li>
+      <li>
+        <a href="#" class="nav-link text-white">
+          <i class="bi bi-reception-4"></i>
+          <s>점수 비교</s>
+        </a>
+      </li>
+      <li>
+        <a href="#" class="nav-link text-white">
+          <i class="bi bi-file-spreadsheet-fill"></i>
+          <s>내 점수 모아보기</s>
+        </a>
+      </li>
+      <li>
+        <a href="/area_change" class="nav-link text-white">
+          <i class="bi bi-globe"></i>
+          지역 설정
+        </a>
+      </li>
+      <li>
+        <a href="/logout" class="nav-link text-white">
+          <i class="bi bi-box-arrow-right"></i>
+          로그아웃
+        </a>
+      </li>
+    {% endif %}
+  </ul>
+  {% if not request.user.is_authenticated %}
+    <hr/>
+    로그인을 하면 자신이 입력한 점수를 저장할 수 있습니다.
+    <hr/>
+  {% endif %}
+  <div class="container">
+    {% if request.user.is_authenticated %}
+      <a class="d-flex justify-content-center align-items-center text-white text-decoration-none">
+        <strong>환영합니다,
+          {{ user.username }}님!</strong><br>
+      </a>
+      <a>
+        <strong>지역:
+          {% if area.area == "seoul" %}서울{% endif %}
+          {% if area.area == "busan" %}부산{% endif %}
+          {% if area.area == "daegu" %}대구{% endif %}
+          {% if area.area == "incheon" %}인천{% endif %}
+          {% if area.area == "gwangju" %}광주{% endif %}
+          {% if area.area == "daejeon" %}대전{% endif %}
+          {% if area.area == "ulsan" %}울산{% endif %}
+          {% if area.area == "sejong" %}세종{% endif %}
+          {% if area.area == "gyeongi" %}경기도{% endif %}
+          {% if area.area == "gangwon" %}강원도{% endif %}
+          {% if area.area == "chungbuk" %}충청북도{% endif %}
+          {% if area.area == "chungnam" %}충청남도{% endif %}
+          {% if area.area == "jeonbuk" %}전라북도{% endif %}
+          {% if area.area == "jeonnam" %}전라남도{% endif %}
+          {% if area.area == "gyeongbuk" %}경상북도{% endif %}
+          {% if area.area == "gyeongnam" %}경상남도{% endif %}
+          {% if area.area == "jeju" %}제주도{% endif %}
+        </strong>
+      </a>
+    {% else %}
+      <a class="d-flex justify-content-center align-items-center text-white text-decoration-none" href="/login">
+        <strong>로그인하기</strong>
+      </a>
+    {% endif %}
+  </div>
+</div>

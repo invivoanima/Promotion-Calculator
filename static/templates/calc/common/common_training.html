@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    {% include 'calc/head.html' %}
+    <title>승진 점수 계산기</title>
+  </head>
+
+  <body>
+    <div class="row g-0">
+
+      <div class="col-3">
+        <div class="d-flex flex-nowrap">{% include 'calc/sidebar.html' %}</div>
+      </div>
+
+      <div class="col-9">
+        <div class="p-5">
+          <div class="mb-4">
+            <ul class="nav nav-fill nav-underline">
+
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'calc:cc' %}">경력평정</a>
+              </li>
+
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'calc:cw' %}">근무성적평정</a>
+              </li>
+
+              <li class="nav-item">
+                <a class="nav-link active" href="{% url 'calc:ct' %}">연수성적평정</a>
+              </li>
+
+            </ul>
+          </div>
+          <form class="wp_form" method="POST" onsubmit="training_input_check();">
+            {% csrf_token %}
+            <p class="h2 mb-5">연수성적평정(30점)</p>
+            <div class="accordion mb-2" id="wp_group">
+              <div class="accordion-item">
+
+                <h2 class="accordion-header row">
+                  <div class="col-1">
+                    <button class="accordion-button collapsed h-100" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne"></button>
+                  </div>
+                  <div class="col-9 align-self-center p-2">
+                    <p class="h5 text-start">자격연수평정(9점)</p>
+                  </div>
+                  <div class="col-2 align-self-center">
+                    <p id="qualification_total" class="h5">0</p>
+                  </div>
+                </h2>
+                <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse">
+                  <div class="accordion-body">
+                    <table class="table align-middle">
+                      <thead>
+                        <tr>
+                          <th scope="col">세부 항목</th>
+                          <th scope="col">점수</th>
+                          <th scope="col">환산</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>
+                            <p class="h5">1급 정교사 자격연수 성적</p>
+                            <p class="h6">9점-(100-연수성적)×0.025</p>
+                          </td>
+                          <td>
+                            <div class="row justify-content-center">
+                              <input type="number" min="0" max="100" {% if request.user.is_authenticated %} value="{{ point.grade1teacher_result }}" {% endif %} class="form-control w-50 p-1" id="grade1teacher_result" name="grade1teacher_result">
+                            </div>
+                          </td>
+                          <td>
+                            <p class="h6" id="grade1teacher_point">0</p>
+                          </td>
+                        </tr>
+                        <tr class="table-group-divider">
+                          <td colspan="2">1급 정교사 자격연수를 받기 전에 석사학위를 취득하였을 경우, A학점 이상은 만점의 90%%, B학점 이상은 85%, D학점 이상은 80%으로 평정합니다.</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div class="row w-100 justify-content-center">
+                      <div class="mb-3 w-75">
+                        <label for="exampleFormControlTextarea1" class="form-label">개인 메모</label>
+                        <textarea class="form-control" id="grade1teacher_memo" name="grade1teacher_memo" rows="3">{{ point.grade1teacher_memo }}</textarea>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <h2 class="accordion-header row">
+                  <div class="col-1">
+                    <button class="accordion-button collapsed h-100" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="true" aria-controls="panelsStayOpen-collapseTwo"></button>
+                  </div>
+                  <div class="col-9 align-self-center p-2">
+                    <p class="h5 text-start">직무연수성적(18점)</p>
+                  </div>
+                  <div class="col-2 align-self-center">
+                    <p id="training_total" class="h5">0</p>
+                  </div>
+                </h2>
+                <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse">
+                  <div class="accordion-body">
+                    <table class="table align-middle">
+                      <thead>
+                        <tr>
+                          <th scope="col" class="col-8">세부 항목</th>
+                          <th scope="col" class="col-2">원점수</th>
+                          <th scope="col" class="col-2">환산</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>
+                            <p class="h5">60시간 이상 직무연수(1회)</p>
+                            <p class="h6">6점×직무연수 환산성적/직무연수성적 만점</p>
+                          </td>
+                          <td>
+                            <div class="row justify-content-center">
+                              <input type="number" min="0" max="100" {% if request.user.is_authenticated %} value="{{ point.training_first }}" {% endif %} class="form-control w-50 p-1" id="training_first" name="training_first">
+                            </div>
+                          </td>
+                          <td>
+                            <p class="h6" id="training_first_point">0</p>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <p class="h5">60시간 이상 직무연수(2회)</p>
+                            <p class="h6">6점×직무연수 환산성적/직무연수성적 만점</p>
+                          </td>
+                          <td>
+                            <div class="row justify-content-center">
+                              <input type="number" min="0" max="100" {% if request.user.is_authenticated %} value="{{ point.training_second }}" {% endif %} class="form-control w-50 p-1" id="training_second" name="training_second">
+                            </div>
+                          </td>
+                          <td>
+                            <p class="h6" id="training_second_point">0</p>
+                          </td>
+                        </tr>
+                        <tr class="table-group-divider">
+                          <td colspan="3">2개의 60시간 이상의 직무연수 이수 중 높은 점수의 환산점수에 6×(연수횟수)를 더합니다.<br>6점×직무연수 환산성적/직무연수성적 만점 + 6점×직무연수횟수(2회)</td>
+                        </tr>
+                        <tr>
+                          <td colspan="3">
+                            <div class="row justify-content-center">
+                              <p class="h5">직무연수 환산점수</p>
+                              <table class="table table-bordered border-black w-auto">
+                                <tbody>
+                                  <tr>
+                                    <td class="bg-secondary-subtle">직무연수 성적</td>
+                                    <td>95점 초과</td>
+                                    <td>90점 초과~95점 이하</td>
+                                    <td>85점 초과~90점 이하</td>
+                                    <td>85점이하</td>
+                                  </tr>
+                                  <tr>
+                                    <td class="bg-secondary-subtle">직무연수 환산성적</td>
+                                    <td>100점</td>
+                                    <td>95점</td>
+                                    <td>90점</td>
+                                    <td>85점</td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div class="row w-100 justify-content-center">
+                      <div class="mb-3 w-75">
+                        <label for="exampleFormControlTextarea1" class="form-label">개인 메모</label>
+                        <textarea class="form-control" id="training_memo" name="training_memo" rows="3">{{ point.training_memo }}</textarea>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <h2 class="accordion-header row">
+                  <div class="col-1">
+                    <button class="accordion-button collapsed h-100" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseThree" aria-expanded="true" aria-controls="panelsStayOpen-collapseThree"></button>
+                  </div>
+                  <div class="col-9 align-self-center p-2">
+                    <p class="h5 text-start">연구실적평정(3점)</p>
+                  </div>
+                  <div class="col-2 align-self-center">
+                    <p id="research_total" class="h5">0</p>
+                  </div>
+                </h2>
+                <div id="panelsStayOpen-collapseThree" class="accordion-collapse collapse">
+                  <div class="accordion-body">
+                    <table class="table align-middle">
+                      <thead>
+                        <tr>
+                          <th scope="col" class="col-7">세부 항목</th>
+                          <th scope="col" class="col-4">점수</th>
+                          <th scope="col" class="col-1">합계</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>
+                            <p class="h5">연구대회 입상실적</p>
+                            <div class="row justify-content-center">
+                              <div class="col justify-content-center col-md-auto">
+                                <p class="h6 w-auto">전국대회 기준</p>
+                                <table class="table table-bordered border-black w-auto">
+                                  <tbody>
+                                    <tr class="p-0">
+                                      <td class="bg-secondary-subtle">등급</td>
+                                      <td class="bg-secondary-subtle">1인</td>
+                                      <td class="bg-secondary-subtle">2인</td>
+                                      <td class="bg-secondary-subtle">3인</td>
+                                      <td class="bg-secondary-subtle">4인</td>
+                                    </tr>
+                                    <tr>
+                                      <td>1등급</td>
+                                      <td>1.500</td>
+                                      <td>1.050</td>
+                                      <td>0.750</td>
+                                      <td>0.450</td>
+                                    </tr>
+                                    <tr>
+                                      <td>2등급</td>
+                                      <td>1.250</td>
+                                      <td>0.875</td>
+                                      <td>0.625</td>
+                                      <td>0.375</td>
+                                    </tr>
+                                    <tr>
+                                      <td>3등급</td>
+                                      <td>1.000</td>
+                                      <td>0.700</td>
+                                      <td>0.500</td>
+                                      <td>0.300</td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </div>
+                              <div class="col justify-content-center col-md-auto">
+                                <p class="h6 w-auto">시도 대회 기준</p>
+                                <table class="table table-bordered border-black w-auto">
+                                  <tbody>
+                                    <tr>
+                                      <td class="bg-secondary-subtle">등급</td>
+                                      <td class="bg-secondary-subtle">1인</td>
+                                      <td class="bg-secondary-subtle">2인</td>
+                                      <td class="bg-secondary-subtle">3인</td>
+                                      <td class="bg-secondary-subtle">4인</td>
+                                    </tr>
+                                    <tr>
+                                      <td>1등급</td>
+                                      <td>1.00</td>
+                                      <td>0.700</td>
+                                      <td>0.500</td>
+                                      <td>0.300</td>
+                                    </tr>
+                                    <tr>
+                                      <td>2등급</td>
+                                      <td>0.75</td>
+                                      <td>0.525</td>
+                                      <td>0.375</td>
+                                      <td>0.225</td>
+                                    </tr>
+                                    <tr>
+                                      <td>3등급</td>
+                                      <td>0.50</td>
+                                      <td>0.350</td>
+                                      <td>0.250</td>
+                                      <td>0.150</td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            <div class="row justify-content-center">
+                              <input type="number" min="0" max="100" {% if request.user.is_authenticated %} value="{{ point.research_contest_point }}" {% endif %} class="form-control w-50 p-1" id="research_contest_point" name="research_contest_point">
+                            </div>
+                          </td>
+                          <td rowspan="2">
+                            <div class="align-self-center">
+                              <p id="competition_point" class="h5">0</p>
+                            </div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class="row justify-content-center">
+                            <p class="h5">학위취득 실적</p>
+                            <table class="table table-bordered border-black w-auto">
+                              <tbody>
+                                <tr class="bg-secondary-subtle">
+                                  <td class="bg-secondary-subtle">학위별</td>
+                                  <td class="bg-secondary-subtle">직무 관련 학위</td>
+                                  <td class="bg-secondary-subtle">그 밖의 학위</td>
+                                </tr>
+                                <tr>
+                                  <td>박사</td>
+                                  <td>3점</td>
+                                  <td>1.5점</td>
+                                </tr>
+                                <tr>
+                                  <td>석사</td>
+                                  <td>1.5점</td>
+                                  <td>1점</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </td>
+                          <td>
+                            <div class="row justify-content-center">
+                              <input type="number" min="0" max="100" {% if request.user.is_authenticated %} value="{{ point.degree_point }}" {% endif %} class="form-control w-50 p-1" id="degree_point" name="degree_point">
+                            </div>
+                          </td>
+                        </tr>
+                        <tr class="table-group-divider">
+                          <td colspan="2">자격연수성적에 학위를 사용하였을 경우, 학위취득 성적은 사용할 수 없습니다.
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div class="row w-100 justify-content-center">
+                      <div class="mb-3 w-75">
+                        <label for="exampleFormControlTextarea1" class="form-label">개인 메모</label>
+                        <textarea class="form-control" id="research_memo" name="research_memo" rows="3">{{ point.research_memo }}</textarea>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-8"></div>
+              <div class="col-2">
+                <p class="h2">합계</p>
+              </div>
+              <div class="col-2">
+                <p id="total" class="h2 text-center mb-3">0</p>
+              </div>
+            </div>
+            <input style="display: none;" type="text" id="hidden_total" name="hidden_total">
+            <button class="btn btn-primary">저장하기</button>
+            <button type="button" class="btn btn-secondary" onclick="training_input_check()">계산하기</button>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </body>
+
+</html>
+
+<style>
+  td {
+    padding: 0.5 !important;
+  }
+</style>
+
+<script>
+  window.onload = function () {
+    calc_training()
+  };
+
+  function form_reset() {
+    document
+      .getElementById("qualification_total")
+      .innerHTML = "0"
+    document
+      .getElementById("training_total")
+      .innerHTML = "0"
+    document
+      .getElementById("research_total")
+      .innerHTML = "0"
+    document
+      .getElementById("total")
+      .innerHTML = "0"
+  }
+
+  function check_0_to_100(a) {
+    b = document
+      .getElementById(a)
+      .value
+    if (b >= 0 && b <= 100) {
+      return true
+    } else {
+      return false
+    }
+  }
+
+  function training_input_check() {
+    if (check_0_to_100("grade1teacher_result") && check_0_to_100("training_first") && check_0_to_100("training_second") && check_0_to_100("research_contest_point") && check_0_to_100("degree_point")) {
+      calc_training()
+    } else {
+      document
+        .getElementById("qualification_total")
+        .innerHTML = "error"
+      document
+        .getElementById("training_total")
+        .innerHTML = "error"
+      document
+        .getElementById("research_total")
+        .innerHTML = "error"
+      document
+        .getElementById("total")
+        .innerHTML = "error"
+    }
+  }
+
+  function calc_training() {
+    form_reset()
+
+    // 1정 연수 성적 계산
+    var g1 = document
+      .getElementById("grade1teacher_result")
+      .value
+    if (g1 == 0) {
+      document
+        .getElementById("qualification_total")
+        .innerHTML = 0
+      document
+        .getElementById("grade1teacher_point")
+        .innerHTML = 0
+    } else {
+      g1 = 9 - (100 - Number(g1)) * 0.025
+      document
+        .getElementById("qualification_total")
+        .innerHTML = g1
+      document
+        .getElementById("grade1teacher_point")
+        .innerHTML = g1
+    }
+
+    // 60시간이상 연수 성적 계산
+    var training_first_to_number = Number(document.getElementById("training_first").value)
+    var training_second_to_number = Number(document.getElementById("training_second").value)
+
+    function translating(a) {
+      if (a > 95) {
+        return 6
+      } else if (a > 90 && a <= 95) {
+        return 6 * 95 / 100
+      } else if (a > 85 && a <= 90) {
+        return 6 * 90 / 100
+      } else if (a > 0 && a <= 85) {
+        return 6 * 85 / 100
+      } else {
+        return 0
+      }
+    }
+    var translated_training_first = translating(training_first_to_number)
+    var translated_training_second = translating(training_second_to_number)
+
+    document
+      .getElementById("training_first_point")
+      .innerHTML = translated_training_first
+    document
+      .getElementById("training_second_point")
+      .innerHTML = translated_training_second
+
+    if (translated_training_first > translated_training_second) {
+      var selected_training_score = translated_training_first
+    } else {
+      var selected_training_score = translated_training_second
+    }
+
+    if (translated_training_first == 0 && translated_training_second == 0) {
+      document
+        .getElementById("training_total")
+        .innerHTML = 0
+    } else if (translated_training_first == 0 || translated_training_second == 0) {
+      document
+        .getElementById("training_total")
+        .innerHTML = selected_training_score + 6
+    } else {
+      document
+        .getElementById("training_total")
+        .innerHTML = selected_training_score + 12
+    }
+
+    // 연구대회 점수 계산
+    var research_contest_point = Number(document.getElementById("research_contest_point").value)
+    var degree_point = Number(document.getElementById("degree_point").value)
+    var check_over_3 = research_contest_point + degree_point
+    if (check_over_3 <= 3 && check_over_3 >= 0) {
+      document
+        .getElementById("research_total")
+        .innerHTML = check_over_3
+      document
+        .getElementById("competition_point")
+        .innerHTML = check_over_3
+    } else {
+      document
+        .getElementById("research_total")
+        .innerHTML = 3
+      document
+        .getElementById("competition_point")
+        .innerHTML = 3
+    }
+
+    //합계
+    var qualification_total = Number(document.getElementById("qualification_total").innerHTML)
+    var training_total = Number(document.getElementById("training_total").innerHTML)
+    var research_total = Number(document.getElementById("research_total").innerHTML)
+    document
+      .getElementById("total")
+      .innerHTML = (qualification_total + training_total + research_total).toFixed(4)
+
+    document
+      .getElementById("hidden_total")
+      .value = document
+      .getElementById("total")
+      .innerHTML
+
+  }
+</script>

@@ -99,6 +99,29 @@ def error(request):
     }
     return render(request, "calc/error.html", datas)
 
+
+def suggestion(request) :
+    if request.user.is_authenticated:
+        area = Profile.objects.get(user__username=request.user.username)
+
+        if request.method == "POST" :
+            user = User.objects.get(username = request.user.username)
+            content = request.POST['content']
+
+            if 'imgfile' in request.FILES :
+                savedata = Suggestion(user=user, content=content, file=request.FILES.get('imgfile'))
+                savedata.save()
+                messages.success(request, "성공")
+            else :
+                savedata = Suggestion(user=user, content=content)
+                savedata.save()
+                messages.success(request, "성공")
+
+        datas ={
+            'area' : area
+        }
+        return render(request, 'calc/suggestion.html', datas)
+
     
 
 def logout(request) : 
@@ -329,3 +352,11 @@ def area_diff(request, areaname) :
     else :
         return render(request, f"calc/area/{areaname}/diff.html")
     
+
+def area_refdata(request, areaname) :
+    if request.user.is_authenticated :
+        area = Profile.objects.get(user__username=request.user.username)
+        datas = {
+            'area' : area,
+        }
+        return render(request, f"calc/area/{areaname}/refdata.html", datas)

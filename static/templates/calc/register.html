@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    {% include 'calc/head.html' %}
+    <title>승진 점수 계산기</title>
+  </head>
+
+  <body class="align-items-center py-4 bg-body-tertiary">
+    <h3 class="h3 m-auto">회원가입</h3>
+    <br>
+    <br>
+    <br>
+    <p class="mb-3">본 사이트에서는 아이디와 지역, 입력한 점수를 저장합니다. 비밀번호는 암호화하여 보관합니다.</p>
+    <p>회원 가입 시 입력한 점수는 서버에 저장되며, 나중에 다시 확인을 하거나 다른 사람과 비교를 할때 활용됩니다.</p>
+    <br>
+    <form method="POST" class="container w-25" id="registration_form" onsubmit="password_check()">
+      {% csrf_token %}
+      <div class="form-floating mb-3">
+        <input type="text" class="form-control" id="input_id" name="username" placeholder="ID" minlength="6" maxlength="15" pattern="^[a-zA-Z0-9]+$" required="required"/>
+        <label for="floatingInput">ID(영어 및 숫자 6~15글자)</label>
+      </div>
+      <div class="form-floating mb-3">
+        <input type="password" class="form-control" id="password1" name="password1" placeholder="Password" minlength="6" maxlength="20" required="required"/>
+        <label for="floatingPassword">Password(6~20글자)</label>
+      </div>
+
+      <div class="form-floating mb-3">
+        <input type="password" class="form-control" id="password2" name="password2" placeholder="Password" required="required"/>
+        <label for="floatingPassword">Password 확인(6~20글자)</label>
+      </div>
+
+      <div class="input-group mb-3">
+        <select class="form-select" id="area_select" name="area_select">
+          <option selected="selected" value="nonselect">지역 선택</option>
+          <option value="seoul">서울</option>
+          <option value="busan">부산</option>
+          <option value="daegu">대구</option>
+          <option value="incheon">인천</option>
+          <option value="gwangju">광주</option>
+          <option value="daejeon">대전</option>
+          <option value="ulsan">울산</option>
+          <option value="sejong">세종</option>
+          <option value="gyeongi">경기도</option>
+          <option value="gangwon">강원도</option>
+          <option value="chungbuk">충청북도</option>
+          <option value="chungnam">충청남도</option>
+          <option value="jeonbuk">전라북도</option>
+          <option value="jeonnam">전라남도</option>
+          <option value="gyeongbuk">경상북도</option>
+          <option value="gyeongnam">경상남도</option>
+          <option value="jeju">제주도</option>
+        </select>
+      </div>
+
+      <div class="flex row">
+        <div class="col">
+          <button class="btn btn-primary w-100 py-2" onclick="id_check">
+            회원가입
+          </button>
+        </div>
+        <div class="col">
+          <button class="btn btn-secondary w-100 py-2" onclick="location.href='/'">
+            메인으로
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div class="modal" tabindex="-1" id="registration_fail">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">회원가입 실패</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p class="text-start" id="modal_content">아이디 또는 비밀번호가 일치하지 않습니다.</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+              닫기
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </body>
+
+</html>
+
+<script>
+  function password_check() {
+    event.preventDefault();
+    var password1 = document
+      .getElementById('password1')
+      .value
+    var password2 = document
+      .getElementById('password2')
+      .value
+    if (password1 === password2) {
+      form_check()
+    } else {
+      document
+        .getElementById("modal_content")
+        .innerHTML = "비밀번호 입력이 일치하지 않습니다."
+      $('#registration_fail').modal('show');
+    };
+  }
+
+  function form_check() {
+    var area_value = document
+      .getElementById('area_select')
+      .value
+    if (area_value === "nonselect") {
+      document
+        .getElementById("modal_content")
+        .innerHTML = "지역을 선택해주세요."
+      $('#registration_fail').modal('show');
+    } else {
+      document
+        .getElementById("registration_form")
+        .submit();
+    }
+  }
+</script>
+<style></style>

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    {% include 'calc/head.html' %}
+    <title>승진 점수 계산기</title>
+  </head>
+
+  <body>
+    <div class="row g-0">
+
+      <div class="col-3">
+        <div class="d-flex flex-nowrap">{% include 'calc/sidebar.html' %}</div>
+      </div>
+
+      <div class="col-9">
+        <div class="p-5">
+          <div class="mb-4">
+            <ul class="nav nav-fill nav-underline">
+
+              <li class="nav-item">
+                <a class="nav-link active" href="{% url 'calc:cc' %}">경력평정</a>
+              </li>
+
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'calc:cw' %}">근무성적평정</a>
+              </li>
+
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'calc:ct' %}">연수성적평정</a>
+              </li>
+
+            </ul>
+          </div>
+          <form class="">
+            <div class="row">
+              <div class="col-8 outline-primary">
+                <p>경력평정</p>
+              </div>
+              <div class="col-2">
+                <label for="carrer_month" class="form-label">개월수</label><input type="text" id="career_month" class="form-control">
+              </div>
+              <div class="col-2"></div>
+            </div>
+            <div>
+              <p class="d-inline-flex gap-1" data-bs-toggle="collapse" data-bs-target="#career_detail">
+                자세히 보기
+              </p>
+              <div class="collapse" id="career_detail">
+                <div class=""></div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </body>
+
+</html>

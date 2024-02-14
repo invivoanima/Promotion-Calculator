@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    {% include 'calc/head.html' %}
+    <title>승진 점수 계산기</title>
+  </head>
+
+  <body>
+    <div class="row g-0">
+      <div class="col-3">
+        <div class="d-flex flex-nowrap">{% include 'calc/sidebar.html' %}</div>
+      </div>
+      <div class="col-9">
+        <div class="p-5">
+          <div class="m-6 w-100 h-100">
+            <p class="h2">공지사항</p>
+            <br>
+            <br>
+            <div class="row justify-content-center">
+              <table class="table w-75">
+                <thead>
+                  <tr>
+                    <th scope="col" class="col-1">#</th>
+                    <th scope="col" class="col-7">제목</th>
+                    <th scope="col" class="col-4">날짜</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for row in notice %}
+                    <tr>
+
+                      <div class="modal" tabindex="-1" id="notice_modal_{{ row.id }}">
+                        <div class="modal-dialog modal-dialog-centered">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <h5 class="modal-title">{{ row.title }}</h5>
+                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                              <p class="text-start" id="modal_content">{{ row.content }}</p>
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                                닫기
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <th scope="row">{{ row.id }}</th>
+                      <td>
+                        <span id="title_modal_{{ row.id }}">{{ row.title }}</span>
+                      </td>
+                      <td>{{ row.date|date:'Y-m-d H:i' }}</td>
+                    </tr>
+
+                    <script type="text/javascript">
+                      $('#title_modal_{{ row.id }}').on('click', () => {
+                        $('#notice_modal_{{ row.id }}').modal('show');
+                      });
+                    </script>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+
+  <div class="modal" tabindex="-1" id="notification">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">‼️‼️확인하세요‼️‼️</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p class="text-start" id="modal_content">본 사이트는 실제 점수 계산과 다른 부분이 존재하며, 제작자의 판단에 따라 간략화된 부분이 많습니다. 정확한 점수 계산은 각 지역의 승진 관련 매뉴얼을 확인하시기 바라며, 참고용도로만 이용하시기 바랍니다. 계산식 수정 및 항목 추가 등은 별도로 문의주시기 바랍니다.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+            이해했습니다.
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</html>
+
+<script type="text/javascript">
+  $(document).ready(function () {
+    $("#notification").modal("show");
+  });
+</script>

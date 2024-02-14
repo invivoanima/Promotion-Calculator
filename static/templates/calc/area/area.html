@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    {% include 'calc/head.html' %}
+    <title>승진 점수 계산기</title>
+  </head>
+
+  <body>
+    <div class="row g-0">
+
+      <div class="col-3">
+        <div class="d-flex flex-nowrap">{% include 'calc/sidebar.html' %}</div>
+      </div>
+
+      <div class="col-9">
+        {% if request.user.is_authenticated %}
+          <div class="p-5">
+            <div class="mb-4">
+              <ul class="nav nav-fill nav-underline">
+
+                <li class="nav-item">
+                  <a class="nav-link" href="/area/{{area.area}}/common">공통가산점</a>
+                </li>
+
+                <li class="nav-item">
+                  <a class="nav-link" href="/area/{{area.area}}/diff">선택가산점</a>
+                </li>
+
+              </ul>
+            </div>
+
+            <div class="">
+              <p>위에서 해당 탭을 클릭해 주세요.</p>
+              <p>가산점은 전 지역이 동일하게 받는 공통가산점과, 지역마다 다른 선택가산점이 있습니다.</p>
+              <p>공통 가산점은 지역별로 가산점 항목은 동일하나, 점수 배정이 지역별로 차이가 있습니다.</p>
+            </div>
+
+          </div>
+        </div>
+      {% else %}
+        <div class="p-5">
+          <div class="row w-75">
+            <table class="table">
+              <tbody>
+                <tr>
+                  <th scope="row" clsss="col-4">
+                    <p class="h3">공통가산점</p>
+                  </th>
+                  <td class="col-8 w-auto row justify-content-center">
+                    <div class="w-75 row justify-content-center">
+                      <table class="w-100">
+                        <tbody class="">
+                          <tr>
+                            <th>
+                              <s>서울</s>
+                            </th>
+                            <th>
+                              <s>부산</s>
+                            </th>
+                            <th>
+                              <s>대구</s>
+                            </th>
+                            <th>
+                              <s>인천</s>
+                            </th>
+                            <th>
+                              <s>광주</s>
+                            </th>
+                          </tr>
+                          <tr>
+                            <th>
+                              <s>대전</s>
+                            </th>
+                            <th>
+                              <s>울산</s>
+                            </th>
+                            <th>
+                              <s>세종</s>
+                            </th>
+                            <th>
+                              <s>인천</s>
+                            </th>
+                          </tr>
+                          <tr>
+                            <th>
+                              <s>경기도</s>
+                            </th>
+                            <th>
+                              <s>강원도</s>
+                            </th>
+                            <th>
+                              <s>충청북도</s>
+                            </th>
+                            <th>
+                              <s>충청남도</s>
+                            </th>
+                            <th>
+                              <s>전라북도</s>
+                            </th>
+                          </tr>
+                          <tr>
+                            <th>
+                              <a href="/area/jeonnam/common">전라남도</a>
+                            </th>
+                            <th>
+                              <s>경상북도</s>
+                            </th>
+                            <th>
+                              <s>경상남도</s>
+                            </th>
+                            <th>
+                              <s>제주도</s>
+                            </th>
+                            <th></th>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+
+                  </td>
+                </tr>
+                <tr>
+                  <th scope="row">
+                    <p class="h3">선택가산점</p>
+                  </th>
+                  <td class="col-8 w-auto row justify-content-center">
+                    <div class="w-75 row justify-content-center">
+                      <table class="w-100">
+                        <tbody class="">
+                          <tr>
+                            <th>
+                              <s>서울</s>
+                            </th>
+                            <th>
+                              <s>부산</s>
+                            </th>
+                            <th>
+                              <s>대구</s>
+                            </th>
+                            <th>
+                              <s>인천</s>
+                            </th>
+                            <th>
+                              <s>광주</s>
+                            </th>
+                          </tr>
+                          <tr>
+                            <th>
+                              <s>대전</s>
+                            </th>
+                            <th>
+                              <s>울산</s>
+                            </th>
+                            <th>
+                              <s>세종</s>
+                            </th>
+                            <th>
+                              <s>인천</s>
+                            </th>
+                          </tr>
+                          <tr>
+                            <th>
+                              <s>경기도</s>
+                            </th>
+                            <th>
+                              <s>강원도</s>
+                            </th>
+                            <th>
+                              <s>충청북도</s>
+                            </th>
+                            <th>
+                              <s>충청남도</s>
+                            </th>
+                            <th>
+                              <s>전라북도</s>
+                            </th>
+                          </tr>
+                          <tr>
+                            <th>
+                              <a href="/area/jeonnam/diff">전라남도</a>
+                            </th>
+                            <th>
+                              <s>경상북도</s>
+                            </th>
+                            <th>
+                              <s>경상남도</s>
+                            </th>
+                            <th>
+                              <s>제주도</s>
+                            </th>
+                            <th></th>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      {% endif %}
+
+    </div>
+  </body>
+
+</html>
+
+<script></script>

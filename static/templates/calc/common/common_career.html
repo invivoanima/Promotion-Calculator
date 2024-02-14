@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    {% include 'calc/head.html' %}
+    <title>승진 점수 계산기</title>
+  </head>
+
+  <body>
+    <div class="row g-0">
+
+      <div class="col-3">
+        <div class="d-flex flex-nowrap">{% include 'calc/sidebar.html' %}</div>
+      </div>
+
+      <div class="col-9">
+        <div class="p-5">
+          <div class="mb-4">
+            <ul class="nav nav-fill nav-underline">
+
+              <li class="nav-item">
+                <a class="nav-link active" href="{% url 'calc:cc' %}">경력평정</a>
+              </li>
+
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'calc:cw' %}">근무성적평정</a>
+              </li>
+
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'calc:ct' %}">연수성적평정</a>
+              </li>
+
+            </ul>
+          </div>
+          <form class="career_form" method="POST" onsubmit="career_input_check();">
+            {% csrf_token %}
+            <p class="h2 mb-5">경력평정(70점)</p>
+            <div class="accordion mb-2" id="career_group">
+              <div class="accordion-item">
+                <h2 class="accordion-header row">
+                  <div class="col-1">
+                    <button class="accordion-button collapsed h-100" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne"></button>
+                  </div>
+                  <div class="col-5 align-self-center p-2">
+                    <p class="h5 text-start">20년 경력 평정</p>
+                  </div>
+                  <div class="col-2 align-self-center align-middle row">
+                    <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-50 p-1" id="career_year" name="career_year">
+                    <p class="h6 w-auto align-self-center">년</p>
+                  </div>
+                  <div class="col-2 align-self-center row">
+                    <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.career_month }}" {% endif %} class="form-control w-50 p-1" id="career_month" name="career_month">
+                    <div class="h6 w-auto align-self-center">월</div>
+                  </div>
+                  <div class="col-2 align-self-center">
+                    <p id="career_total" class="h5">0</p>
+                  </div>
+                </h2>
+                <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse">
+                  <div class="accordion-body">
+                    <table class="table align-middle">
+                      <thead>
+                        <tr>
+                          <th scope="col">세부 항목</th>
+                          <th scope="col">개월수</th>
+                          <th scope="col">점수</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>
+                            <p class="h5">0~15년 경력 점수</p>
+                            <p class="h6">월수 0.3555, 64점 만점</p>
+                          </td>
+                          <td>
+                            <p class="h6" id="0to15y_to_month">0</p>
+                          </td>
+                          <td>
+                            <p class="h6" id="0to15y_point">0</p>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <p class="h5">16~20년 경력 점수</p>
+                            <p class="h6">월수 0.1000, 6점 만점</p>
+                          </td>
+                          <td>
+                            <p class="h6" id="over15y_to_month">0</p>
+                          </td>
+                          <td>
+                            <p class="h6" id="over15y_point">0</p>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div class="row w-100 justify-content-center">
+                      <div class="mb-3 w-75">
+                        <label for="exampleFormControlTextarea1" class="form-label">개인 메모</label>
+                        <textarea class="form-control" id="career_memo" name="career_memo" rows="3">{{ point.career_memo }}</textarea>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-8"></div>
+                <div class="col-2">
+                  <p class="h2">합계</p>
+                </div>
+                <div class="col-2">
+                  <p id="total" class="h2 text-center mb-3">0</p>
+                </div>
+              </div>
+              <input style="display: none;" type="text" id="hidden_total" name="hidden_total">
+              <button class="btn btn-primary">저장하기</button>
+              <button type="button" class="btn btn-secondary" onclick="career_input_check()">계산하기</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </body>
+
+  </html>
+
+  <script>
+    window.onload = function () {
+      calc_career()
+    };
+
+    function career_input_check() {
+      var check_year = document
+        .getElementById("career_year")
+        .value
+      var check_month = document
+        .getElementById("career_month")
+        .value;
+      if (check_year >= 0 && check_year <= 40 && check_month >= 0 && check_month <= 12) {
+        calc_career()
+      } else {
+        document
+          .getElementById("total")
+          .innerHTML = "error"
+        document
+          .getElementById("career_total")
+          .innerHTML = "error"
+      }
+    }
+
+    function form_reset() {
+      document
+        .getElementById("career_total")
+        .innerHTML = "0"
+      document
+        .getElementById("0to15y_to_month")
+        .innerHTML = "0"
+      document
+        .getElementById("0to15y_point")
+        .innerHTML = "0"
+      document
+        .getElementById("over15y_to_month")
+        .innerHTML = "0"
+      document
+        .getElementById("over15y_point")
+        .innerHTML = "0"
+      document
+        .getElementById("total")
+        .innerHTML = "0"
+    }
+
+    function calc_career() {
+      form_reset()
+      var check_year = document
+        .getElementById("career_year")
+        .value
+      var check_month = document
+        .getElementById("career_month")
+        .value
+      var total_month = Number(check_year) * 12 + Number(check_month)
+      if (total_month > 240) {
+        total_month = 240
+      }
+      if (total_month == 240) {
+        document
+          .getElementById("0to15y_to_month")
+          .innerHTML = "180"
+        document
+          .getElementById("0to15y_point")
+          .innerHTML = "64"
+        document
+          .getElementById("over15y_to_month")
+          .innerHTML = "60"
+        document
+          .getElementById("over15y_point")
+          .innerHTML = "6"
+        document
+          .getElementById("career_total")
+          .innerHTML = "70"
+      } else if (total_month > 180 && total_month < 240) {
+        document
+          .getElementById("0to15y_to_month")
+          .innerHTML = "180"
+        document
+          .getElementById("0to15y_point")
+          .innerHTML = "64"
+        var over15y_month = total_month - 180
+        var over15y_month_point = (over15y_month * 0.1000).toFixed(4)
+        document
+          .getElementById("over15y_to_month")
+          .innerHTML = over15y_month
+        document
+          .getElementById("over15y_point")
+          .innerHTML = (over15y_month * 0.1000).toFixed(4)
+        document
+          .getElementById("career_total")
+          .innerHTML = (64 + Number(over15y_month_point)).toFixed(4)
+      } else if (total_month == 180) {
+        document
+          .getElementById("0to15y_to_month")
+          .innerHTML = "180"
+        document
+          .getElementById("0to15y_point")
+          .innerHTML = "64"
+        document
+          .getElementById("career_total")
+          .innerHTML = "64"
+        document
+          .getElementById("total")
+          .innerHTML = "64"
+      } else {
+        document
+          .getElementById("0to15y_to_month")
+          .innerHTML = total_month
+        document
+          .getElementById("0to15y_point")
+          .innerHTML = (total_month * 0.3555).toFixed(4)
+        document
+          .getElementById("total")
+          .innerHTML = (total_month * 0.3555).toFixed(4)
+        document
+          .getElementById("career_total")
+          .innerHTML = (total_month * 0.3555).toFixed(4)
+      }
+      document
+        .getElementById("hidden_total")
+        .value = document
+        .getElementById("total")
+        .innerHTML
+      return true;
+    }
+  </script>

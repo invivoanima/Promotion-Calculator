@@ -1,5 +1,7 @@
 from django.urls import path
 from . import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 app_name = 'calc'
 urlpatterns = [
@@ -10,6 +12,7 @@ urlpatterns = [
     path('register/', views.register, name='register'),
     path('area_change/', views.area_change, name="area_change"),
     path('error/', views.error, name='error'),
+    path('suggestion/', views.suggestion, name='suggestion'),
 
     path('common/', views.common, name='common'),
     path('common/career', views.common_career, name="cc"),
@@ -21,5 +24,8 @@ urlpatterns = [
     path('area/<str:areaname>/diff', views.area_diff, name="ad"),
     path('area/common', views.area_common),
     path('area/diff', views.area_diff),
+    path('area/<str:areaname>/refdata', views.area_refdata, name='refdata'),
 
 ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

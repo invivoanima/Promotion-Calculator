@@ -30,9 +30,9 @@
     </li>
     {% if request.user.is_authenticated %}
       <li>
-        <a href="#" class="nav-link text-white">
+        <a href="/area/{{ area.area }}/refdata" class="nav-link text-white">
           <i class="bi bi-box-fill"></i>
-          <s>인사관련 자료</s>
+          인사관련 자료
         </a>
       </li>
       <li>
@@ -51,6 +51,12 @@
         <a href="/area_change" class="nav-link text-white">
           <i class="bi bi-globe"></i>
           지역 설정
+        </a>
+      </li>
+      <li>
+        <a href="/suggestion" class="nav-link text-white">
+          <i class="bi bi-chat-right-heart"></i>
+          건의/오류 제보
         </a>
       </li>
       <li>

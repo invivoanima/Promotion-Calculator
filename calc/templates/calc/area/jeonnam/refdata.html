@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    {% include 'calc/head.html' %}
+    <title>승진 점수 계산기</title>
+  </head>
+
+  <body>
+    <div class="row g-0">
+      <div class="col-3">
+        <div class="d-flex flex-nowrap">{% include 'calc/sidebar.html' %}</div>
+      </div>
+      <div class="col-9">
+        <div class="p-5">
+          <div class="m-6 w-100 h-100">
+            <p class="h2">인사 관련 자료</p>
+            <p class="h5">본 페이지 작성에 참고한 자료 및 매뉴얼 입니다.</p>
+            <br>
+            <br>
+
+            <table class="table">
+              {% load static %}
+              <thead>
+                <tr>
+                  <th scope="col">제목</th>
+                  <th scope="col">연도</th>
+                  <th scope="col">파일</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>2023. 전라남도교육공무원 승진후보자 평정업무 처리요령</td>
+                  <td>2023</td>
+                  <td>
+                    <a href="{% static 'templates/calc/area/jeonnam/manual/2023. 전라남도교육공무원 승진후보자 평정업무 처리요령.pdf' %}" target="_blank">클릭</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td>2022. 도서벽지학교 및 농어촌교육진흥학교 지정 일람</td>
+                  <td>2022</td>
+                  <td>
+                    <a href="{% static 'templates/calc/area/jeonnam/manual/2022. 도서벽지학교 및 농어촌교육진흥학교 지정 일람.pdf' %}" target="_blank">클릭</a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </body>
+
+  </html>
+
+  <script></script>

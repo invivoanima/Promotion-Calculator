@@ -25,6 +25,13 @@ class Manual(models.Model) :
     uploader = models.TextField()
 
 
+class Suggestion(models.Model) :
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.TextField(default='')
+    file = models.FileField(upload_to='suggestion/', null=True, blank=True)
+    date = models.DateTimeField(auto_now_add=True)
+
+
 class Common_Career(models.Model) :
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     career_year = models.IntegerField(blank=True, null=True)

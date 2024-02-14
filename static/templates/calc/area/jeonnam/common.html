@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    {% include 'calc/head.html' %}
+    <title>승진 점수 계산기</title>
+  </head>
+
+  <body>
+    <div class="row g-0">
+
+      <div class="col-3">
+        <div class="d-flex flex-nowrap">{% include 'calc/sidebar.html' %}</div>
+      </div>
+
+      <div class="col-9">
+        <div class="p-5">
+          {% if request.user.is_authenticated %}
+            <div class="mb-4">
+              <ul class="nav nav-fill nav-underline">
+
+                <li class="nav-item">
+                  <a class="nav-link active" href="/area/{{area.area}}/common">공통가산점</a>
+                </li>
+
+                <li class="nav-item">
+                  <a class="nav-link" href="/area/{{area.area}}/diff">선택가산점</a>
+                </li>
+
+              </ul>
+            </div>
+          {% endif %}
+
+          <form class="plus_form" method="POST" onsubmit="ac_input_check();">
+            {% csrf_token %}
+            <p class="h2 mb-5">
+              {% if not request.user.is_authenticated %}전남
+              {% endif %}공통가산점(3.3점)</p>
+            <div class="accordion mb-2" id="plus_group">
+              <div class="accordion-item">
+                <h2 class="accordion-header row">
+                  <div class="col-1">
+                    <button class="accordion-button collapsed h-100" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne"></button>
+                  </div>
+                  <div class="col-9 align-self-center p-2">
+                    <p class="h5 text-start">연구학교 근무경력(1.0점)</p>
+                  </div>
+                  <div class="col-2 align-self-center">
+                    <p id="research_school_total" class="h5">0</p>
+                  </div>
+                </h2>
+                <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse">
+                  <div class="accordion-body">
+                    <table class="table align-middle">
+                      <thead>
+                        <tr>
+                          <th class="col-6">세부 항목</th>
+                          <th class="col-5">개월수</th>
+                          <th class="col-1">점수</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>
+                            <p class="h5">교육부장관 지정 연구학교(시범, 실험학교 포함)</p>
+                            <p class="h6">월 0.018점</p>
+                          </td>
+                          <td>
+                            <div class="row justify-content-center">
+                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.research_school_year }}" {% endif %} class="form-control w-25 p-1" id="research_school_year" name="research_school_year">
+                              <p class="w-auto">년</p>
+                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.research_school_month }}" {% endif %} class="form-control w-25 p-1" id="research_school_month" name="research_school_month">
+                              <p class="w-auto">월</p>
+                            </div>
+                          </td>
+                          <td>
+                            <p class="h6" id="research_school_point">0</p>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div class="row w-100 justify-content-center">
+                      <div class="mb-3 w-75">
+                        <label for="exampleFormControlTextarea1" class="form-label">개인 메모</label>
+                        <textarea class="form-control" id="research_school_memo" name="research_school_memo" rows="3">{{ point.research_school_memo }}</textarea>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <h2 class="accordion-header row">
+                  <div class="col-1">
+                    <button class="accordion-button collapsed h-100" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="true" aria-controls="panelsStayOpen-collapseTwo"></button>
+                  </div>
+                  <div class="col-9 align-self-center p-2">
+                    <p class="h5 text-start">재외국인교육기관 파견근무 경력(0.5점)</p>
+                  </div>
+                  <div class="col-2 align-self-center">
+                    <p id="foreign_school_total" class="h5">0</p>
+                  </div>
+                </h2>
+                <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse">
+                  <div class="accordion-body">
+                    <table class="table align-middle">
+                      <thead>
+                        <tr>
+                          <th class="col-6">세부 항목</th>
+                          <th class="col-5">개월수</th>
+                          <th class="col-1">점수</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>
+                            <p class="h5">재외국인교육기관 파견근무경력</p>
+                            <p class="h6">월 0.015점</p>
+                          </td>
+                          <td>
+                            <div class="row justify-content-center">
+                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.foreign_school_year }}" {% endif %} class="form-control w-25 p-1" id="foreign_school_year" name="foreign_school_year">
+                              <p class="w-auto">년</p>
+                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.foreign_school_month }}" {% endif %} class="form-control w-25 p-1" id="foreign_school_month" name="foreign_school_month">
+                              <p class="w-auto">월</p>
+                            </div>
+                          </td>
+                          <td>
+                            <p class="h6" id="foreign_school_point">0</p>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div class="row w-100 justify-content-center">
+                      <div class="mb-3 w-75">
+                        <label for="exampleFormControlTextarea1" class="form-label">개인 메모</label>
+                        <textarea class="form-control" id="foreign_school_memo" name="foreign_school_memo" rows="3">{{ point.foreign_school_memo }}</textarea>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <h2 class="accordion-header row">
+                  <div class="col-1">
+                    <button class="accordion-button collapsed h-100" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseThree" aria-expanded="true" aria-controls="panelsStayOpen-collapseThree"></button>
+                  </div>
+                  <div class="col-9 align-self-center p-2">
+                    <p class="h5 text-start">연수이수학점실적(0.8점)</p>
+                  </div>
+                  <div class="col-2 align-self-center">
+                    <p id="lecture_total" class="h5">0</p>
+                  </div>
+                </h2>
+                <div id="panelsStayOpen-collapseThree" class="accordion-collapse collapse">
+                  <div class="accordion-body">
+                    <table class="table align-middle">
+                      <thead>
+                        <tr>
+                          <th class="col-7">세부 항목</th>
+                          <th class="col-4">연도별이수시간</th>
+                          <th class="col-1">점수</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>
+                            <p class="h5">NEIS 인사기록에 등재되어 학점으로 관리되는 직무연수 실적</p>
+                            <p class="h6">연도별 누적 시간, 1학점(15시간)당 0.02점, 연도별 상한점 0.08점</p>
+                          </td>
+                          <td class="class">
+                            <div class="col">
+                              <div class="row justify-content-center align-text-middle">
+                                <p class="w-auto align-text-middle m-0">1.
+                                </p><input type="number" min="0" max="400" {% if request.user.is_authenticated %} value="{{ point.lecture1_point }}" {% endif %} class="form-control w-25 p-1" id="lecture1_point" name="lecture1_point">
+                              </div>
+                              <div class="row justify-content-center align-text-middle">
+                                <p class="w-auto align-text-middle m-0">2.
+                                </p><input type="number" min="0" max="400" {% if request.user.is_authenticated %} value="{{ point.lecture2_point }}" {% endif %} class="form-control w-25 p-1" id="lecture2_point" name="lecture2_point">
+                              </div>
+                              <div class="row justify-content-center align-text-middle">
+                                <p class="w-auto align-text-middle m-0">3.
+                                </p><input type="number" min="0" max="400" {% if request.user.is_authenticated %} value="{{ point.lecture3_point }}" {% endif %} class="form-control w-25 p-1" id="lecture3_point" name="lecture3_point">
+                              </div>
+                              <div class="row justify-content-center align-text-middle">
+                                <p class="w-auto align-text-middle m-0">4.
+                                </p><input type="number" min="0" max="400" {% if request.user.is_authenticated %} value="{{ point.lecture4_point }}" {% endif %} class="form-control w-25 p-1" id="lecture4_point" name="lecture4_point">
+                              </div>
+                              <div class="row justify-content-center align-text-middle">
+                                <p class="w-auto align-text-middle m-0">5.
+                                </p><input type="number" min="0" max="400" {% if request.user.is_authenticated %} value="{{ point.lecture5_point }}" {% endif %} class="form-control w-25 p-1" id="lecture5_point" name="lecture5_point">
+                              </div>
+                              <div class="row justify-content-center align-text-middle">
+                                <p class="w-auto align-text-middle m-0">6.
+                                </p><input type="number" min="0" max="400" {% if request.user.is_authenticated %} value="{{ point.lecture6_point }}" {% endif %} class="form-control w-25 p-1" id="lecture6_point" name="lecture6_point">
+                              </div>
+                              <div class="row justify-content-center align-text-middle">
+                                <p class="w-auto align-text-middle m-0">7.
+                                </p><input type="number" min="0" max="400" {% if request.user.is_authenticated %} value="{{ point.lecture7_point }}" {% endif %} class="form-control w-25 p-1" id="lecture7_point" name="lecture7_point">
+                              </div>
+                              <div class="row justify-content-center align-text-middle">
+                                <p class="w-auto align-text-middle m-0">8.
+                                </p><input type="number" min="0" max="400" {% if request.user.is_authenticated %} value="{{ point.lecture8_point }}" {% endif %} class="form-control w-25 p-1" id="lecture8_point" name="lecture8_point">
+                              </div>
+                              <div class="row justify-content-center align-text-middle">
+                                <p class="w-auto align-text-middle m-0">9.
+                                </p><input type="number" min="0" max="400" {% if request.user.is_authenticated %} value="{{ point.lecture9_point }}" {% endif %} class="form-control w-25 p-1" id="lecture9_point" name="lecture9_point">
+                              </div>
+                              <div class="row justify-content-center align-text-middle">
+                                <p class="w-auto align-text-middle m-0">10.
+                                </p><input type="number" min="0" max="400" {% if request.user.is_authenticated %} value="{{ point.lecture10_point }}" {% endif %} class="form-control w-25 p-1" id="lecture10_point" name="lecture10_point">
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            <p class="h6" id="lecture_point">0</p>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div class="row w-100 justify-content-center">
+                      <div class="mb-3 w-75">
+                        <label for="exampleFormControlTextarea1" class="form-label">개인 메모</label>
+                        <textarea class="form-control" id="lecture_memo" name="lecture_memo" rows="3">{{ point.lecture_memo }}</textarea>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <h2 class="accordion-header row">
+                  <div class="col-1">
+                    <button class="accordion-button collapsed h-100" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseFour" aria-expanded="true" aria-controls="panelsStayOpen-collapseFour"></button>
+                  </div>
+                  <div class="col-9 align-self-center p-2">
+                    <p class="h5 text-start">학교폭력의 예방 및 대응 관련 실적(1점)</p>
+                  </div>
+                  <div class="col-2 align-self-center">
+                    <p id="violence_total" class="h5">0</p>
+                  </div>
+                </h2>
+                <div id="panelsStayOpen-collapseFour" class="accordion-collapse collapse">
+                  <div class="accordion-body">
+                    <table class="table align-middle">
+                      <thead>
+                        <tr>
+                          <th class="col-6">세부 항목</th>
+                          <th class="col-5">횟수</th>
+                          <th class="col-1">점수</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>
+                            <p class="h5">학교폭력예방 관련 가산점</p>
+                            <p class="h6">연 0.1점</p>
+                          </td>
+                          <td>
+                            <div class="row justify-content-center">
+                              <input type="number" min="0" max="10" {% if request.user.is_authenticated %} value="{{ point.violence_count }}" {% endif %} class="form-control w-25 p-1" id="violence_count" name="violence_count">
+                              <p class="w-auto"></p>
+                            </div>
+                          </td>
+                          <td>
+                            <p class="h6" id="violence_point">0</p>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div class="row w-100 justify-content-center">
+                      <div class="mb-3 w-75">
+                        <label for="exampleFormControlTextarea1" class="form-label">개인 메모</label>
+                        <textarea class="form-control" id="violence_memo" name="violence_memo" rows="3">{{ point.violence_memo }}</textarea>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-8"></div>
+              <div class="col-2">
+                <p class="h2">합계</p>
+              </div>
+              <div class="col-2">
+                <p id="total" class="h2 text-center mb-3">0</p>
+              </div>
+            </div>
+            <input style="display: none;" type="text" id="hidden_total" name="hidden_total">
+            <button class="btn btn-primary">저장하기</button>
+            <button type="button" class="btn btn-secondary" onclick="ac_input_check()">계산하기</button>
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </body>
+
+</html>
+
+<script>
+  window.onload = function () {
+    calc_ac()
+  };
+
+  function ac_input_check() {
+    calc_ac()
+  }
+
+  function form_reset() {
+    document
+      .getElementById("research_school_total")
+      .innerHTML = "0"
+    document
+      .getElementById("research_school_point")
+      .innerHTML = "0"
+    document
+      .getElementById("foreign_school_total")
+      .innerHTML = "0"
+    document
+      .getElementById("foreign_school_point")
+      .innerHTML = "0"
+    document
+      .getElementById("lecture_total")
+      .innerHTML = "0"
+    document
+      .getElementById("lecture_point")
+      .innerHTML = "0"
+    document
+      .getElementById("violence_total")
+      .innerHTML = "0"
+    document
+      .getElementById("violence_point")
+      .innerHTML = "0"
+  }
+
+  function calc_ac() {
+    form_reset()
+
+    //연구학교근무경력
+    var research_school_check_year = document
+      .getElementById("research_school_year")
+      .value
+    var research_school_check_month = document
+      .getElementById("research_school_month")
+      .value
+    var research_school_total = research_school_check_year * 0.216 + research_school_check_month * 0.018
+    if (research_school_total >= 0 && research_school_total <= 1) {
+      document
+        .getElementById("research_school_total")
+        .innerHTML = research_school_total.toFixed(4)
+      document
+        .getElementById("research_school_point")
+        .innerHTML = research_school_total.toFixed(4)
+    } else {
+      document
+        .getElementById("research_school_total")
+        .innerHTML = 1
+      document
+        .getElementById("research_school_point")
+        .innerHTML = 1
+    }
+
+    //재외국인교육기관근무경력
+    var foreign_school_check_year = document
+      .getElementById("foreign_school_year")
+      .value
+    var foreign_school_check_month = document
+      .getElementById("foreign_school_month")
+      .value
+    var foreign_school_total = foreign_school_check_year * 0.18 + foreign_school_check_month * 0.015
+    if (foreign_school_total >= 0 && foreign_school_total <= 1) {
+      document
+        .getElementById("foreign_school_total")
+        .innerHTML = foreign_school_total.toFixed(4)
+      document
+        .getElementById("foreign_school_point")
+        .innerHTML = foreign_school_total.toFixed(4)
+    } else {
+      document
+        .getElementById("foreign_school_total")
+        .innerHTML = 0.5
+      document
+        .getElementById("foreign_school_point")
+        .innerHTML = 0.5
+    }
+
+    //연수이수학점실력
+    var lecture_score = 0
+    for (let i = 1; i < 11; i++) {
+      var var_name = 'lecture' + i + '_point'
+
+      if (document.getElementById(var_name).value >= 60) {
+        lecture_score = lecture_score + 0.08
+      } else if (document.getElementById(var_name).value < 60 && document.getElementById(var_name).value >= 45) {
+        lecture_score = lecture_score + 0.06
+      } else if (document.getElementById(var_name).value < 45 && document.getElementById(var_name).value >= 30) {
+        lecture_score = lecture_score + 0.04
+      } else if (document.getElementById(var_name).value < 30 && document.getElementById(var_name).value >= 15) {
+        lecture_score = lecture_score + 0.02
+      }
+
+      document
+        .getElementById("lecture_point")
+        .innerHTML = lecture_score.toFixed(4)
+      document
+        .getElementById("lecture_total")
+        .innerHTML = lecture_score.toFixed(4)
+    }
+
+    //학폭가산점
+    var violence_count = document
+      .getElementById("violence_count")
+      .value
+    violence_score = violence_count * 0.1
+
+    document
+      .getElementById("violence_point")
+      .innerHTML = violence_score.toFixed(4)
+    document
+      .getElementById("violence_total")
+      .innerHTML = violence_score.toFixed(4)
+
+    //합계
+    var research_school_total = Number(document.getElementById("research_school_total").innerHTML)
+    var foreign_school_total = Number(document.getElementById("foreign_school_total").innerHTML)
+    var lecture_total = Number(document.getElementById("lecture_total").innerHTML)
+    var violence_total = Number(document.getElementById("violence_total").innerHTML)
+    document
+      .getElementById("total")
+      .innerHTML = research_school_total + foreign_school_total + lecture_total + violence_total
+    document
+      .getElementById("hidden_total")
+      .value = research_school_total + foreign_school_total + lecture_total + violence_total
+  }
+</script>

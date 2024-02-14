@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    {% include 'calc/head.html' %}
+    <title>승진 점수 계산기</title>
+  </head>
+
+  <body>
+    <div class="row g-0">
+      <div class="col-3">
+        <div class="d-flex flex-nowrap">{% include 'calc/sidebar.html' %}</div>
+      </div>
+      <div class="col-9">
+        <div class="p-5">
+          <div class="m-6 w-100 h-100">
+            <p class="h2">지역 설정</p>
+            <p class="h5">본인의 지역을 바꿀 수 있습니다. 가산점 입력 페이지에서 본인이 입력한 페이지로 자동으로 이동합니다.</p>
+            <br>
+            <br>
+            <div class="flex">
+              <form method="POST">
+                {% csrf_token %}
+                <div class="row justify-content-center">
+                  <div class="input-group mb-3 w-25">
+                    <select class="form-select  mb-5" id="area_change" name="area_change">
+                      <option value="seoul" {% if area.area == "seoul"%} selected="selected" {% endif %}>서울</option>
+                      <option value="busan" {% if area.area == "busan"%} selected="selected" {% endif %}>부산</option>
+                      <option value="daegu" {% if area.area == "daegu"%} selected="selected" {% endif %}>대구</option>
+                      <option value="incheon" {% if area.area == "incheon"%} selected="selected" {% endif %}>인천</option>
+                      <option value="gwangju" {% if area.area == "gwangju"%} selected="selected" {% endif %}>광주</option>
+                      <option value="daejeon" {% if area.area == "daejeon"%} selected="selected" {% endif %}>대전</option>
+                      <option value="ulsan" {% if area.area == "ulsan"%} selected="selected" {% endif %}>울산</option>
+                      <option value="sejong" {% if area.area == "sejong"%} selected="selected" {% endif %}>세종</option>
+                      <option value="gyeongi" {% if area.area == "gyeongi"%} selected="selected" {% endif %}>경기도</option>
+                      <option value="gangwon" {% if area.area == "gangwon"%} selected="selected" {% endif %}>강원도</option>
+                      <option value="chungbuk" {% if area.area == "chungbuk"%} selected="selected" {% endif %}>충청북도</option>
+                      <option value="chungnam" {% if area.area == "chungnam"%} selected="selected" {% endif %}>충청남도</option>
+                      <option value="jeonbuk" {% if area.area == "jeonbuk"%} selected="selected" {% endif %}>전라북도</option>
+                      <option value="jeonnam" {% if area.area == "jeonnam"%} selected="selected" {% endif %}>전라남도</option>
+                      <option value="gyeongbuk" {% if area.area == "gyeongbuk"%} selected="selected" {% endif %}>경상북도</option>
+                      <option value="gyeongnam" {% if area.area == "gyeongnam"%} selected="selected" {% endif %}>경상남도</option>
+                      <option value="jeju" {% if area.area == "jeju"%} selected="selected" {% endif %}>제주도</option>
+                    </select>
+                  </div>
+                </div>
+                <button class="btn btn-primary w-25 py-2" type="submit">
+                  변경하기
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+
+  </html>
+
+  <script></script>

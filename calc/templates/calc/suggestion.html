@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    {% include 'calc/head.html' %}
+    <title>승진 점수 계산기</title>
+  </head>
+
+  <body>
+    <div class="row g-0">
+      <div class="col-3">
+        <div class="d-flex flex-nowrap">{% include 'calc/sidebar.html' %}</div>
+      </div>
+      <div class="col-9">
+        <div class="p-5">
+          <div class="m-6 w-100 h-100">
+            <p class="h2">건의/오류 제보</p>
+            <p class="h5">사용 중 발생한 오류에 대해 제보하거나, 사이트 운영에 관한 건의를 할 수 있습니다.</p>
+            <br>
+            <br>
+            <div class="flex">
+              <form method="POST" enctype="multipart/form-data" id="dataform">
+                {% csrf_token %}
+                <div class="row justify-content-center">
+                  <div class="mb-3 w-50">
+                    <label for="exampleFormControlTextarea1" class="form-label">전달할 내용</label>
+                    <textarea class="form-control" id="exampleFormControlTextarea1" rows="8" name='content'></textarea>
+                  </div>
+                </div>
+                <div>
+                  <div class="row justify-content-md-center">
+                    <div class="col"></div>
+                    <div class="col">
+                      <div class="mb-3">
+                        <label for="formFile" class="form-label">첨부파일<br>(선택 또는 사진 캡처/복사 후 붙여넣기)</label>
+                        <input class="form-control" type="file" id="formFile" name="imgfile">
+                      </div>
+                    </div>
+                    <div class="col"></div>
+                  </div>
+                  <div class="row justify-content-md-center">
+                    <div class="col"></div>
+                    <div class="col">
+                      <label for="blah" class="form-label">사진 미리보기</label>
+                      <div id="imageDiv"><img id="blah" src="#" alt="your image" style="border:1px solid black; width:100% !important"/></div>
+                    </div>
+                    <div class="col"></div>
+                  </div>
+                </div>
+                <button class="btn btn-primary w-25 py-2" type="submit">
+                  제출하기
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+
+  </html>
+
+  <script>
+    const fileInput = document.getElementById("formFile");
+
+    window.onload = function () {
+      document
+        .getElementById("imageDiv")
+        .style
+        .display = 'none';
+    };
+
+    window.addEventListener('paste', e => {
+      document
+        .getElementById("imageDiv")
+        .style
+        .display = 'inline';
+      fileInput.files = e.clipboardData.files;
+      const [file] = formFile.files
+      if (file) {
+        blah.src = URL.createObjectURL(file)
+      }
+    });
+
+    formFile.onchange = evt => {
+      document
+        .getElementById("imageDiv")
+        .style
+        .display = 'inline';
+      const [file] = formFile.files
+      if (file) {
+        blah.src = URL.createObjectURL(file)
+      }
+    }
+  </script>
