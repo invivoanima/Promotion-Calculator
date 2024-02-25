@@ -31,7 +31,7 @@
             </div>
           {% endif %}
 
-          <form class="plus_area_form" method="POST">
+          <form class="plus_area_form" method="POST" onsubmit="area_diff_input_check();">
             {% csrf_token %}
             <p class="h2 mb-5">
               {% if not request.user.is_authenticated %}전남
@@ -68,9 +68,9 @@
                           </td>
                           <td>
                             <div class="row justify-content-center">
-                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="island_ga_year" name="island_ga_year">
+                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.island_ga_year }}" {% endif %} class="form-control w-25 p-1" id="island_ga_year" name="island_ga_year">
                               <p class="w-auto">년</p>
-                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.career_month }}" {% endif %} class="form-control w-25 p-1" id="island_ga_month" name="island_ga_month">
+                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.island_ga_month }}" {% endif %} class="form-control w-25 p-1" id="island_ga_month" name="island_ga_month">
                               <p class="w-auto">월</p>
                             </div>
                           </td>
@@ -85,9 +85,9 @@
                           </td>
                           <td>
                             <div class="row justify-content-center">
-                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="island_na_year" name="island_na_year">
+                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.island_na_year }}" {% endif %} class="form-control w-25 p-1" id="island_na_year" name="island_na_year">
                               <p class="w-auto">년</p>
-                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.career_month }}" {% endif %} class="form-control w-25 p-1" id="island_na_month" name="island_na_month">
+                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.island_na_month }}" {% endif %} class="form-control w-25 p-1" id="island_na_month" name="island_na_month">
                               <p class="w-auto">월</p>
                             </div>
                           </td>
@@ -102,9 +102,9 @@
                           </td>
                           <td>
                             <div class="row justify-content-center">
-                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="island_da_year" name="island_da_year">
+                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.island_da_year }}" {% endif %} class="form-control w-25 p-1" id="island_da_year" name="island_da_year">
                               <p class="w-auto">년</p>
-                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.career_month }}" {% endif %} class="form-control w-25 p-1" id="island_da_month" name="island_da_month">
+                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.island_da_month }}" {% endif %} class="form-control w-25 p-1" id="island_da_month" name="island_da_month">
                               <p class="w-auto">월</p>
                             </div>
                           </td>
@@ -119,9 +119,9 @@
                           </td>
                           <td>
                             <div class="row justify-content-center">
-                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="island_ra_year" name="island_ra_year">
+                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.island_ra_year }}" {% endif %} class="form-control w-25 p-1" id="island_ra_year" name="island_ra_year">
                               <p class="w-auto">년</p>
-                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.career_month }}" {% endif %} class="form-control w-25 p-1" id="island_ra_month" name="island_ra_month">
+                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.island_ra_month }}" {% endif %} class="form-control w-25 p-1" id="island_ra_month" name="island_ra_month">
                               <p class="w-auto">월</p>
                             </div>
                           </td>
@@ -136,9 +136,9 @@
                           </td>
                           <td>
                             <div class="row justify-content-center">
-                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="mountain_ga_year" name="mountain_ga_year">
+                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.mountain_ga_year }}" {% endif %} class="form-control w-25 p-1" id="mountain_ga_year" name="mountain_ga_year">
                               <p class="w-auto">년</p>
-                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.career_month }}" {% endif %} class="form-control w-25 p-1" id="mountain_ga_month" name="mountain_ga_month">
+                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.mountain_ga_month }}" {% endif %} class="form-control w-25 p-1" id="mountain_ga_month" name="mountain_ga_month">
                               <p class="w-auto">월</p>
                             </div>
                           </td>
@@ -153,9 +153,9 @@
                           </td>
                           <td>
                             <div class="row justify-content-center">
-                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="mountain_na_year" name="mountain_na_year">
+                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.mountain_na_year }}" {% endif %} class="form-control w-25 p-1" id="mountain_na_year" name="mountain_na_year">
                               <p class="w-auto">년</p>
-                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.career_month }}" {% endif %} class="form-control w-25 p-1" id="mountain_na_month" name="mountain_na_month">
+                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.mountain_na_month }}" {% endif %} class="form-control w-25 p-1" id="mountain_na_month" name="mountain_na_month">
                               <p class="w-auto">월</p>
                             </div>
                           </td>
@@ -170,9 +170,9 @@
                           </td>
                           <td>
                             <div class="row justify-content-center">
-                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="mountain_da_year" name="mountain_da_year">
+                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.mountain_da_year }}" {% endif %} class="form-control w-25 p-1" id="mountain_da_year" name="mountain_da_year">
                               <p class="w-auto">년</p>
-                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.career_month }}" {% endif %} class="form-control w-25 p-1" id="mountain_da_month" name="mountain_da_month">
+                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.mountain_da_month }}" {% endif %} class="form-control w-25 p-1" id="mountain_da_month" name="mountain_da_month">
                               <p class="w-auto">월</p>
                             </div>
                           </td>
@@ -187,9 +187,9 @@
                           </td>
                           <td>
                             <div class="row justify-content-center">
-                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="mountain_ra_year" name="mountain_ra_year">
+                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.mountain_ra_year }}" {% endif %} class="form-control w-25 p-1" id="mountain_ra_year" name="mountain_ra_year">
                               <p class="w-auto">년</p>
-                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.career_month }}" {% endif %} class="form-control w-25 p-1" id="mountain_ra_month" name="mountain_ra_month">
+                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.mountain_ra_month }}" {% endif %} class="form-control w-25 p-1" id="mountain_ra_month" name="mountain_ra_month">
                               <p class="w-auto">월</p>
                             </div>
                           </td>
@@ -206,7 +206,7 @@
                     <div class="row w-100 justify-content-center">
                       <div class="mb-3 w-75">
                         <label for="exampleFormControlTextarea1" class="form-label">개인 메모</label>
-                        <textarea class="form-control" id="outside_school_memo" name="outside_school_memo" rows="3"></textarea>
+                        <textarea class="form-control" id="outside_school_memo" name="outside_school_memo" rows="3">{{ point.outside_school_memo }}</textarea>
                       </div>
                     </div>
                   </div>
@@ -241,9 +241,9 @@
                           </td>
                           <td>
                             <div class="row justify-content-center">
-                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="rural_1_year" name="rural_1_year">
+                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.rural_1_year }}" {% endif %} class="form-control w-25 p-1" id="rural_1_year" name="rural_1_year">
                               <p class="w-auto">년</p>
-                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.career_month }}" {% endif %} class="form-control w-25 p-1" id="rural_1_month" name="rural_1_month">
+                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.rural_1_month }}" {% endif %} class="form-control w-25 p-1" id="rural_1_month" name="rural_1_month">
                               <p class="w-auto">월</p>
                             </div>
                           </td>
@@ -258,9 +258,9 @@
                           </td>
                           <td>
                             <div class="row justify-content-center">
-                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="rural_2_year" name="rural_2_year">
+                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.rural_2_year }}" {% endif %} class="form-control w-25 p-1" id="rural_2_year" name="rural_2_year">
                               <p class="w-auto">년</p>
-                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.career_month }}" {% endif %} class="form-control w-25 p-1" id="rural_2_month" name="rural_2_month">
+                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.rural_2_month }}" {% endif %} class="form-control w-25 p-1" id="rural_2_month" name="rural_2_month">
                               <p class="w-auto">월</p>
                             </div>
                           </td>
@@ -275,9 +275,9 @@
                           </td>
                           <td>
                             <div class="row justify-content-center">
-                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="rural_3_year" name="rural_3_year">
+                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.rural_3_year }}" {% endif %} class="form-control w-25 p-1" id="rural_3_year" name="rural_3_year">
                               <p class="w-auto">년</p>
-                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.career_month }}" {% endif %} class="form-control w-25 p-1" id="rural_3_month" name="rural_3_month">
+                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.rural_3_month }}" {% endif %} class="form-control w-25 p-1" id="rural_3_month" name="rural_3_month">
                               <p class="w-auto">월</p>
                             </div>
                           </td>
@@ -286,9 +286,25 @@
                           </td>
                         </tr>
                         <tr>
-                          <td colspan="2">
+                          <td>
+                            <p class="h5">기본경력점 합계(0.85)</p>
+                            <p class="h6">0.85점을 초과하면 각 급지의 개월수를 줄이고, 아래의 추가경력점을 올려주세요.</p>
+                          </td>
+                          <td></td>
+                          <td>
+                            <p class="h6" id="rural_default_point">0</p>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
                             <p class="h5">추가경력점(0.15)</p>
                             <p class="h6">기본 경력점 상한점 0.85점을 초과한 근무 경력에 한해 월 0.002점을 추가경력점으로 인정</p>
+                          </td>
+                          <td>
+                            <div class="row justify-content-center">
+                              <input type="number" min="0" max="75" {% if request.user.is_authenticated %} value="{{ point.rural_add_month }}" {% endif %} class="form-control w-25 p-1" id="rural_add_month" name="rural_add_month">
+                              <p class="w-auto">개월</p>
+                            </div>
                           </td>
                           <td>
                             <p class="h6" id="rural_add_point">0</p>
@@ -303,7 +319,7 @@
                     <div class="row w-100 justify-content-center">
                       <div class="mb-3 w-75">
                         <label for="exampleFormControlTextarea1" class="form-label">개인 메모</label>
-                        <textarea class="form-control" id="rural_memo" name="rural_memo" rows="3"></textarea>
+                        <textarea class="form-control" id="rural_memo" name="rural_memo" rows="3">{{ point.rural_memo }}</textarea>
                       </div>
                     </div>
                   </div>
@@ -338,7 +354,7 @@
                           </td>
                           <td>
                             <div class="row justify-content-center">
-                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="high_teacher_year" name="high_teacher_year">
+                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.high_teacher_year }}" {% endif %} class="form-control w-25 p-1" id="high_teacher_year" name="high_teacher_year">
                               <p class="w-auto">년</p>
                             </div>
                           </td>
@@ -353,13 +369,24 @@
                           </td>
                           <td>
                             <div class="row justify-content-center">
-                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="high_teacher_add_year" name="high_teacher_add_year">
+                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.high_teacher_add_year }}" {% endif %} class="form-control w-25 p-1" id="high_teacher_add_year" name="high_teacher_add_year">
                               <p class="w-auto">년</p>
                             </div>
                           </td>
                           <td>
                             <p class="h6" id="high_teacher_add_point">0</p>
                           </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <p class="h6">1정 자격연수 평정점 부족분(추가경력점 가능점수)</p>
+                          </td>
+                          <td>
+                            <div class="row justify-content-center">
+                              <p class="w-auto" id="grade1translated">{{ grade1translated }}</p>
+                            </div>
+                          </td>
+                          <td></td>
                         </tr>
                         <tr class="table-group-divider">
                           <td colspan="3">기본 경력점 만점은 1점이며, 추가 경력점은 1정 자격연수 평정점과의 합산점이 9점에 도달할 때까지 적용할 수 있습니다.
@@ -371,7 +398,7 @@
                     <div class="row w-100 justify-content-center">
                       <div class="mb-3 w-75">
                         <label for="exampleFormControlTextarea1" class="form-label">개인 메모</label>
-                        <textarea class="form-control" id="high_teacher_memo" name="high_teacher_memo" rows="3"></textarea>
+                        <textarea class="form-control" id="high_teacher_memo" name="high_teacher_memo" rows="3">{{ point.high_teacher_memo }}</textarea>
                       </div>
                     </div>
 
@@ -407,9 +434,9 @@
                           </td>
                           <td>
                             <div class="row justify-content-center">
-                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="research_school_area_year" name="research_school_area_year">
+                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.research_school_area_year }}" {% endif %} class="form-control w-25 p-1" id="research_school_area_year" name="research_school_area_year">
                               <p class="w-auto">년</p>
-                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.career_month }}" {% endif %} class="form-control w-25 p-1" id="research_school_area_month" name="research_school_area_month">
+                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.research_school_area_month }}" {% endif %} class="form-control w-25 p-1" id="research_school_area_month" name="research_school_area_month">
                               <p class="w-auto">월</p>
                             </div>
                           </td>
@@ -424,9 +451,9 @@
                           </td>
                           <td>
                             <div class="row justify-content-center">
-                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="research_school_area2_year" name="research_school_area2_year">
+                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.research_school_area2_year }}" {% endif %} class="form-control w-25 p-1" id="research_school_area2_year" name="research_school_area2_year">
                               <p class="w-auto">년</p>
-                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.career_month }}" {% endif %} class="form-control w-25 p-1" id="research_school_area2_month" name="research_school_area2_month">
+                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.research_school_area2_month }}" {% endif %} class="form-control w-25 p-1" id="research_school_area2_month" name="research_school_area2_month">
                               <p class="w-auto">월</p>
                             </div>
                           </td>
@@ -440,7 +467,7 @@
                     <div class="row w-100 justify-content-center">
                       <div class="mb-3 w-75">
                         <label for="exampleFormControlTextarea1" class="form-label">개인 메모</label>
-                        <textarea class="form-control" id="research_school_area_memo" name="research_school_area_memo" rows="3"></textarea>
+                        <textarea class="form-control" id="research_school_area_memo" name="research_school_area_memo" rows="3">{{ point.research_school_area_memo }}</textarea>
                       </div>
                     </div>
 
@@ -476,9 +503,9 @@
                           </td>
                           <td>
                             <div class="row justify-content-center">
-                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="double_class_year" name="double_class_year">
+                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.double_class_year }}" {% endif %} class="form-control w-25 p-1" id="double_class_year" name="double_class_year">
                               <p class="w-auto">년</p>
-                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.career_month }}" {% endif %} class="form-control w-25 p-1" id="double_class_month" name="double_class_month">
+                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.double_class_month }}" {% endif %} class="form-control w-25 p-1" id="double_class_month" name="double_class_month">
                               <p class="w-auto">월</p>
                             </div>
                           </td>
@@ -493,9 +520,9 @@
                           </td>
                           <td>
                             <div class="row justify-content-center">
-                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="cyber_year" name="cyber_year">
+                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.cyber_year }}" {% endif %} class="form-control w-25 p-1" id="cyber_year" name="cyber_year">
                               <p class="w-auto">년</p>
-                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.career_month }}" {% endif %} class="form-control w-25 p-1" id="cyber_month" name="cyber_month">
+                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.cyber_month }}" {% endif %} class="form-control w-25 p-1" id="cyber_month" name="cyber_month">
                               <p class="w-auto">월</p>
                             </div>
                           </td>
@@ -510,14 +537,14 @@
                           </td>
                           <td>
                             <div class="row justify-content-center">
-                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="cyber_year" name="cyber_year">
+                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.genius_year }}" {% endif %} class="form-control w-25 p-1" id="genius_year" name="genius_year">
                               <p class="w-auto">년</p>
-                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.career_month }}" {% endif %} class="form-control w-25 p-1" id="cyber_month" name="cyber_month">
+                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.genius_month }}" {% endif %} class="form-control w-25 p-1" id="genius_month" name="genius_month">
                               <p class="w-auto">월</p>
                             </div>
                           </td>
                           <td>
-                            <p class="h6" id="cyber_point">0</p>
+                            <p class="h6" id="genius_point">0</p>
                           </td>
                         </tr>
                         <tr>
@@ -527,9 +554,9 @@
                           </td>
                           <td>
                             <div class="row justify-content-center">
-                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="intern_month" name="intern_month">
+                              <input type="number" min="0" max="12" {% if request.user.is_authenticated %} value="{{ point.intern_month }}" {% endif %} class="form-control w-25 p-1" id="intern_month" name="intern_month">
                               <p class="w-auto">월</p>
-                              <input type="number" min="0" max="31" {% if request.user.is_authenticated %} value="{{ point.career_month }}" {% endif %} class="form-control w-25 p-1" id="intern_day" name="intern_day">
+                              <input type="number" min="0" max="31" {% if request.user.is_authenticated %} value="{{ point.intern_day }}" {% endif %} class="form-control w-25 p-1" id="intern_day" name="intern_day">
                               <p class="w-auto">일</p>
                             </div>
                           </td>
@@ -544,8 +571,8 @@
                           </td>
                           <td>
                             <div class="row justify-content-center">
-                              <input type="number" min="0" max="100" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="scout_month" name="scout_month">
-                              <p class="w-auto">월</p>
+                              <input type="number" min="0" max="100" {% if request.user.is_authenticated %} value="{{ point.scout_month }}" {% endif %} class="form-control w-25 p-1" id="scout_month" name="scout_month">
+                              <p class="w-auto">개월</p>
                             </div>
                           </td>
                           <td>
@@ -563,15 +590,15 @@
                               <div class="col">
                                 <div class="row justify-content-center align-text-middle">
                                   <p class="w-auto align-text-middle m-0">금상 횟수
-                                  </p><input type="number" min="0" max="10" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="competition_gold_point" name="competition_gold_point">
+                                  </p><input type="number" min="0" max="10" {% if request.user.is_authenticated %} value="{{ point.competition_gold_point }}" {% endif %} class="form-control w-25 p-1" id="competition_gold_point" name="competition_gold_point">
                                 </div>
                                 <div class="row justify-content-center align-text-middle">
                                   <p class="w-auto align-text-middle m-0">은상 횟수
-                                  </p><input type="number" min="0" max="10" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="competition_silver_point" name="competition_silver_point">
+                                  </p><input type="number" min="0" max="10" {% if request.user.is_authenticated %} value="{{ point.competition_silver_point }}" {% endif %} class="form-control w-25 p-1" id="competition_silver_point" name="competition_silver_point">
                                 </div>
                                 <div class="row justify-content-center align-text-middle">
                                   <p class="w-auto align-text-middle m-0">동상 횟수
-                                  </p><input type="number" min="0" max="10" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="competition_bronze_point" name="competition_bronze_point">
+                                  </p><input type="number" min="0" max="10" {% if request.user.is_authenticated %} value="{{ point.competition_bronze_point }}" {% endif %} class="form-control w-25 p-1" id="competition_bronze_point" name="competition_bronze_point">
                                 </div>
                               </div>
                             </div>
@@ -591,15 +618,15 @@
                               <div class="col">
                                 <div class="row justify-content-center align-text-middle">
                                   <p class="w-auto align-text-middle m-0">1급 횟수
-                                  </p><input type="number" min="0" max="10" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="cert_1_point" name="cert_1_point">
+                                  </p><input type="number" min="0" max="10" {% if request.user.is_authenticated %} value="{{ point.cert_1_point }}" {% endif %} class="form-control w-25 p-1" id="cert_1_point" name="cert_1_point">
                                 </div>
                                 <div class="row justify-content-center align-text-middle">
                                   <p class="w-auto align-text-middle m-0">2급 횟수
-                                  </p><input type="number" min="0" max="10" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="cert_2_point" name="cert_2_point">
+                                  </p><input type="number" min="0" max="10" {% if request.user.is_authenticated %} value="{{ point.cert_2_point }}" {% endif %} class="form-control w-25 p-1" id="cert_2_point" name="cert_2_point">
                                 </div>
                                 <div class="row justify-content-center align-text-middle">
                                   <p class="w-auto align-text-middle m-0">3급 횟수
-                                  </p><input type="number" min="0" max="10" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="cert_3_point" name="cert_3_point">
+                                  </p><input type="number" min="0" max="10" {% if request.user.is_authenticated %} value="{{ point.cert_3_point }}" {% endif %} class="form-control w-25 p-1" id="cert_3_point" name="cert_3_point">
                                 </div>
                               </div>
                             </div>
@@ -610,14 +637,14 @@
                         </tr>
                         <tr>
                           <td>
-                            <p class="h5">더. 학교교육력유공증진유공교원</p>
+                            <p class="h5">더. 학교교육력유공증진유공교원(0.2)</p>
                             <p class="h6">연 0.036점</p>
                           </td>
                           <td>
                             <div class="row justify-content-center">
                               <div class="col">
                                 <div class="row justify-content-center align-text-middle">
-                                  <input type="number" min="0" max="10" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="edupower_count" name="edupower_count">
+                                  <input type="number" min="0" max="10" {% if request.user.is_authenticated %} value="{{ point.edupower_count }}" {% endif %} class="form-control w-25 p-1" id="edupower_count" name="edupower_count">
                                   <p class="w-auto align-text-middle m-0">회</p>
                                 </div>
                               </div>
@@ -636,7 +663,7 @@
                             <div class="row justify-content-center">
                               <div class="col">
                                 <div class="row justify-content-center align-text-middle">
-                                  <input type="number" min="0" max="50" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="openclass_add_count" name="openclass_add_count">
+                                  <input type="number" min="0" max="50" {% if request.user.is_authenticated %} value="{{ point.openclass_add_count }}" {% endif %} class="form-control w-25 p-1" id="openclass_add_count" name="openclass_add_count">
                                   <p class="w-auto align-text-middle m-0">회</p>
                                 </div>
                               </div>
@@ -649,13 +676,13 @@
                         <tr>
                           <td>
                             <p class="h5">머. 보직교사 추가경력</p>
-                            <p class="h6">연 0.036, 0.25점 상한</p>
+                            <p class="h6">보직교사 근무경력을 다 채웠을 경우, 연 0.036, 0.25점 상한</p>
                           </td>
                           <td>
                             <div class="row justify-content-center">
                               <div class="col">
                                 <div class="row justify-content-center align-text-middle">
-                                  <input type="number" min="0" max="50" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="high_teacher_add_plus_count" name="high_teacher_add_plus_count">
+                                  <input type="number" min="0" max="50" {% if request.user.is_authenticated %} value="{{ point.high_teacher_add_plus_count }}" {% endif %} class="form-control w-25 p-1" id="high_teacher_add_plus_count" name="high_teacher_add_plus_count">
                                   <p class="w-auto align-text-middle m-0">년</p>
                                 </div>
                               </div>
@@ -682,7 +709,7 @@
                     <div class="row w-100 justify-content-center">
                       <div class="mb-3 w-75">
                         <label for="exampleFormControlTextarea1" class="form-label">개인 메모</label>
-                        <textarea class="form-control" id="etc_memo" name="etc_memo" rows="3"></textarea>
+                        <textarea class="form-control" id="etc_memo" name="etc_memo" rows="3">{{ point.etc_memo }}</textarea>
                       </div>
                     </div>
 
@@ -697,7 +724,7 @@
                     <p class="h5 text-start">좋은수업실천연구 실적(2점)</p>
                   </div>
                   <div class="col-2 align-self-center">
-                    <p id="research_school_area_total" class="h5">0</p>
+                    <p id="openclass_total" class="h5">0</p>
                   </div>
                 </h2>
                 <div id="panelsStayOpen-collapseSix" class="accordion-collapse collapse">
@@ -718,7 +745,7 @@
                           </td>
                           <td>
                             <div class="row justify-content-center">
-                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="openclass_count" name="openclass_count">
+                              <input type="number" min="0" max="40" {% if request.user.is_authenticated %} value="{{ point.openclass_count }}" {% endif %} class="form-control w-25 p-1" id="openclass_count" name="openclass_count">
                               <p class="w-auto">회</p>
                             </div>
                           </td>
@@ -732,7 +759,7 @@
                     <div class="row w-100 justify-content-center">
                       <div class="mb-3 w-75">
                         <label for="exampleFormControlTextarea1" class="form-label">개인 메모</label>
-                        <textarea class="form-control" id="openclass_memo" name="openclass_memo" rows="3"></textarea>
+                        <textarea class="form-control" id="openclass_memo" name="openclass_memo" rows="3">{{ point.openclass_memo }}</textarea>
                       </div>
                     </div>
 
@@ -768,9 +795,9 @@
                           </td>
                           <td>
                             <div class="row justify-content-center">
-                              <input type="number" min="0" max="500" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="living_solo_month" name="living_solo_month">
+                              <input type="number" min="0" max="500" {% if request.user.is_authenticated %} value="{{ point.living_solo_month }}" {% endif %} class="form-control w-25 p-1" id="living_solo_month" name="living_solo_month">
                               <p class="w-auto">월</p>
-                              <input type="number" min="0" max="31" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="living_solo_day" name="living_solo_day">
+                              <input type="number" min="0" max="31" {% if request.user.is_authenticated %} value="{{ point.living_solo_day }}" {% endif %} class="form-control w-25 p-1" id="living_solo_day" name="living_solo_day">
                               <p class="w-auto">일</p>
                             </div>
                           </td>
@@ -785,9 +812,9 @@
                           </td>
                           <td>
                             <div class="row justify-content-center">
-                              <input type="number" min="0" max="500" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="living_family_month" name="living_family_month">
+                              <input type="number" min="0" max="500" {% if request.user.is_authenticated %} value="{{ point.living_family_month }}" {% endif %} class="form-control w-25 p-1" id="living_family_month" name="living_family_month">
                               <p class="w-auto">월</p>
-                              <input type="number" min="0" max="31" {% if request.user.is_authenticated %} value="{{ point.career_year }}" {% endif %} class="form-control w-25 p-1" id="living_family_day" name="living_family_day">
+                              <input type="number" min="0" max="31" {% if request.user.is_authenticated %} value="{{ point.living_family_day }}" {% endif %} class="form-control w-25 p-1" id="living_family_day" name="living_family_day">
                               <p class="w-auto">일</p>
                             </div>
                           </td>
@@ -801,7 +828,7 @@
                     <div class="row w-100 justify-content-center">
                       <div class="mb-3 w-75">
                         <label for="exampleFormControlTextarea1" class="form-label">개인 메모</label>
-                        <textarea class="form-control" id="openclass_memo" name="openclass_memo" rows="3"></textarea>
+                        <textarea class="form-control" id="living_memo" name="living_memo" rows="3">{{ point.living_memo }}</textarea>
                       </div>
                     </div>
 
@@ -819,7 +846,10 @@
                 <p id="total" class="h2 text-center mb-3">0</p>
               </div>
             </div>
-            <button class="btn btn-primary">저장하기</button>
+            <input style="display: none;" type="text" id="hidden_total" name="hidden_total">
+            {% if request.user.is_authenticated %}
+              <button class="btn btn-primary">저장하기</button>
+            {% endif %}
             <button type="button" class="btn btn-secondary" onclick="area_diff_input_check()">계산하기</button>
           </form>
 
@@ -830,56 +860,628 @@
 
 </html>
 
-<script>
+<script type="text/javascript">
   window.onload = function () {
     calc_area_diff()
   };
 
   function area_diff_input_check() {
     calc_area_diff()
-  }
+  };
 
   function form_reset() {
-    var reset_list = ["outside_school_total", 
-    "island_ga_point","island_na_point", "island_da_point","island_ra_point",
-    "mountain_ga_point","mountain_na_point", "mountain_da_point","mountain_ra_point",
-    "rural_total","rural_1_point","rural_2_point","rural_3_point","rural_add_point",
-    "high_teacher_total","high_teacher_point","high_teacher_add_point",
-    "research_school_area_total","research_school_area_point","research_school_area2_point",
-    "etc_total","double_class_point","cyber_point","genius_point","intern_point",
-    "scout_point","competition_point","cert_point","edupower_point","openclass_add_point",
-    "high_teacher_add_plus_point",
-    "openclass_total","openclass_point",
-    "living_total","living_solo_point","living_family_point",
-    "total"]
+    var reset_list = [
+      "outside_school_total",
+      "island_ga_point",
+      "island_na_point",
+      "island_da_point",
+      "island_ra_point",
+      "mountain_ga_point",
+      "mountain_na_point",
+      "mountain_da_point",
+      "mountain_ra_point",
+      "rural_total",
+      "rural_1_point",
+      "rural_2_point",
+      "rural_3_point",
+      "rural_default_point",
+      "rural_add_point",
+      "high_teacher_total",
+      "high_teacher_point",
+      "high_teacher_add_point",
+      "research_school_area_total",
+      "research_school_area_point",
+      "research_school_area2_point",
+      "etc_total",
+      "double_class_point",
+      "cyber_point",
+      "genius_point",
+      "intern_point",
+      "scout_point",
+      "competition_point",
+      "cert_point",
+      "edupower_point",
+      "openclass_add_point",
+      "high_teacher_add_plus_point",
+      "openclass_total",
+      "openclass_point",
+      "living_total",
+      "living_solo_point",
+      "living_family_point",
+      "total"
+    ]
 
-    for (var i = 0; i < reset_list.length; i++) {
-      document.getElementById(reset_list[i]).innerHTML = "0";
+    for (const list of reset_list) {
+      document
+        .getElementById(list)
+        .innerHTML = "0";
     }
   }
 
   function calc_area_diff() {
-    form_reset()
-
-    var island_ga_year = document.getElementById("island_ga_year").value
-    var island_na_year = document.getElementById("island_na_year").value
-    var island_da_year = document.getElementById("island_da_year").value
-    var island_ra_year = document.getElementById("island_ra_year").value
-    var island_ga_month = document.getElementById("island_ga_month").value
-    var island_na_month = document.getElementById("island_na_month").value
-    var island_da_month = document.getElementById("island_da_month").value
-    var island_ra_month = document.getElementById("island_ra_month").value
-    var mountain_ga_year = document.getElementById("mountain_ga_year").value
-    var mountain_na_year = document.getElementById("mountain_na_year").value
-    var mountain_da_year = document.getElementById("mountain_da_year").value
-    var mountain_ra_year = document.getElementById("mountain_ra_year").value
-    var mountain_ga_month = document.getElementById("mountain_ga_month").value
-    var mountain_na_month = document.getElementById("mountain_na_month").value
-    var mountain_da_month = document.getElementById("mountain_da_month").value
-    var mountain_ra_month = document.getElementById("mountain_ra_month").value
+    // 도서벽지 점수 계산
+    var island_ga_year = document
+      .getElementById("island_ga_year")
+      .value
+    var island_na_year = document
+      .getElementById("island_na_year")
+      .value
+    var island_da_year = document
+      .getElementById("island_da_year")
+      .value
+    var island_ra_year = document
+      .getElementById("island_ra_year")
+      .value
+    var island_ga_month = document
+      .getElementById("island_ga_month")
+      .value
+    var island_na_month = document
+      .getElementById("island_na_month")
+      .value
+    var island_da_month = document
+      .getElementById("island_da_month")
+      .value
+    var island_ra_month = document
+      .getElementById("island_ra_month")
+      .value
+    var mountain_ga_year = document
+      .getElementById("mountain_ga_year")
+      .value
+    var mountain_na_year = document
+      .getElementById("mountain_na_year")
+      .value
+    var mountain_da_year = document
+      .getElementById("mountain_da_year")
+      .value
+    var mountain_ra_year = document
+      .getElementById("mountain_ra_year")
+      .value
+    var mountain_ga_month = document
+      .getElementById("mountain_ga_month")
+      .value
+    var mountain_na_month = document
+      .getElementById("mountain_na_month")
+      .value
+    var mountain_da_month = document
+      .getElementById("mountain_da_month")
+      .value
+    var mountain_ra_month = document
+      .getElementById("mountain_ra_month")
+      .value
 
     var island_ga_point = Number(island_ga_year) * 0.167 * 12 + Number(island_ga_month) * 0.167
-    document.getElementById("island_ga_point").innerHTML = island_ga_point.toFixed(4)
+    document
+      .getElementById("island_ga_point")
+      .innerHTML = island_ga_point
+      .toFixed(4)
+    var island_na_point = Number(island_na_year) * 0.125 * 12 + Number(island_na_month) * 0.125
+    document
+      .getElementById("island_na_point")
+      .innerHTML = island_na_point
+      .toFixed(4)
+    var island_da_point = Number(island_da_year) * 0.084 * 12 + Number(island_da_month) * 0.084
+    document
+      .getElementById("island_da_point")
+      .innerHTML = island_da_point
+      .toFixed(4)
+    var island_ra_point = Number(island_ra_year) * 0.063 * 12 + Number(island_ra_month) * 0.063
+    document
+      .getElementById("island_ra_point")
+      .innerHTML = island_ra_point
+      .toFixed(4)
+    var mountain_ga_point = Number(mountain_ga_year) * 0.084 * 12 + Number(mountain_ga_month) * 0.084
+    document
+      .getElementById("mountain_ga_point")
+      .innerHTML = mountain_ga_point
+      .toFixed(4)
+    var mountain_na_point = Number(mountain_na_year) * 0.063 * 12 + Number(mountain_na_month) * 0.063
+    document
+      .getElementById("mountain_na_point")
+      .innerHTML = mountain_na_point
+      .toFixed(4)
+    var mountain_da_point = Number(mountain_da_year) * 0.050 * 12 + Number(mountain_da_month) * 0.050
+    document
+      .getElementById("mountain_da_point")
+      .innerHTML = mountain_da_point
+      .toFixed(4)
+    var mountain_ra_point = Number(mountain_ra_year) * 0.042 * 12 + Number(mountain_ra_month) * 0.042
+    document
+      .getElementById("mountain_ra_point")
+      .innerHTML = mountain_ra_point
+      .toFixed(4)
 
+    var sum_island_mountain_point = island_ga_point + island_na_point + island_da_point + island_ra_point + mountain_ga_point + mountain_na_point + mountain_da_point + mountain_ra_point
+
+    if (sum_island_mountain_point >= 3) {
+      sum_island_mountain_point = 3
+    }
+
+    document
+      .getElementById("outside_school_total")
+      .innerHTML = sum_island_mountain_point
+      .toFixed(4)
+
+    //농어촌교육진흥학교 계산
+    var rural_1_year = document
+      .getElementById("rural_1_year")
+      .value
+    var rural_1_month = document
+      .getElementById("rural_1_month")
+      .value
+    var rural_1_total_month = Number(rural_1_year) * 12 + Number(rural_1_month)
+    var rural_1_point = rural_1_total_month * 0.012
+
+    var rural_2_year = document
+      .getElementById("rural_2_year")
+      .value
+    var rural_2_month = document
+      .getElementById("rural_2_month")
+      .value
+    var rural_2_total_month = Number(rural_2_year) * 12 + Number(rural_2_month)
+    var rural_2_point = rural_2_total_month * 0.008
+
+    var rural_3_year = document
+      .getElementById("rural_3_year")
+      .value
+    var rural_3_month = document
+      .getElementById("rural_3_month")
+      .value
+    var rural_3_total_month = Number(rural_3_year) * 12 + Number(rural_3_month)
+    var rural_3_point = rural_3_total_month * 0.006
+
+    var rural_default_point = rural_1_point + rural_2_point + rural_3_point
+
+    var rural_add_month = document
+      .getElementById("rural_add_month")
+      .value
+    var rural_add_point = Number(rural_add_month) * 0.002
+
+    document
+      .getElementById("rural_1_point")
+      .innerHTML = rural_1_point
+      .toFixed(4)
+    document
+      .getElementById("rural_2_point")
+      .innerHTML = rural_2_point
+      .toFixed(4)
+    document
+      .getElementById("rural_3_point")
+      .innerHTML = rural_3_point
+      .toFixed(4)
+
+    if (rural_1_point + rural_2_point + rural_3_point >= 0.85) {
+      rural_default_point = 0.85
+      document
+        .getElementById("rural_default_point")
+        .innerHTML = 0.85
+    } else {
+      document
+        .getElementById("rural_default_point")
+        .innerHTML = rural_default_point.toFixed(4)
+    }
+
+    if (rural_add_point >= 0.15) {
+      rural_add_point = 0.15
+      document
+        .getElementById("rural_add_point")
+        .innerHTML = 0.15
+    } else {
+      document
+        .getElementById("rural_add_point")
+        .innerHTML = rural_add_point.toFixed(4)
+    }
+
+    document
+      .getElementById("rural_total")
+      .innerHTML = (rural_default_point + rural_add_point)
+      .toFixed(4)
+
+    //보직교사 근무경력
+    var high_teacher_year = document
+      .getElementById("high_teacher_year")
+      .value
+    var high_teacher_add_year = document
+      .getElementById("high_teacher_add_year")
+      .value
+    var high_teacher_can_add = document
+      .getElementById("grade1translated")
+      .innerHTML
+
+    var high_teacher_point = Number(high_teacher_year) * 0.144
+    var high_teacher_add_point = Number(high_teacher_add_year) * 0.096
+
+    if (high_teacher_point >= 1) {
+      high_teacher_point = 1
+      document
+        .getElementById("high_teacher_point")
+        .innerHTML = 1
+    } else {
+      document
+        .getElementById("high_teacher_point")
+        .innerHTML = high_teacher_point.toFixed(4)
+    }
+
+    if (Number(high_teacher_add_point) >= Number(high_teacher_can_add)) {
+      high_teacher_add_point = Number(high_teacher_can_add)
+      document
+        .getElementById("high_teacher_add_point")
+        .innerHTML = high_teacher_can_add
+    } else {
+      document
+        .getElementById("high_teacher_add_point")
+        .innerHTML = high_teacher_add_point.toFixed(4)
+    }
+
+    document
+      .getElementById("high_teacher_total")
+      .innerHTML = (high_teacher_point + high_teacher_add_point)
+      .toFixed(4)
+
+    //교육감/교육장 지정 연구학교 근무경력
+    var research_school_area_year = document
+      .getElementById("research_school_area_year")
+      .value
+    var research_school_area_month = document
+      .getElementById("research_school_area_month")
+      .value
+    var research_school_area2_year = document
+      .getElementById("research_school_area2_year")
+      .value
+    var research_school_area2_month = document
+      .getElementById("research_school_area2_month")
+      .value
+
+    var research_school_area_point = Number(research_school_area_year) * 0.0167 * 12 + Number(research_school_area_month) * 0.0167
+    var research_school_area2_point = Number(research_school_area2_year) * 0.0139 * 12 + Number(research_school_area2_month) * 0.0139
+
+    document
+      .getElementById("research_school_area_point")
+      .innerHTML = research_school_area_point
+      .toFixed(4)
+    document
+      .getElementById("research_school_area2_point")
+      .innerHTML = research_school_area2_point
+      .toFixed(4)
+
+    if (research_school_area_point + research_school_area2_point >= 1.25) {
+      document
+        .getElementById("research_school_area_total")
+        .innerHTML = 1.25
+    } else {
+      document
+        .getElementById("research_school_area_total")
+        .innerHTML = (research_school_area_point + research_school_area2_point).toFixed(4)
+    }
+
+    //기타교육활동및전문성신장경력실적
+    ///복식학급 담당 또는 겸임순회교사
+    var double_class_year = document
+      .getElementById("double_class_year")
+      .value
+    var double_class_month = document
+      .getElementById("double_class_month")
+      .value
+    var double_class_point = Number(double_class_year) * 0.0105 * 12 + Number(double_class_month) * 0.0105
+
+    if (double_class_point >= 0.5) {
+      double_class_point = 0.5
+      document
+        .getElementById("double_class_point")
+        .innerHTML = 0.5
+    } else {
+      document
+        .getElementById("double_class_point")
+        .innerHTML = double_class_point.toFixed(4)
+    }
+
+    ///사이버가정학습담당교사
+    var cyber_year = document
+      .getElementById("cyber_year")
+      .value
+    var cyber_month = document
+      .getElementById("cyber_month")
+      .value
+    var cyber_point = Number(cyber_year) * 0.0105 * 12 + Number(cyber_month) * 0.0105
+
+    if (cyber_point >= 0.5) {
+      cyber_point = 0.5
+      document
+        .getElementById("cyber_point")
+        .innerHTML = 0.5
+    } else {
+      document
+        .getElementById("cyber_point")
+        .innerHTML = cyber_point.toFixed(4)
+    }
+
+    ///영재교육원/발명교실/영어타운 전담교사
+    var genius_year = document
+      .getElementById("genius_year")
+      .value
+    var genius_month = document
+      .getElementById("genius_month")
+      .value
+    var genius_point = Number(genius_year) * 0.0105 * 12 + Number(genius_month) * 0.0105
+
+    if (genius_point >= 0.5) {
+      genius_point = 0.5
+      document
+        .getElementById("genius_point")
+        .innerHTML = 0.5
+    } else {
+      document
+        .getElementById("genius_point")
+        .innerHTML = genius_point.toFixed(4)
+    }
+
+    ///교육실습학생담당교사
+    var intern_month = document
+      .getElementById("intern_month")
+      .value
+    var intern_day = document
+      .getElementById("intern_day")
+      .value
+    var intern_point = Number(intern_month) * 0.0315 + Number(intern_day) * 0.00105
+
+    if (intern_point >= 0.5) {
+      intern_point = 0.5
+      document
+        .getElementById("intern_point")
+        .innerHTML = 0.5
+    } else {
+      document
+        .getElementById("intern_point")
+        .innerHTML = intern_point.toFixed(5)
+    }
+
+    ///청소년단체담당교사
+    var scout_month = document
+      .getElementById("scout_month")
+      .value
+    var scout_point = Number(scout_month) * 0.0053
+
+    if (scout_point >= 0.5) {
+      scout_point = 0.5
+      document
+        .getElementById("scout_point")
+        .innerHTML = 0.5
+    } else {
+      document
+        .getElementById("scout_point")
+        .innerHTML = scout_point.toFixed(4)
+    }
+
+    ///전국대회 지도교사
+    var competition_gold_point = document
+      .getElementById("competition_gold_point")
+      .value
+    var competition_silver_point = document
+      .getElementById("competition_silver_point")
+      .value
+    var competition_bronze_point = document
+      .getElementById("competition_bronze_point")
+      .value
+
+    var competition_point = Number(competition_gold_point) * 0.25 + Number(competition_silver_point) * 0.1875 + Number(competition_bronze_point) * 0.125
+
+    if (competition_point >= 0.5) {
+      competition_point = 0.5
+      document
+        .getElementById("competition_point")
+        .innerHTML = 0.5
+    } else {
+      document
+        .getElementById("competition_point")
+        .innerHTML = competition_point.toFixed(4)
+    }
+
+    ///국가기술자격법에 의한 기술자격증 소지자
+    var cert_1_point = document
+      .getElementById("cert_1_point")
+      .value
+    var cert_2_point = document
+      .getElementById("cert_2_point")
+      .value
+    var cert_3_point = document
+      .getElementById("cert_3_point")
+      .value
+
+    var cert_point = Number(cert_1_point) * 0.3 + Number(cert_2_point) * 0.2 + Number(cert_3_point) * 0.1
+
+    if (cert_point >= 0.3) {
+      cert_point = 0.3
+      document
+        .getElementById("cert_point")
+        .innerHTML = 0.3
+    } else {
+      document
+        .getElementById("cert_point")
+        .innerHTML = cert_point.toFixed(4)
+    }
+
+    ///학교교육력유공증진유공교원
+    var edupower_count = document
+      .getElementById("edupower_count")
+      .value
+
+    var edupower_point = Number(edupower_count) * 0.036
+
+    if (edupower_point >= 0.2) {
+      edupower_point = 0.2
+      document
+        .getElementById("edupower_point")
+        .innerHTML = 0.2
+    } else {
+      document
+        .getElementById("edupower_point")
+        .innerHTML = edupower_point.toFixed(4)
+    }
+
+    ///좋은수업실천연구 추가 실적점
+    var openclass_add_count = document
+      .getElementById("openclass_add_count")
+      .value
+
+    var openclass_add_point = Number(openclass_add_count) * 0.02
+
+    if (openclass_add_point >= 0.5) {
+      openclass_add_point = 0.5
+      document
+        .getElementById("openclass_add_point")
+        .innerHTML = 0.5
+    } else {
+      document
+        .getElementById("openclass_add_point")
+        .innerHTML = openclass_add_point.toFixed(4)
+    }
+
+    ///보직교사 추가경력
+    var high_teacher_add_plus_count = document
+      .getElementById("high_teacher_add_plus_count")
+      .value
+
+    var high_teacher_add_plus_point = Number(high_teacher_add_plus_count) * 0.036
+
+    if (high_teacher_add_plus_point >= 0.25) {
+      high_teacher_add_plus_point = 0.25
+      document
+        .getElementById("high_teacher_add_plus_point")
+        .innerHTML = 0.25
+    } else {
+      document
+        .getElementById("high_teacher_add_plus_point")
+        .innerHTML = high_teacher_add_plus_point.toFixed(4)
+    }
+
+    var etc_total = double_class_point + cyber_point + genius_point + intern_point + scout_point + competition_point + cert_point + edupower_point + openclass_add_point + high_teacher_add_plus_point
+    if (etc_total >= 1) {
+      etc_total = 1
+      document
+        .getElementById("etc_total")
+        .innerHTML = 1
+    } else {
+      document
+        .getElementById("etc_total")
+        .innerHTML = etc_total.toFixed(4)
+    }
+
+    // 좋은수업실천연구 횟수
+    var openclass_count = document
+      .getElementById("openclass_count")
+      .value
+
+    var openclass_point = Number(openclass_count) * 0.06
+
+    if (openclass_point >= 2) {
+      openclass_point = 2
+      document
+        .getElementById("openclass_point")
+        .innerHTML = 2
+    } else {
+      document
+        .getElementById("openclass_point")
+        .innerHTML = openclass_point.toFixed(4)
+    }
+    document
+      .getElementById("openclass_total")
+      .innerHTML = openclass_point
+      .toFixed(4)
+
+    // 전라남도 거주자 경력
+    var living_solo_month = document
+      .getElementById("living_solo_month")
+      .value
+    var living_solo_day = document
+      .getElementById("living_solo_day")
+      .value
+    var living_family_month = document
+      .getElementById("living_family_month")
+      .value
+    var living_family_day = document
+      .getElementById("living_family_day")
+      .value
+
+    var living_solo_point = Number(living_solo_month) * 0.0016 + Number(living_solo_day) * 0.000053
+    var living_family_point = Number(living_family_month) * 0.0025 + Number(living_family_day) * 0.000083
+
+    document
+      .getElementById("living_solo_point")
+      .innerHTML = living_solo_point
+      .toFixed(6)
+    document
+      .getElementById("living_family_point")
+      .innerHTML = living_family_point
+      .toFixed(6)
+
+    if (living_solo_point + living_family_point >= 0.5) {
+      document
+        .getElementById("living_total")
+        .innerHTML = 0.5
+    } else {
+      document
+        .getElementById("living_total")
+        .innerHTML = (living_solo_point + living_family_point).toFixed(6)
+    }
+
+    var total_outside_school_total = document
+      .getElementById("outside_school_total")
+      .innerHTML
+    var total_rural_total = document
+      .getElementById("rural_total")
+      .innerHTML
+    var total_high_teacher_total = document
+      .getElementById("high_teacher_total")
+      .innerHTML
+    var total_research_school_area_total = document
+      .getElementById("research_school_area_total")
+      .innerHTML
+    var total_etc_total = document
+      .getElementById("etc_total")
+      .innerHTML
+    var total_openclass_total = document
+      .getElementById("openclass_total")
+      .innerHTML
+    var total_living_total = document
+      .getElementById("living_total")
+      .innerHTML
+    var total_sum = Number(total_outside_school_total) + Number(total_rural_total) + Number(total_high_teacher_total) + Number(total_research_school_area_total) + Number(total_etc_total) + Number(total_openclass_total) + Number(total_living_total)
+
+    if (total_sum >= 10) {
+      total_sum = 10
+      document
+        .getElementById("total")
+        .innerHTML = total_sum.toFixed(6)
+      document
+        .getElementById("hidden_total")
+        .value = total_sum.toFixed(6)
+    } else {
+      document
+        .getElementById("total")
+        .innerHTML = total_sum.toFixed(6)
+      document
+        .getElementById("hidden_total")
+        .value = total_sum.toFixed(6)
+    }
+    return true;
   }
 </script>

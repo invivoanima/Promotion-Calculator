@@ -15,16 +15,16 @@ urlpatterns = [
     path('suggestion/', views.suggestion, name='suggestion'),
 
     path('common/', views.common, name='common'),
-    path('common/career', views.common_career, name="cc"),
-    path('common/wp', views.common_workperformance, name="cw"),
-    path('common/training', views.common_training, name="ct"),
+    path('common/career/', views.common_career, name="cc"),
+    path('common/wp/', views.common_workperformance, name="cw"),
+    path('common/training/', views.common_training, name="ct"),
 
     path('area/', views.area, name='area'),
-    path('area/<str:areaname>/common', views.area_common, name='ac'),
-    path('area/<str:areaname>/diff', views.area_diff, name="ad"),
-    path('area/common', views.area_common),
-    path('area/diff', views.area_diff),
-    path('area/<str:areaname>/refdata', views.area_refdata, name='refdata'),
+    path('area/<str:areaname>/common/', views.area_common, name='ac'),
+    path('area/<str:areaname>/diff/', views.area_diff, name="ad"),
+    path('area/common/', views.area_common),
+    path('area/diff/', views.area_diff),
+    path('area/<str:areaname>/refdata/', views.area_refdata, name='refdata'),
 
 ]
 

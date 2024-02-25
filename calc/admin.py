@@ -11,3 +11,5 @@ admin.site.register(models.Common_Training)
 admin.site.register(models.Area_Common)
 admin.site.register(models.Notice)
 admin.site.register(models.Suggestion)
+
+admin.site.register(models.Area_Diff_Jeonnam)

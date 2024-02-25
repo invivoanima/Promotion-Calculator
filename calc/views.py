@@ -3,6 +3,7 @@ from django.template import TemplateDoesNotExist
 from django.contrib import auth
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.apps import apps
 from .models import *
 import re
 
@@ -23,7 +24,7 @@ def main(request) :
         datas = {
             'notice' : notice,
         }
-        return render(request, "calc/main.html")
+        return render(request, "calc/main.html", datas)
     
 
 def login(request) :
@@ -65,7 +66,8 @@ def register(request) :
             profile = Profile(user=user, area=area_select)
             profile.save()
 
-            return redirect("calc:login")
+            messages.success(request, 'registersuccess')
+            return render(request, 'calc/login.html')
         
         else :
             redirect("calc:register")
@@ -234,15 +236,32 @@ def common_training(request) :
 
         if request.method == "POST" :
             editdata = Common_Training.objects.get(user__username = request.user.username)
-            editdata.grade1teacher_result = request.POST["grade1teacher_result"]
+            if request.POST["grade1teacher_result"] != '' :
+                editdata.grade1teacher_result = request.POST["grade1teacher_result"]
+            else :
+                editdata.grade1teacher_result = 0
             editdata.grade1teacher_memo = request.POST["grade1teacher_memo"]
-            editdata.training_first = request.POST["training_first"]
-            editdata.training_second = request.POST["training_second"]
+
+            if request.POST["training_first"] != '' :
+                editdata.training_first = request.POST["training_first"]
+            else :
+                editdata.training_first = 0
+            if request.POST["training_second"] != '' :
+                editdata.training_second = request.POST["training_second"]
+            else :
+                editdata.training_second = 0
             editdata.training_memo = request.POST["training_memo"]
-            editdata.research_contest_point = request.POST["research_contest_point"]
-            editdata.degree_point = request.POST["degree_point"]
+            if request.POST["research_contest_point"] != '' :
+                editdata.research_contest_point = request.POST["research_contest_point"]
+            else :
+                editdata.research_contest_point = 0
+            if request.POST["degree_point"] != '' :
+                editdata.degree_point = request.POST["degree_point"]
+            else :
+                editdata.degree_point = 0
             editdata.research_memo = request.POST["research_memo"]
             editdata.save()
+
             totaldata = Profile.objects.get(user__username = request.user.username)
             totaldata.point_ct = float(request.POST['hidden_total'])
             totaldata.save()
@@ -292,26 +311,72 @@ def area_common(request, areaname) :
         if request.method == "POST" :
             editdata = Area_Common.objects.get(user__username=request.user.username)
             editdata.area = areaname
-            editdata.research_school_year = request.POST["research_school_year"]
-            editdata.research_school_month = request.POST["research_school_month"]
+            if request.POST["research_school_year"] != '' :
+               editdata.research_school_year = request.POST["research_school_year"]
+            else :
+                editdata.research_school_year = 0
+            if request.POST["research_school_month"] != '' :
+               editdata.research_school_month = request.POST["research_school_month"]
+            else :
+                editdata.research_school_month = 0
             editdata.research_school_memo = request.POST["research_school_memo"]
-            editdata.foreign_school_year = request.POST["foreign_school_year"]
-            editdata.foreign_school_month = request.POST["foreign_school_month"]
+            if request.POST["foreign_school_year"] != '' :
+                editdata.foreign_school_year = request.POST["foreign_school_year"]
+            else :
+                editdata.foreign_school_year = 0
+            if request.POST["foreign_school_month"] != '' :
+                editdata.foreign_school_month = request.POST["foreign_school_month"]
+            else :
+                editdata.foreign_school_month = 0
             editdata.foreign_school_memo = request.POST["foreign_school_memo"]
-            editdata.lecture1_point = request.POST["lecture1_point"]
-            editdata.lecture2_point = request.POST["lecture2_point"]
-            editdata.lecture3_point = request.POST["lecture3_point"]
-            editdata.lecture4_point = request.POST["lecture4_point"]
-            editdata.lecture5_point = request.POST["lecture5_point"]
-            editdata.lecture6_point = request.POST["lecture6_point"]
-            editdata.lecture7_point = request.POST["lecture7_point"]
-            editdata.lecture8_point = request.POST["lecture8_point"]
-            editdata.lecture9_point = request.POST["lecture9_point"]
-            editdata.lecture10_point = request.POST["lecture10_point"]
+            if request.POST["lecture1_point"] != '' :
+                editdata.lecture1_point = request.POST["lecture1_point"]
+            else :
+                editdata.lecture1_point = 0
+            if request.POST["lecture2_point"] != '' :
+                editdata.lecture2_point = request.POST["lecture2_point"]
+            else :
+                editdata.lecture2_point = 0
+            if request.POST["lecture3_point"] != '' :
+                editdata.lecture3_point = request.POST["lecture3_point"]
+            else :
+                editdata.lecture3_point = 0
+            if request.POST["lecture4_point"] != '' :
+                editdata.lecture4_point = request.POST["lecture4_point"]
+            else :
+                editdata.lecture4_point = 0
+            if request.POST["lecture5_point"] != '' :
+                editdata.lecture5_point = request.POST["lecture5_point"]
+            else :
+                editdata.lecture5_point = 0
+            if request.POST["lecture6_point"] != '' :
+                editdata.lecture6_point = request.POST["lecture6_point"]
+            else :
+                editdata.lecture6_point = 0
+            if request.POST["lecture7_point"] != '' :
+                editdata.lecture7_point = request.POST["lecture7_point"]
+            else :
+                editdata.lecture7_point = 0
+            if request.POST["lecture8_point"] != '' :
+                editdata.lecture8_point = request.POST["lecture8_point"]
+            else :
+                editdata.lecture8_point = 0
+            if request.POST["lecture9_point"] != '' :
+                editdata.lecture9_point = request.POST["lecture9_point"]
+            else :
+                editdata.lecture9_point = 0
+            if request.POST["lecture10_point"] != '' :
+                editdata.lecture10_point = request.POST["lecture10_point"]
+            else :
+                editdata.lecture10_point = 0
             editdata.lecture_memo = request.POST["lecture_memo"]
-            editdata.violence_count = request.POST["violence_count"]
+            if request.POST["violence_count"] != '' :
+                editdata.violence_count = request.POST["violence_count"]
+            else :
+                editdata.violence_count = 0
             editdata.violence_memo = request.POST["violence_memo"]
             editdata.save()
+
             total_editdata = Profile.objects.get(user__username=request.user.username)
             total_editdata.point_ac = float(request.POST["hidden_total"])
             total_editdata.save()
@@ -344,11 +409,261 @@ def area_common(request, areaname) :
 def area_diff(request, areaname) :
     if request.user.is_authenticated :
         area = Profile.objects.get(user__username=request.user.username)
+        
+        try:
+            model_loaded = apps.get_model('calc', f'Area_Diff_{areaname}')      
+        except LookupError :
+            return redirect("calc:error")            
+        except : 
+            user = User.objects.get(username=request.user.username)
+            model_loaded.objects.create(user=user)
+            model_loaded = apps.get_model('calc', f'Area_Diff_{areaname}')  
+
         datas = {
-            'area' : area,
-        }
-        return render(request, f"calc/area/{areaname}/diff.html", datas)
-    
+                'area' : area,
+            }
+        
+        if areaname == 'jeonnam' :
+            user = User.objects.get(username=request.user.username)
+            point, created = Area_Diff_Jeonnam.objects.get_or_create(user__username=request.user.username, defaults={'user':user})
+            grade1data, created = Common_Training.objects.get_or_create(user__username=request.user.username, defaults={'user':user})
+            datas["grade1data"] = grade1data
+            datas["grade1translated"] = (100 - grade1data.grade1teacher_result)*0.025
+            datas["point"] = point
+
+            if request.method == 'POST' :
+                point = model_loaded.objects.get(user__username=request.user.username)
+                if request.POST["island_ga_year"] != '' :
+                    point.island_ga_year = request.POST["island_ga_year"]
+                else :
+                    point.island_ga_year = 0
+                if request.POST["island_ga_month"] != '' :
+                    point.island_ga_month = request.POST["island_ga_month"]
+                else :
+                    point.island_ga_month = 0
+                if request.POST["island_na_year"] != '' :
+                    point.island_na_year = request.POST["island_na_year"]
+                else :
+                    point.island_na_year = 0
+                if request.POST["island_na_month"] != '' :
+                    point.island_na_month = request.POST["island_na_month"]
+                else :
+                    point.island_na_month = 0
+                if request.POST["island_da_year"] != '' :
+                    point.island_da_year = request.POST["island_da_year"]
+                else :
+                    point.island_da_year = 0
+                if request.POST["island_da_month"] != '' :
+                    point.island_da_month = request.POST["island_da_month"]
+                else :
+                    point.island_da_month = 0
+                if request.POST["island_ra_year"] != '' :
+                   point.island_ra_year = request.POST["island_ra_year"]
+                else :
+                    point.island_ra_year = 0
+                if request.POST["island_ra_month"] != '' :
+                    point.island_ra_month = request.POST["island_ra_month"]
+                else :
+                    point.island_ra_month = 0
+                if request.POST["mountain_ga_year"] != '' :
+                    point.mountain_ga_year = request.POST["mountain_ga_year"]
+                else :
+                    point.mountain_ga_year = 0
+                if request.POST["mountain_ga_month"] != '' :
+                    point.mountain_ga_month = request.POST["mountain_ga_month"]
+                else :
+                    point.mountain_ga_month = 0
+                if request.POST["mountain_na_year"] != '' :
+                    point.mountain_na_year = request.POST["mountain_na_year"]
+                else :
+                    point.mountain_na_year = 0
+                if request.POST["mountain_na_month"] != '' :
+                    point.mountain_na_month = request.POST["mountain_na_month"]
+                else :
+                    point.mountain_na_month = 0
+                if request.POST["mountain_da_year"] != '' :
+                    point.mountain_da_year = request.POST["mountain_da_year"]
+                else :
+                    point.mountain_da_year = 0
+                if request.POST["mountain_da_month"] != '' :
+                    point.mountain_da_month = request.POST["mountain_da_month"]
+                else :
+                    point.mountain_da_month = 0
+                if request.POST["mountain_ra_year"] != '' :
+                    point.mountain_ra_year = request.POST["mountain_ra_year"]
+                else :
+                    point.mountain_ra_year = 0
+                if request.POST["mountain_ra_month"] != '' :
+                    point.mountain_ra_month = request.POST["mountain_ra_month"]
+                else :
+                    point.mountain_ra_month = 0
+                point.outside_school_memo = request.POST["outside_school_memo"]
+
+                if request.POST["rural_1_year"] != '' :
+                    point.rural_1_year = request.POST["rural_1_year"]
+                else : 
+                    point.rural_1_year = 0
+                if request.POST["rural_1_month"] != '' :
+                    point.rural_1_month = request.POST["rural_1_month"]
+                else : 
+                    point.rural_1_month = 0
+                if request.POST["rural_2_year"] != '' :
+                    point.rural_2_year = request.POST["rural_2_year"]
+                else : 
+                    point.rural_2_year = 0
+                if request.POST["rural_2_month"] != '' :
+                    point.rural_2_month = request.POST["rural_2_month"]
+                else : 
+                    point.rural_2_month = 0
+                if request.POST["rural_3_year"] != '' :
+                    point.rural_3_year = request.POST["rural_3_year"]
+                else : 
+                    point.rural_3_year = 0
+                if request.POST["rural_3_month"] != '' :
+                    point.rural_3_month = request.POST["rural_3_month"]
+                else : 
+                    point.rural_3_month = 0
+                if request.POST["rural_add_month"] != '' :
+                    point.rural_add_month = request.POST["rural_add_month"]
+                else : 
+                    point.rural_add_month = 0
+                point.rural_memo = request.POST["rural_memo"]
+
+                if request.POST["high_teacher_year"] != '' :
+                    point.high_teacher_year = request.POST["high_teacher_year"]
+                else :
+                    point.high_teacher_year = 0
+                if request.POST["high_teacher_add_year"] != '' :
+                    point.high_teacher_add_year = request.POST["high_teacher_add_year"]
+                else :
+                    point.high_teacher_year = 0
+                point.high_teacher_memo = request.POST["high_teacher_memo"]
+
+                if request.POST["research_school_area_year"] != '' :
+                    point.research_school_area_year = request.POST["research_school_area_year"]
+                else: 
+                    point.research_school_area_year = 0
+                if request.POST["research_school_area_month"] != '' :
+                    point.research_school_area_month = request.POST["research_school_area_month"]
+                else : 
+                    point.research_school_area_month = 0
+                if request.POST["research_school_area2_year"] != '' :
+                    point.research_school_area2_year = request.POST["research_school_area2_year"]
+                else :
+                    point.research_school_area2_year = 0
+                if request.POST["research_school_area2_month"] != '' :
+                    point.research_school_area2_month = request.POST["research_school_area2_month"]
+                else :
+                    point.research_school_area2_month = 0
+                point.research_school_area_memo = request.POST["research_school_area_memo"]
+
+                if request.POST["double_class_year"] != '' :
+                    point.double_class_year = request.POST["double_class_year"]
+                else :
+                    point.double_class_year = 0
+                if request.POST["double_class_month"] != '' :
+                    point.double_class_month = request.POST["double_class_month"]
+                else :
+                    point.double_class_month = 0
+                if request.POST["cyber_year"] != '' :
+                    point.cyber_year = request.POST["cyber_year"]
+                else :
+                    point.cyber_year = 0
+                if request.POST["cyber_month"] != '' :
+                    point.cyber_month = request.POST["cyber_month"]
+                else :
+                    point.cyber_month = 0
+                if request.POST["genius_year"] != '' :
+                    point.genius_year = request.POST["genius_year"]
+                else :
+                    point.genius_year = 0
+                if request.POST["genius_month"] != '' :
+                    point.genius_month = request.POST["genius_month"]
+                else :
+                    point.genius_month = 0
+                if request.POST["intern_month"] != '' :
+                    point.intern_month = request.POST["intern_month"]
+                else :
+                    point.intern_month = 0
+                if request.POST["intern_day"] != '' :
+                    point.intern_day = request.POST["intern_day"]
+                else :
+                    point.intern_day = 0
+                if request.POST["scout_month"] != '' :
+                    point.scout_month = request.POST["scout_month"]
+                else :
+                    point.scout_month = 0
+                if request.POST["competition_gold_point"] != '' :
+                    point.competition_gold_point = request.POST["competition_gold_point"]
+                else :
+                    point.competition_gold_point = 0
+                if request.POST["competition_silver_point"] != '' :
+                    point.competition_silver_point = request.POST["competition_silver_point"]
+                else :
+                    point.competition_silver_point = 0
+                if request.POST["competition_bronze_point"] != '' :
+                    point.competition_bronze_point = request.POST["competition_bronze_point"]
+                else :
+                    point.competition_bronze_point = 0
+                if request.POST["cert_1_point"] != '' :
+                    point.cert_1_point = request.POST["cert_1_point"]
+                else :
+                    point.cert_1_point = 0
+                if request.POST["cert_2_point"] != '' :
+                    point.cert_2_point = request.POST["cert_2_point"]
+                else :
+                    point.cert_2_point = 0
+                if request.POST["cert_3_point"] != '' :
+                    point.cert_3_point = request.POST["cert_3_point"]
+                else :
+                    point.cert_3_point = 0
+                if request.POST["edupower_count"] != '' :
+                    point.edupower_count = request.POST["edupower_count"]
+                else :
+                    point.edupower_count = 0
+                if request.POST["openclass_add_count"] != '' :
+                    point.openclass_add_count = request.POST["openclass_add_count"]
+                else :
+                    point.openclass_add_count = 0
+                if request.POST["high_teacher_add_plus_count"] != '' :
+                    point.high_teacher_add_plus_count = request.POST["high_teacher_add_plus_count"]
+                else :
+                    point.high_teacher_add_plus_count = 0
+                point.etc_memo = request.POST["etc_memo"]
+
+                if request.POST["openclass_count"] != '' :
+                    point.openclass_count = request.POST["openclass_count"]
+                else :
+                    point.openclass_count = 0
+                point.openclass_memo = request.POST["openclass_memo"]
+
+                if request.POST["living_solo_month"] != '' :
+                    point.living_solo_month = request.POST["living_solo_month"]
+                else :
+                    point.living_solo_month = 0
+                if request.POST["living_solo_day"] != '' :
+                    point.living_solo_day = request.POST["living_solo_day"]
+                else :
+                    point.living_solo_day = 0
+                if request.POST["living_family_month"] != '' :
+                    point.living_family_month = request.POST["living_family_month"]
+                else :
+                    point.living_family_month = 0
+                if request.POST["living_family_day"] != '' :
+                    point.living_family_day = request.POST["living_family_day"]
+                else :
+                    point.living_family_day = 0
+                point.living_memo = request.POST["living_memo"]
+                point.save()
+
+                total_editdata = Profile.objects.get(user__username=request.user.username)
+                total_editdata.point_ad = float(request.POST["hidden_total"])
+                total_editdata.save()
+
+                return redirect(f'/area/{areaname}/diff/')
+
+            return render(request, f"calc/area/{areaname}/diff.html", datas)
+
     else :
         return render(request, f"calc/area/{areaname}/diff.html")
     
