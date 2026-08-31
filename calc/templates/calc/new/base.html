@@ -1,0 +1,82 @@
+{% load static %}
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="초등교사를 위한 교감 승진 점수 기록장">
+    <meta name="theme-color" content="#173828">
+    <title>{% block title %}승진점수 계산기{% endblock %}</title>
+    <link rel="icon" href="{% static 'calc/images/promotion-mark.svg' %}" type="image/svg+xml">
+    <link rel="stylesheet" href="{% static 'calc/app.css' %}?v=20260831-score-total-1">
+    <script src="{% static 'calc/app.js' %}?v=20260830-local-storage-2" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      {% if request.user.is_authenticated %}
+        <aside class="sidebar" id="sidebar">
+          <a class="brand" href="{% url 'calc:dashboard' %}">
+            <span class="brand-mark"><img src="{% static 'calc/images/promotion-mark.svg' %}" alt=""></span>
+            <span><strong>승진점수 계산기</strong><small>초등 · 교감 준비</small></span>
+          </a>
+          <nav class="main-nav" aria-label="주 메뉴">
+            <a href="{% url 'calc:dashboard' %}" {% if request.resolver_match.url_name == 'dashboard' or request.resolver_match.url_name == 'main' %}class="active"{% endif %}>대시보드</a>
+            <a href="{% url 'calc:score_index' %}" {% if 'score' in request.resolver_match.url_name %}class="active"{% endif %}>점수 입력</a>
+            <a href="{% url 'calc:korean_history' %}" {% if request.resolver_match.url_name == 'korean_history' %}class="active"{% endif %}>한국사 자격요건</a>
+            <a href="{% url 'calc:records' %}" {% if request.resolver_match.url_name == 'records' %}class="active"{% endif %}>내 기록 모아보기</a>
+            <a href="{% url 'calc:score_changes' %}" {% if request.resolver_match.url_name == 'score_changes' %}class="active"{% endif %}>점수 변화 기록</a>
+            <a href="{% url 'calc:resources' %}" {% if request.resolver_match.url_name == 'resources' %}class="active"{% endif %}>평정업무 자료</a>
+            <a href="{% url 'calc:region_select' %}" {% if request.resolver_match.url_name == 'region_select' %}class="active"{% endif %}>지역 선택</a>
+            <a href="{% url 'calc:account_settings' %}" {% if request.resolver_match.url_name == 'account_settings' %}class="active"{% endif %}>계정 설정</a>
+          </nav>
+          <div class="sidebar-user">
+            <span class="avatar">{{ app_profile.display_name|default:user.username|slice:':1'|upper }}</span>
+            <div><strong>{{ app_profile.display_name|default:user.username }}</strong><small>{{ primary_region.name|default:'지역 미선택' }}</small></div>
+          </div>
+          <form method="post" action="{% url 'calc:logout' %}">
+            {% csrf_token %}
+            <button class="sidebar-logout" type="submit">로그아웃</button>
+          </form>
+        </aside>
+      {% endif %}
+
+      <div class="app-body {% if not request.user.is_authenticated %}public-body{% endif %}">
+        <header class="topbar">
+          {% if request.user.is_authenticated %}
+            <button class="menu-button" type="button" data-menu-toggle aria-label="메뉴 열기">☰</button>
+          {% else %}
+            <a class="compact-brand" href="{% url 'calc:welcome' %}"><span class="brand-mark"><img src="{% static 'calc/images/promotion-mark.svg' %}" alt=""></span> 승진점수 계산기</a>
+          {% endif %}
+          <div class="topbar-actions">
+            {% if viewed_region %}
+              <a class="region-chip {% if is_reference_region %}reference{% endif %}" href="{% url 'calc:region_select' %}">
+                {% if is_reference_region %}참고 계산 · {% else %}내 지역 · {% endif %}{{ viewed_region.name }}
+              </a>
+            {% endif %}
+            {% if not request.user.is_authenticated %}
+              <a class="text-link" href="{% url 'calc:login' %}">로그인</a>
+              <a class="button small" href="{% url 'calc:register' %}">회원가입</a>
+            {% endif %}
+          </div>
+        </header>
+
+        {% if is_reference_region %}
+          <div class="reference-banner">
+            현재 {{ viewed_region.name }} 기준을 참고 계산 중입니다. 비교·백분위에는 {{ primary_region.name }} 점수만 사용됩니다.
+            <a href="{% url 'calc:dashboard' %}">내 지역으로 돌아가기</a>
+          </div>
+        {% endif %}
+
+        {% if messages %}
+          <div class="message-stack" aria-live="polite">
+            {% for message in messages %}<div class="message {{ message.tags }}">{{ message }}</div>{% endfor %}
+          </div>
+        {% endif %}
+
+        <main class="page-content">
+          {% block content %}{% endblock %}
+        </main>
+      </div>
+    </div>
+  </body>
+</html>

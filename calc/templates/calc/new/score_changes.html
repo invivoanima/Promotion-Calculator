@@ -1,0 +1,11 @@
+{% extends 'calc/new/base.html' %}
+{% load calc_extras %}
+{% block title %}점수 변화 기록 · 승진점수 계산기{% endblock %}
+{% block content %}
+  <header class="page-heading"><span class="eyebrow">저장 이력</span><h1>점수 변화 기록</h1><p>기록을 저장하거나 삭제했을 때 달라진 항목점수와 총점을 보여줍니다.</p></header>
+  <section class="timeline">
+    {% for change in changes %}
+      <article><span class="timeline-dot"></span><div><small>{{ change.created_at|date:'Y.m.d H:i' }}</small><h2>{{ change.item_code|item_name }}</h2><p>항목 {{ change.previous_item_score|floatformat:3 }} → <strong>{{ change.new_item_score|floatformat:3 }}</strong></p></div><div class="change-total"><span>총점</span><strong>{{ change.previous_total|floatformat:3 }} → {{ change.new_total|floatformat:3 }}</strong></div></article>
+    {% empty %}<div class="empty-state"><strong>아직 점수 변화 기록이 없습니다.</strong><p>점수 항목을 저장하면 이곳에 자동으로 남습니다.</p></div>{% endfor %}
+  </section>
+{% endblock %}

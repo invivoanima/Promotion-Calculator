@@ -1,0 +1,23 @@
+{% extends 'calc/new/base.html' %}
+{% load calc_extras %}
+{% block title %}내 기록 모아보기 · 승진점수 계산기{% endblock %}
+{% block content %}
+  <header class="page-heading split"><div><span class="eyebrow">항목별 기록</span><h1>내 기록 모아보기</h1><p>내 지역 {{ primary_region.name }}의 점수 기록을 평정 항목별로 모았습니다.</p></div><div class="compact-total"><span>예상 총점</span><strong>{{ summary.total|floatformat:3 }}</strong></div></header>
+  <div class="records-groups">
+    {% for group in groups %}
+      <section class="record-group">
+        <div class="record-group-heading"><div><h2>{{ group.category.name }}</h2><span>{{ group.score|floatformat:3 }} / {{ group.category.max_score|floatformat:1 }}점</span></div><a href="{% url 'calc:score_index_category' group.category.code %}">입력 화면</a></div>
+        {% for item_group in group.items %}
+          <details class="record-details" {% if item_group.records %}open{% endif %}>
+            <summary><span><strong>{{ item_group.item.name }}</strong><small>{{ item_group.records|length }}개 기록</small></span><b>{{ item_group.score|floatformat:3 }}점</b></summary>
+            <div class="details-body">
+              {% for record in item_group.records %}
+                <a class="archive-row" href="{% url 'calc:edit_score_record' record.item_code record.id %}"><span><strong>{{ record.label|default:record.institution|default:'입력 기록' }}</strong><small>{% if record.start_date %}{{ record.start_date|date:'Y.m.d' }} ~ {{ record.end_date|date:'Y.m.d' }}{% elif record.event_date %}{{ record.event_date|date:'Y.m.d' }}{% endif %}{% if record.memo %} · {{ record.memo|truncatechars:42 }}{% endif %}</small></span><b>{{ record.calculated_score|floatformat:4 }}</b></a>
+              {% empty %}<div class="empty-compact">저장한 기록이 없습니다. <a href="{% url 'calc:score_item' item_group.item.code %}">입력하기</a></div>{% endfor %}
+            </div>
+          </details>
+        {% endfor %}
+      </section>
+    {% endfor %}
+  </div>
+{% endblock %}

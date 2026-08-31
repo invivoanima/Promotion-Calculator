@@ -1,0 +1,34 @@
+{% extends 'calc/new/base.html' %}
+{% block title %}지역 선택 · 승진점수 계산기{% endblock %}
+{% block content %}
+  <header class="page-heading centered">
+    <span class="eyebrow">지역별 평정 기준</span>
+    <h1>어느 지역의 기준을 확인할까요?</h1>
+    <p>모든 지역을 선택할 수 있습니다. 준비 중인 지역은 전국 공통 항목을 이용할 수 있고 선택가산점 입력은 비활성화됩니다.</p>
+  </header>
+  <div class="region-grid">
+    {% for region in regions %}
+      <article class="region-card {% if not region.implemented %}pending{% endif %} {% if profile.region == region.code %}primary{% endif %}">
+        <div class="region-card-top">
+          <span class="region-symbol">{{ region.name|slice:':1' }}</span>
+          {% if profile.region == region.code %}<span class="badge success">내 지역</span>{% elif selected_region == region.code %}<span class="badge">선택한 지역</span>{% elif region.implemented %}<span class="badge">전체 이용 가능</span>{% else %}<span class="badge muted">선택가산점 준비 중</span>{% endif %}
+        </div>
+        <h2>{{ region.name }}</h2>
+        <p>{% if region.implemented %}초등교사 · 2026년 전체 기준 이용 가능{% else %}전국 공통 항목 이용 가능 · 선택가산점 준비 중{% endif %}</p>
+        <form method="post">
+          {% csrf_token %}<input type="hidden" name="region" value="{{ region.code }}">
+          {% if request.user.is_authenticated and not profile.region %}
+            <button class="button full" name="action" value="set_primary">내 지역으로 설정하고 시작</button>
+          {% elif request.user.is_authenticated and profile.region == region.code %}
+            <button class="button full" name="action" value="view">내 대시보드 열기</button>
+          {% elif request.user.is_authenticated %}
+            <button class="button secondary full" name="action" value="view">참고 계산으로 열기</button>
+            <button class="text-button" name="action" value="set_primary">내 지역으로 변경</button>
+          {% else %}
+            <button class="button secondary full" name="action" value="view">이 지역으로 계산해보기</button>
+          {% endif %}
+        </form>
+      </article>
+    {% endfor %}
+  </div>
+{% endblock %}

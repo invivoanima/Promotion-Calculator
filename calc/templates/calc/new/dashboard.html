@@ -1,0 +1,37 @@
+{% extends 'calc/new/base.html' %}
+{% load calc_extras %}
+{% block title %}대시보드 · 승진점수 계산기{% endblock %}
+{% block content %}
+  <header class="page-heading split">
+    <div><span class="eyebrow">{{ primary_region.name }} · 초등교사 · {{ rule_year }}년 기준</span><h1>{{ profile.display_name|default:user.username }}님의 점수 기록</h1><p>마지막으로 저장한 기록을 기준으로 한 참고용 예상점수입니다.</p></div>
+    <a class="button" href="{% url 'calc:score_index' %}">점수 입력 계속하기</a>
+  </header>
+  <section class="total-card">
+    <div><span>현재 예상 총점</span><strong>{{ summary.total|floatformat:3 }}</strong><small>/ {{ total_max|floatformat:1 }}점</small></div>
+    <div class="total-note"><strong>정확한 공식 점수가 아니에요</strong><p>실제 평정 전에는 공식 자료와 담당 기관의 확인이 필요합니다.</p></div>
+  </section>
+  <section class="score-card-grid">
+    {% for card in category_cards %}
+      {% if card.input_disabled %}<article class="score-card score-card-disabled" aria-disabled="true">{% else %}<a class="score-card" href="{% url 'calc:score_index_category' card.code %}">{% endif %}
+        <div><span>{{ card.name }}</span><small>{{ card.record_count }}개 기록</small></div>
+        {% if card.input_disabled %}<strong class="disabled-score-label">준비 중<small>입력·편집 비활성화</small></strong>{% else %}<strong>{{ card.score|floatformat:3 }}<small>/ {{ card.max_score|floatformat:1 }}</small></strong><div class="progress"><i style="width: {{ card.percent }}%"></i></div>{% endif %}
+      {% if card.input_disabled %}</article>{% else %}</a>{% endif %}
+    {% endfor %}
+  </section>
+  <div class="dashboard-columns">
+    <section class="panel">
+      <div class="panel-heading"><div><span class="eyebrow">자격요건</span><h2>한국사 능력 검정·연수</h2></div><a href="{% url 'calc:korean_history' %}">확인하기</a></div>
+      {% with status=qualification.qualification_status %}
+        <div class="qualification-status {{ status }}"><span class="status-dot"></span><strong>{% if status == 'satisfied' %}충족{% elif status == 'not_satisfied' %}미충족{% else %}확인 필요{% endif %}</strong><p>총점에는 합산되지 않는 자격요건 확인 항목입니다.</p></div>
+      {% endwith %}
+    </section>
+    <section class="panel">
+      <div class="panel-heading"><div><span class="eyebrow">최근 기록</span><h2>마지막으로 수정한 항목</h2></div><a href="{% url 'calc:records' %}">모두 보기</a></div>
+      <div class="recent-list">
+        {% for record in recent_records %}
+          <a href="{% url 'calc:edit_score_record' record.item_code record.id %}"><span><strong>{{ record.item_code|item_name }}</strong><small>{{ record.label|default:record.institution|default:'입력 기록' }}</small></span><b>{{ record.calculated_score|floatformat:3 }}</b></a>
+        {% empty %}<div class="empty-compact">아직 저장한 기록이 없습니다.</div>{% endfor %}
+      </div>
+    </section>
+  </div>
+{% endblock %}

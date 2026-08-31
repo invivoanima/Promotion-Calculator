@@ -13,3 +13,8 @@ admin.site.register(models.Notice)
 admin.site.register(models.Suggestion)
 
 admin.site.register(models.Area_Diff_Jeonnam)
+admin.site.register(models.RegionPortfolio)
+admin.site.register(models.ScoreRecord)
+admin.site.register(models.ItemStatus)
+admin.site.register(models.KoreanHistoryQualification)
+admin.site.register(models.ScoreChange)

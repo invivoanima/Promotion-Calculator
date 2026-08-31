@@ -1,0 +1,52 @@
+{% extends 'calc/new/base.html' %}
+{% load calc_extras %}
+{% block title %}{% if is_guest %}점수 계산해보기{% else %}점수 입력{% endif %} · 승진점수 계산기{% endblock %}
+{% block content %}
+  <div{% if is_guest %} data-guest-calculator data-guest-hydrated="{{ guest_hydrated|yesno:'true,false' }}" data-guest-local-key="{{ guest_local_key }}"{% endif %}>
+  <header class="page-heading score-index-heading">
+    <div>
+      <span class="eyebrow">{{ region.name }}</span>
+      <h1>{% if selected_category %}{{ selected_category.name }}{% elif is_guest %}점수 계산해보기{% else %}점수 입력{% endif %}</h1>
+      <p>{% if selected_category %}{{ selected_category.description }}{% elif is_guest %}로그인 없이 항목별 예상점수를 계산할 수 있습니다.{% else %}평정 영역을 선택하고 필요한 기록부터 차례로 입력하세요.{% endif %}</p>
+    </div>
+    <div class="score-index-total" aria-label="현재 점수 {{ summary.total|floatformat:3 }}, 총점 {{ total_max|floatformat:1 }}">
+      <span>현재 점수 / 총점</span>
+      <strong>{{ summary.total|floatformat:3 }} <small>/ {{ total_max|floatformat:1 }}</small></strong>
+    </div>
+  </header>
+  {% if is_guest %}
+    <section class="guest-calculator-note">
+      <div><strong>이 브라우저에만 저장되는 계산입니다.</strong><p>브라우저 데이터를 지우거나 아래 버튼을 누를 때까지 유지됩니다. 공용 컴퓨터에서는 사용 후 삭제하고 개인정보는 입력하지 마세요.</p></div>
+      <button class="button secondary small" type="button" data-guest-reset data-reset-url="{% url 'calc:guest_score_index' %}">이 기기의 계산값 전체 삭제</button>
+    </section>
+  {% endif %}
+  {% if selected_category %}
+    <div class="item-list">
+      {% for row in selected_item_rows %}
+        {% with item=row.item %}
+        {% if row.input_disabled %}<div class="item-row disabled-row" aria-disabled="true">{% else %}<a class="item-row" href="{% if is_guest %}{% url 'calc:guest_score_item' item.code %}{% else %}{% url 'calc:score_item' item.code %}{% endif %}">{% endif %}
+          <span class="item-number">{{ forloop.counter|stringformat:'02d' }}</span>
+          <span class="item-main"><strong>{{ item.name }}</strong><small>{% if selected_category.input_disabled %}이 지역의 선택가산점 기준을 준비 중입니다.{% else %}{{ item.formula }}{% endif %}</small>{% if row.status %}<b class="item-status-badge">{{ row.status.get_status_display }}</b>{% endif %}</span>
+          <span class="item-meta"><small>{{ row.record_count }}개 기록</small><strong>{{ row.score|floatformat:3 }}점</strong></span>
+          <span class="row-arrow">{% if row.input_disabled %}—{% else %}›{% endif %}</span>
+        {% if row.input_disabled %}</div>{% else %}</a>{% endif %}
+        {% endwith %}
+      {% endfor %}
+    </div>
+    <a class="back-link" href="{% if is_guest %}{% url 'calc:guest_score_index' %}{% else %}{% url 'calc:score_index' %}{% endif %}">← 전체 점수 영역</a>
+  {% else %}
+    <section class="category-list-grid">
+      {% for card in category_cards %}
+        {% if card.input_disabled %}<article class="category-card category-card-disabled" aria-disabled="true">{% else %}<a class="category-card" href="{% if is_guest %}{% url 'calc:guest_score_category' card.code %}{% else %}{% url 'calc:score_index_category' card.code %}{% endif %}">{% endif %}
+          <span class="eyebrow">{{ forloop.counter|stringformat:'02d' }}</span><h2>{{ card.name }}</h2><p>{{ card.description }}</p>
+          {% if card.input_disabled %}<span class="disabled-category-label">입력·편집 비활성화</span>{% else %}<div class="category-score"><strong>{{ card.score|floatformat:3 }}</strong><span>/ {{ card.max_score|floatformat:1 }}점</span></div><div class="progress"><i style="width: {{ card.percent }}%"></i></div>{% endif %}
+        {% if card.input_disabled %}</article>{% else %}</a>{% endif %}
+      {% endfor %}
+    </section>
+  {% endif %}
+  {% if is_guest %}
+    {{ guest_storage|json_script:"guest-calculator-state" }}
+    <form method="post" action="" data-guest-hydrate hidden>{% csrf_token %}<input type="hidden" name="action" value="hydrate"><input type="hidden" name="guest_payload"></form>
+  {% endif %}
+  </div>
+{% endblock %}

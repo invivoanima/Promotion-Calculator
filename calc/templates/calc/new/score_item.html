@@ -1,0 +1,199 @@
+{% extends 'calc/new/base.html' %}
+{% load calc_extras %}
+{% block title %}{{ item.name }} · 승진점수 계산기{% endblock %}
+{% block content %}
+  <div{% if is_guest %} data-guest-calculator data-guest-hydrated="{{ guest_hydrated|yesno:'true,false' }}" data-guest-local-key="{{ guest_local_key }}"{% endif %}>
+  <div class="item-layout">
+    <aside class="item-sidebar item-sidebar-{{ category.code }}">
+      <a class="back-link" href="{% if is_guest %}{% url 'calc:guest_score_category' category.code %}{% else %}{% url 'calc:score_index_category' category.code %}{% endif %}">← {{ category.name }}</a>
+      <nav>{% for sibling in category_items %}{% if regional_bonus_disabled %}<span class="disabled-nav-item"><b>{{ forloop.counter }}</b>{{ sibling.name }}</span>{% else %}<a href="{% if is_guest %}{% url 'calc:guest_score_item' sibling.code %}{% else %}{% url 'calc:score_item' sibling.code %}{% endif %}" {% if sibling.code == item.code %}class="active"{% endif %}><span>{{ forloop.counter }}</span>{{ sibling.name }}</a>{% endif %}{% endfor %}</nav>
+    </aside>
+    <div class="item-content">
+      {% if is_guest %}<section class="guest-calculator-note compact"><div><strong>이 브라우저에만 저장되는 계산입니다.</strong><p>서버의 계정 기록과 점수 변화표에는 저장되지 않습니다.</p></div><a class="button secondary small" href="{% url 'calc:guest_score_index' %}">전체 점수 보기</a></section>{% endif %}
+      <header class="item-hero">
+        <div><span class="eyebrow">{{ category.name }} · {{ region.name }}</span><h1>{{ item.name }}</h1><p>{{ item.description }}</p></div>
+        <div class="item-score"><span>현재 점수</span><strong>{{ item_score|floatformat:4 }}</strong><small>/ {{ item.max_score|floatformat:2 }}점</small></div>
+      </header>
+      <section class="formula-card"><span>간단한 계산식</span><strong>{{ item.formula }}</strong></section>
+
+      {% if qualification_score != None %}
+        <section class="supplement-card"><div><span>현재 1급 정교사 자격연수 평정점</span><strong>{{ qualification_score|floatformat:3 }}점</strong></div><div><span>9점까지 보완 가능한 범위</span><strong>{{ qualification_gap|floatformat:3 }}점</strong></div></section>
+      {% endif %}
+
+      {% if status_object %}
+        <section class="item-status-note">
+          <div><span class="badge muted">{{ status_object.get_status_display }}</span><strong>이 항목의 상태가 저장되어 있습니다.</strong><p>새 기록을 저장하면 이 표시는 자동으로 해제됩니다.</p></div>
+          <form method="post">{% csrf_token %}<input type="hidden" name="action" value="clear_item_status"><button class="button secondary small" type="submit">표시 해제</button></form>
+        </section>
+      {% endif %}
+
+      {% if input_disabled %}
+        <section class="notice-card muted-card"><span class="notice-icon">i</span><div><h2>{% if regional_bonus_disabled %}선택가산점 준비 중{% else %}입력하지 않는 항목입니다{% endif %}</h2><p>{{ input_disabled_reason }}</p></div></section>
+      {% else %}
+        <section class="records-section">
+          <div class="section-heading"><div><span class="eyebrow">{% if is_guest %}임시 계산 목록{% else %}저장된 기록{% endif %}</span><h2>{{ records|length }}개 {% if is_guest %}항목{% else %}기록{% endif %}</h2></div><button class="button small" type="button" data-form-focus>+ {% if is_guest %}계산 항목{% else %}기록{% endif %} 추가</button></div>
+          {% if item.code == 'work_performance' %}<p class="score-selection-guide">최근 5개 평정연도 중 점수가 높은 3개가 선택됩니다. 초록색 ‘점수 반영’ 표시가 실제 계산에 사용된 연도입니다.</p>{% endif %}
+          {% if item.code == 'training_job' %}<p class="score-selection-guide">인정 가능한 연수 중 원점수가 가장 높은 1건의 환산점수가 자동 반영됩니다. 최대 2건에는 이수실적 각 6점이 반영되며, 초록색 기록이 최고 성적 선택 항목입니다.</p>{% endif %}
+          {% if item.code == 'common_training_credit' %}<p class="score-selection-guide">연도별 0.08점과 전체 0.8점 상한 안에서 실제 반영되는 연수를 초록색으로 표시합니다.</p>{% endif %}
+          <div class="record-list">
+            {% for record in records %}
+              <article class="record-card{% if record.is_score_selected %} score-selected{% endif %}">
+                <div class="record-card-main"><div class="record-card-labels"><span class="record-kicker">{{ record|input_summary|default:'입력 기록' }}</span>{% if record.is_score_selected %}<span class="score-selection-badge">{% if item.code == 'training_job' %}최고 성적 반영{% elif item.code == 'common_training_credit' %}점수 반영 · {{ record.applied_score|floatformat:4 }}점{% else %}점수 반영 · {{ record.score_weight_percent }}%{% endif %}</span>{% endif %}{% if item.code == 'training_job' and record.is_completion_selected %}<span class="completion-selection-badge">이수실적 반영 · 6점</span>{% endif %}</div><h3>{{ record.label|default:record.institution|default:item.name }}</h3><p>{% if record.start_date %}{{ record.start_date|date:'Y.m.d' }} ~ {{ record.end_date|date:'Y.m.d' }}{% elif record.event_date %}{{ record.event_date|date:'Y.m.d' }}{% endif %}{% if record.institution and record.label %} · {{ record.institution }}{% endif %}</p>{% if record.memo %}<small>{{ record.memo|truncatechars:80 }}</small>{% endif %}</div>
+                <div class="record-score"><span>{% if item.code == 'training_job' %}6점 환산점수{% else %}기록점수{% endif %}</span><strong>{{ record.display_calculated_score|floatformat:4 }}</strong></div>
+                <div class="record-actions"><a href="{% if is_guest %}{% url 'calc:guest_edit_score_record' item.code record.guest_key %}{% else %}{% url 'calc:edit_score_record' item.code record.id %}{% endif %}">수정</a><form method="post" action="{% if is_guest %}{% url 'calc:guest_delete_score_record' item.code record.guest_key %}{% else %}{% url 'calc:delete_score_record' record.id %}{% endif %}" data-confirm="이 항목을 삭제할까요? 점수도 다시 계산됩니다."{% if is_guest %} data-guest-state-form{% endif %}>{% csrf_token %}<button type="submit">삭제</button></form></div>
+              </article>
+            {% empty %}<div class="empty-state"><strong>아직 입력한 항목이 없습니다.</strong><p>{% if is_guest %}아래 입력폼에서 계산할 내용을 추가하세요.{% else %}아래에서 첫 기록을 추가하거나 이 항목이 해당 없음을 표시할 수 있습니다.{% endif %}</p></div>{% endfor %}
+          </div>
+        </section>
+
+        {% if item.code == 'jeonnam_professional_activity' %}
+          <section class="professional-activity-score-card" aria-label="기타 교육활동 및 전문성 신장 평정표">
+            <div class="professional-table-heading">
+              <div><span class="eyebrow">PDF 18~19쪽 기준</span><h2>기타 교육활동 및 전문성 신장 평정표</h2></div>
+              <div><strong>전체 상한 1.0점</strong><span>각 세부 목은 원칙적으로 최대 0.5점</span></div>
+            </div>
+            <div class="professional-activity-table-wrap">
+              <table>
+                <thead><tr><th scope="col">평정항목</th><th scope="col">실적 인정기간</th><th scope="col">평정점</th><th scope="col">상한점</th></tr></thead>
+                <tbody>
+                  <tr><th scope="row">가. 특별연구교사·(좋은)수업선도교사(수업장학요원)</th><td>2002.3.1. ~ 2012.5.31.</td><td>월 0.0105점<br>일 0.00035점</td><td>목별 0.5점</td></tr>
+                  <tr><th scope="row">나. 교과전담 교사</th><td>2009.1.1. ~ 2012.2.29.</td><td>월 0.0105점<br>일 0.00035점</td><td>목별 0.5점</td></tr>
+                  <tr><th scope="row">나. 복식학급담당 교사</th><td>2009.1.1. ~ 2026.2.28.</td><td>월 0.0105점<br>일 0.00035점</td><td>목별 0.5점</td></tr>
+                  <tr><th scope="row">나. 겸임순회교사</th><td>2009.1.1. ~ 2026.2.28.</td><td>월 0.0105점<br>일 0.00035점</td><td>목별 0.5점</td></tr>
+                  <tr><th scope="row">나. 병설(통합)운영학교 교감</th><td>2012.6.1. ~ 2026.2.28.</td><td>월 0.0105점<br>일 0.00035점</td><td>목별 0.5점</td></tr>
+                  <tr><th scope="row">다. 사이버가정학습 담당교사</th><td>2009.1.1. ~ 2026.2.28.</td><td>월 0.0105점<br>일 0.00035점</td><td>목별 0.5점</td></tr>
+                  <tr><th scope="row">라. 영재교육원 전담교사</th><td>2005.3.1. ~ 2026.2.28.</td><td>월 0.0105점<br>일 0.00035점</td><td>목별 0.5점</td></tr>
+                  <tr><th scope="row">라. 발명교실·영어(외국어체험)타운 전담교사</th><td>2009.1.1. ~ 2026.2.28.</td><td>월 0.0105점<br>일 0.00035점</td><td>목별 0.5점</td></tr>
+                  <tr><th scope="row">마. 교육실습학생 담당교사</th><td>2005.3.1. ~ 2026.2.28.</td><td>월 0.0315점<br>일 0.00105점</td><td>목별 0.5점</td></tr>
+                  <tr><th scope="row">바. 청소년단체 담당교사</th><td>2005.3.1. ~ 2012.5.31.</td><td>월 0.0105점<br>일 0.00035점</td><td rowspan="2">목별 0.5점</td></tr>
+                  <tr><th scope="row">바. 청소년단체 담당교사</th><td>2012.6.1. ~ 2026.2.28.</td><td>월 0.0053점<br>일 0.000177점</td></tr>
+                  <tr class="inactive-rate-row"><th scope="row">사. 기숙사·생활관 사감교사 등</th><td>유·초등 해당 없음</td><td>-</td><td>-</td></tr>
+                  <tr><th scope="row">아. 현직연구원</th><td>2009.1.1. ~ 2026.2.28.</td><td>월 0.0105점<br>일 0.00035점</td><td>목별 0.5점</td></tr>
+                  <tr><th scope="row">자. 학급경영 우수교사</th><td>2009.1.1. ~ 2011.12.31.</td><td>1회 0.25점<br>(1회 실적에 한함)</td><td>0.25점</td></tr>
+                  <tr><th scope="row">차. 정보활용능력인증서 취득자</th><td>1998.1.1. ~ 2013.12.31.</td><td>1회 0.25점<br>(1회 실적에 한함)</td><td>0.25점</td></tr>
+                  <tr class="inactive-rate-row"><th scope="row">카. 삭제</th><td>2024.3.1. 삭제</td><td>-</td><td>-</td></tr>
+                  <tr><th scope="row">타. 전국소년체육대회·전국과학전람회·전국학생발명품경진대회 입상학생 지도교사</th><td>2005.3.1. ~ 2026.2.28.</td><td>금상 0.25점<br>은상 0.1875점<br>동상 0.125점</td><td>목별 0.5점</td></tr>
+                  <tr><th scope="row">타. 전국과학탐구경진대회 입상학생 지도교사</th><td>2009.1.1. ~ 2026.2.28.</td><td>금상 0.25점<br>은상 0.1875점<br>동상 0.125점</td><td>목별 0.5점</td></tr>
+                  <tr><th scope="row">파. 한센병 환자자녀 수용학교 및 학급담임 경력</th><td>해당 직위 ~ 2008.12.31.</td><td>월 0.0084점<br>일 0.00028점</td><td>목별 0.5점</td></tr>
+                  <tr><th scope="row">하. 특수학교 근무경력</th><td rowspan="3">해당 직위 ~ 2008.2.29.</td><td>월 0.0084점<br>일 0.00028점</td><td rowspan="3">목별 0.5점</td></tr>
+                  <tr><th scope="row">하. 특수학급 근무경력</th><td>월 0.0042점<br>일 0.00014점</td></tr>
+                  <tr><th scope="row">하. 통합교육학급 근무경력</th><td>월 0.0021점<br>일 0.00007점</td></tr>
+                  <tr><th scope="row">거. 국가기술자격법에 의한 기술자격증 소지자</th><td>해당 직위 ~ 2026.2.28.</td><td>1급 0.3점<br>2급 0.2점<br>3급 0.1점</td><td>0.3점</td></tr>
+                  <tr class="inactive-rate-row"><th scope="row">너. 학급 담임 경력</th><td>유·초등 해당 없음</td><td>-</td><td>-</td></tr>
+                  <tr><th scope="row">더. 학교교육력 증진 유공교원</th><td>2014.7.1. ~ 2026.2.28.</td><td>연 0.036점</td><td>0.2점</td></tr>
+                  <tr><th scope="row">러. 좋은수업 실천연구 추가 실적점</th><td>제7호 상한점 1.5점 도달 이후</td><td>1회당 0.02점</td><td>목별 0.5점</td></tr>
+                  <tr><th scope="row">머. 보직교사 추가 경력점</th><td>기본경력점 1.0점 도달 이후</td><td>월 0.003점<br>일 0.0001점</td><td>0.25점</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="professional-table-note">2008.12.31. 이전 취득점은 0.25점까지 인정하며, 2009.1.1. 이후 새로 취득한 점수를 인정합니다. 같은 세부 목에서는 0.5점을 초과할 수 없습니다.</p>
+          </section>
+        {% endif %}
+
+        <section class="form-card" id="record-form">
+          <div class="section-heading"><div><span class="eyebrow">{% if editing_record %}입력 수정{% elif is_guest %}새 계산 항목{% else %}새 기록{% endif %}</span><h2>{% if editing_record %}입력값을 고쳐주세요{% elif is_guest %}계산할 내용을 입력하세요{% else %}기록을 추가하세요{% endif %}</h2></div>{% if editing_record %}<a href="{% if is_guest %}{% url 'calc:guest_score_item' item.code %}{% else %}{% url 'calc:score_item' item.code %}{% endif %}">수정 취소</a>{% endif %}</div>
+          <form method="post" class="record-form" data-record-form{% if is_guest %} data-guest-state-form{% endif %}>
+            {% csrf_token %}{% if is_guest %}<input type="hidden" name="action" value="record_form">{% endif %}{{ form.non_field_errors }}
+            <div class="form-grid">
+              {% for field in form %}
+                <div class="form-field {% if field.field.widget.input_type == 'checkbox' %}checkbox-field{% endif %} {% if field.name == 'memo' %}full-span{% endif %}">
+                  {% if field.field.widget.input_type == 'checkbox' %}{{ field }}<label for="{{ field.id_for_label }}">{{ field.label }}</label>{% else %}<label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<em>*</em>{% endif %}</label>{{ field }}{% endif %}
+                  {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}{{ field.errors }}
+                  {% if item.code == 'training_research' and field.name == 'variant' %}
+                    <section class="research-score-guide" aria-label="연구실적 평정점 안내">
+                      <div class="research-guide-heading"><strong>연구대회 입상실적 평정표</strong><span>등급과 연구자 수를 함께 확인하세요.</span></div>
+                      <div class="research-table-grid">
+                        <div>
+                          <b>전국 규모 연구대회</b>
+                          <table><thead><tr><th>등급</th><th>1인</th><th>2인</th><th>3인</th><th>4인</th></tr></thead><tbody><tr><th>1등급</th><td>1.500</td><td>1.050</td><td>0.750</td><td>0.450</td></tr><tr><th>2등급</th><td>1.250</td><td>0.875</td><td>0.625</td><td>0.375</td></tr><tr><th>3등급</th><td>1.000</td><td>0.700</td><td>0.500</td><td>0.300</td></tr></tbody></table>
+                        </div>
+                        <div>
+                          <b>시·도 규모 연구대회</b>
+                          <table><thead><tr><th>등급</th><th>1인</th><th>2인</th><th>3인</th><th>4인</th></tr></thead><tbody><tr><th>1등급</th><td>1.000</td><td>0.700</td><td>0.500</td><td>0.300</td></tr><tr><th>2등급</th><td>0.750</td><td>0.525</td><td>0.375</td><td>0.225</td></tr><tr><th>3등급</th><td>0.500</td><td>0.350</td><td>0.250</td><td>0.150</td></tr></tbody></table>
+                        </div>
+                      </div>
+                      <div class="degree-score-guide"><strong>학위취득실적</strong><span>박사: 직무 관련 3점 / 그 밖의 학위 1.5점</span><span>석사: 직무 관련 1.5점 / 그 밖의 학위 1점</span></div>
+                    </section>
+                  {% endif %}
+                </div>
+                {% if item.code == 'jeonnam_island_remote' and field.name == 'variant' %}
+                    <section class="island-remote-score-guide full-span" aria-label="도서·벽지학교 급지별 평정점 안내">
+                      <div class="research-guide-heading"><strong>도서·벽지학교 급지별 평정표</strong><span>학교 구분과 급지에 따른 월·일 평정점입니다.</span></div>
+                      <div class="island-remote-table-wrap">
+                        <table>
+                          <thead>
+                            <tr><th rowspan="2" scope="col">급지</th><th colspan="2" scope="colgroup">도서학교</th><th colspan="2" scope="colgroup">벽지학교</th></tr>
+                            <tr><th scope="col">월</th><th scope="col">일</th><th scope="col">월</th><th scope="col">일</th></tr>
+                          </thead>
+                          <tbody>
+                            <tr><th scope="row">가</th><td>0.167</td><td>0.0056</td><td>0.084</td><td>0.0028</td></tr>
+                            <tr><th scope="row">나</th><td>0.125</td><td>0.0042</td><td>0.063</td><td>0.0021</td></tr>
+                            <tr><th scope="row">다</th><td>0.084</td><td>0.0028</td><td>0.050</td><td>0.0017</td></tr>
+                            <tr><th scope="row">라</th><td>0.063</td><td>0.0021</td><td>0.042</td><td>0.0014</td></tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                {% endif %}
+                {% if item.code == 'jeonnam_rural' and field.name == 'variant' %}
+                    <section class="rural-score-guide full-span" aria-label="농어촌교육진흥학교 급지별 평정점 안내">
+                      <div class="research-guide-heading"><strong>농어촌교육진흥학교 급지별 평정표</strong><span>근무기간과 급지에 따른 월·일 평정점입니다.</span></div>
+                      <div class="rural-rate-table-wrap">
+                        <table>
+                          <thead>
+                            <tr><th scope="col">평정 구분</th><th scope="col">적용 기간</th><th scope="col">급지</th><th scope="col">월</th><th scope="col">일</th></tr>
+                          </thead>
+                          <tbody>
+                            <tr><th scope="row">기본경력점</th><td>1995.1.1. ~ 2013.2.28.</td><td>급지 없음</td><td>0.0119</td><td>0.0004</td></tr>
+                            <tr><th scope="row" rowspan="3">기본경력점</th><td rowspan="3">2013.3.1. ~ 2026.2.28.</td><td>1급지</td><td>0.012</td><td>0.0004</td></tr>
+                            <tr><td>2급지</td><td>0.008</td><td>0.00027</td></tr>
+                            <tr><td>3급지</td><td>0.006</td><td>0.0002</td></tr>
+                            <tr><th scope="row">추가경력점</th><td>2014.3.1. ~ 2026.2.28.</td><td>해당 없음</td><td>0.002</td><td>-</td></tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div class="degree-score-guide"><strong>상한점</strong><span>기본경력점 0.85점</span><span>추가경력점 0.15점</span></div>
+                    </section>
+                {% endif %}
+                {% if item.code == 'jeonnam_leadership' and field.name == 'variant' %}
+                    <section class="leadership-score-guide full-span" aria-label="보직교사·장학사·교육연구사 근무경력 평정점 안내">
+                      <div class="research-guide-heading"><strong>보직교사 등 근무경력 평정표</strong><span>교원 구분과 경력 구분에 따른 월·일 평정점입니다.</span></div>
+                      <div class="leadership-rate-table-wrap">
+                        <table>
+                          <thead>
+                            <tr><th scope="col">교원 구분</th><th scope="col">경력 구분</th><th scope="col">상한점</th><th scope="col">월</th><th scope="col">일</th></tr>
+                          </thead>
+                          <tbody>
+                            <tr><th scope="row">유치원교사</th><td>기본경력</td><td>1.2점</td><td>0.0143</td><td>0.00048</td></tr>
+                            <tr><th scope="row" rowspan="2">초등교사 등</th><td>기본경력</td><td>1.0점</td><td>0.012</td><td>0.0004</td></tr>
+                            <tr><td>추가경력</td><td>0.25점</td><td>0.003</td><td>0.0001</td></tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div class="degree-score-guide"><strong>초등교사 등</strong><span>총 상한점 1.25점</span><span>추가경력은 화면의 ‘1급 정교사 자격연수성적 보완경력’에 해당합니다.</span></div>
+                    </section>
+                {% endif %}
+              {% endfor %}
+            </div>
+            <div class="form-actions"><button class="button" type="submit">{% if editing_record %}{% if is_guest %}수정하여 다시 계산{% else %}수정 내용 저장{% endif %}{% elif is_guest %}계산에 반영{% else %}기록 저장{% endif %}</button></div>
+          </form>
+        </section>
+
+        {% if not is_guest and not status_object %}
+          <form method="post" class="not-applicable-row">
+            {% csrf_token %}<input type="hidden" name="action" value="toggle_not_applicable"><input type="hidden" name="status" value="not_applicable">
+            <div><strong>이 항목에 해당하는 기록이 없나요?</strong><p>항목 목록에 ‘해당 없음’으로 표시해 둘 수 있습니다.</p></div><button class="button secondary small" type="submit">해당 없음으로 표시</button>
+          </form>
+        {% endif %}
+      {% endif %}
+
+      {% if item.notes %}<section class="rule-notes"><span class="eyebrow">인정 기준·유의사항</span><ul>{% for note in item.notes %}<li>{{ note }}</li>{% endfor %}</ul><a href="{% url 'calc:resources' %}{% if is_guest %}?region=jeonnam{% endif %}">평정업무 자료에서 자세히 보기 →</a></section>{% endif %}
+      {% if not regional_bonus_disabled %}<nav class="prev-next">{% if previous_item %}<a href="{% if is_guest %}{% url 'calc:guest_score_item' previous_item.code %}{% else %}{% url 'calc:score_item' previous_item.code %}{% endif %}"><small>이전 항목</small><strong>← {{ previous_item.name }}</strong></a>{% else %}<span></span>{% endif %}{% if next_item %}<a class="next" href="{% if is_guest %}{% url 'calc:guest_score_item' next_item.code %}{% else %}{% url 'calc:score_item' next_item.code %}{% endif %}"><small>다음 항목</small><strong>{{ next_item.name }} →</strong></a>{% endif %}</nav>{% endif %}
+    </div>
+  </div>
+  {% if is_guest %}
+    {{ guest_storage|json_script:"guest-calculator-state" }}
+    <form method="post" action="" data-guest-hydrate hidden>{% csrf_token %}<input type="hidden" name="action" value="hydrate"><input type="hidden" name="guest_payload"></form>
+  {% endif %}
+  </div>
+{% endblock %}

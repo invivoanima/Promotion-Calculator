@@ -1,0 +1,20 @@
+{% extends 'calc/new/base.html' %}
+{% block title %}로그인 · 승진점수 계산기{% endblock %}
+{% block content %}
+  <section class="auth-shell">
+    <div class="auth-card">
+      <span class="eyebrow">다시 만나 반가워요</span>
+      <h1>로그인</h1>
+      <p>저장해 둔 점수 기록을 이어서 정리하세요.</p>
+      <form method="post" class="stack-form">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        {% for field in form %}
+          <div class="form-field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{{ field.errors }}</div>
+        {% endfor %}
+        <button class="button full" type="submit">로그인</button>
+      </form>
+      <div class="auth-links"><a href="{% url 'calc:password_reset' %}">비밀번호 재설정</a><a href="{% url 'calc:register' %}">새 계정 만들기</a></div>
+    </div>
+  </section>
+{% endblock %}

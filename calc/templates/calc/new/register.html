@@ -1,0 +1,20 @@
+{% extends 'calc/new/base.html' %}
+{% block title %}회원가입 · 승진점수 계산기{% endblock %}
+{% block content %}
+  <section class="auth-shell">
+    <div class="auth-card wide">
+      <span class="eyebrow">개인 점수 기록 시작하기</span>
+      <h1>회원가입</h1>
+      <p>지역은 가입 후 선택합니다. 실명·소속학교·교직원번호는 받지 않습니다.</p>
+      <form method="post" class="stack-form">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        {% for field in form %}
+          <div class="form-field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.help_text %}<small>{{ field.help_text|safe }}</small>{% endif %}{{ field.errors }}</div>
+        {% endfor %}
+        <button class="button full" type="submit">가입하고 지역 선택하기</button>
+      </form>
+      <div class="auth-links"><span>이미 계정이 있나요?</span><a href="{% url 'calc:login' %}">로그인</a></div>
+    </div>
+  </section>
+{% endblock %}
