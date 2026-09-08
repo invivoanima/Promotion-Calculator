@@ -1,0 +1,14 @@
+{% extends 'calc/new/base.html' %}
+{% block title %}건의 관리 · 관리자 대시보드{% endblock %}
+{% block content %}
+  <header class="page-heading"><span class="eyebrow">STAFF · 의견 관리</span><h1>건의·신고 관리</h1><p>회원이 제출한 의견을 확인하고 처리 상태를 관리합니다.</p></header>
+  <form class="filter-bar staff-filter-bar" method="get">
+    <label for="suggestion-category">유형</label><select id="suggestion-category" name="category"><option value="">전체</option>{% for value,label in suggestion_categories %}<option value="{{ value }}" {% if selected_category == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+    <label for="suggestion-status">상태</label><select id="suggestion-status" name="status"><option value="">전체</option>{% for value,label in suggestion_statuses %}<option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+    <label for="suggestion-query">검색</label><input id="suggestion-query" name="q" value="{{ query }}" placeholder="제목 또는 회원 아이디">
+    <label for="suggestion-start">시작일</label><input id="suggestion-start" type="date" name="start_date" value="{{ start_date }}">
+    <label for="suggestion-end">종료일</label><input id="suggestion-end" type="date" name="end_date" value="{{ end_date }}">
+    <button class="button secondary small" type="submit">필터 적용</button>
+  </form>
+  <section class="panel staff-table-section"><div class="table-scroll"><table class="data-table"><thead><tr><th>유형</th><th>제목</th><th>회원</th><th>상태</th><th>접수일</th></tr></thead><tbody>{% for item in suggestions %}<tr><td><span class="notice-badge notice-badge-neutral">{{ item.get_category_display }}</span></td><th><a href="{% url 'calc:staff_suggestion_detail' item.id %}">{{ item.title }}</a></th><td>{{ item.user.username }}</td><td><span class="suggestion-status suggestion-status-{{ item.status }}">{{ item.get_status_display }}</span></td><td>{{ item.date|date:'Y.m.d H:i' }}</td></tr>{% empty %}<tr><td colspan="5" class="table-empty">조건에 맞는 건의가 없습니다.</td></tr>{% endfor %}</tbody></table></div></section>
+{% endblock %}

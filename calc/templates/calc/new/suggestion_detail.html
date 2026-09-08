@@ -1,0 +1,12 @@
+{% extends 'calc/new/base.html' %}
+{% block title %}내 건의 상세 · 승진점수 계산기{% endblock %}
+{% block content %}
+  <a class="back-link" href="{% url 'calc:suggestions' %}">← 건의·신고 목록으로 돌아가기</a>
+  <article class="suggestion-detail-card">
+    <div class="notice-badge-row"><span class="notice-badge notice-badge-neutral">{{ suggestion.get_category_display }}</span><span class="suggestion-status suggestion-status-{{ suggestion.status }}">{{ suggestion.get_status_display }}</span></div>
+    <h1>{{ suggestion.title }}</h1>
+    <dl class="meta-list"><div><dt>접수일</dt><dd>{{ suggestion.date|date:'Y.m.d H:i' }}</dd></div><div><dt>제출 당시 화면</dt><dd>{{ suggestion.source_path|default:'-'}} </dd></div><div><dt>대표 지역</dt><dd>{{ suggestion.region|default:'미선택' }}</dd></div></dl>
+    <div class="suggestion-content">{{ suggestion.content|linebreaksbr }}</div>
+    {% if suggestion.file %}<p class="attachment-link"><a href="{% url 'calc:suggestion_file' suggestion.id %}">첨부파일 확인</a></p>{% endif %}
+  </article>
+{% endblock %}

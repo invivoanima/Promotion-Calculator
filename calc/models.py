@@ -1,11 +1,48 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 
 from .catalog import REGIONS
 
 
 REGION_CHOICES = [(region["code"], region["name"]) for region in REGIONS]
+MAX_SUGGESTION_FILE_SIZE = 100 * 1024 * 1024
+
+
+def validate_suggestion_file(uploaded_file):
+    """Validate suggestion attachments without trusting the filename or MIME header."""
+    if not uploaded_file:
+        return
+    if uploaded_file.size > MAX_SUGGESTION_FILE_SIZE:
+        raise ValidationError("첨부파일은 100MB 이하만 업로드할 수 있습니다.")
+
+    filename = (getattr(uploaded_file, "name", "") or "").lower()
+    extension = filename.rsplit(".", 1)[-1] if "." in filename else ""
+    signatures = {
+        "jpg": lambda data: data.startswith(b"\xff\xd8\xff"),
+        "jpeg": lambda data: data.startswith(b"\xff\xd8\xff"),
+        "png": lambda data: data.startswith(b"\x89PNG\r\n\x1a\n"),
+        "webp": lambda data: len(data) >= 12 and data[:4] == b"RIFF" and data[8:12] == b"WEBP",
+        "pdf": lambda data: data.startswith(b"%PDF-") ,
+    }
+    signature_check = signatures.get(extension)
+    if signature_check is None:
+        raise ValidationError("JPG, JPEG, PNG, WEBP, PDF 파일만 첨부할 수 있습니다.")
+
+    try:
+        original_position = uploaded_file.tell()
+        uploaded_file.seek(0)
+        header = uploaded_file.read(32)
+    except (AttributeError, OSError):
+        raise ValidationError("첨부파일을 확인할 수 없습니다. 파일을 다시 선택해주세요.")
+    finally:
+        try:
+            uploaded_file.seek(original_position)
+        except (AttributeError, OSError, UnboundLocalError):
+            pass
+    if not signature_check(header):
+        raise ValidationError("파일 형식과 확장자가 일치하지 않습니다. JPG, JPEG, PNG, WEBP, PDF만 첨부할 수 있습니다.")
 
 class Profile(models.Model) :
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -35,9 +72,39 @@ class Profile(models.Model) :
 
 
 class Notice(models.Model) :
+    class Category(models.TextChoices):
+        NOTICE = "notice", "공지"
+        UPDATE = "update", "업데이트"
+        MAINTENANCE = "maintenance", "점검"
+        IMPORTANT = "important", "중요"
+
     title = models.TextField()
     content = models.TextField()
     date = models.DateTimeField(auto_now_add=True)
+    category = models.CharField(
+        max_length=20,
+        choices=Category.choices,
+        default=Category.NOTICE,
+    )
+    is_published = models.BooleanField(default=True)
+    is_pinned = models.BooleanField(default=False)
+    updated_at = models.DateTimeField(auto_now=True)
+    published_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-is_pinned", "-date"]
+
+    def save(self, *args, **kwargs):
+        publication_field_changed = False
+        if self.is_published and not self.published_at:
+            self.published_at = timezone.now()
+            publication_field_changed = True
+        elif not self.is_published:
+            publication_field_changed = self.published_at is not None
+            self.published_at = None
+        if publication_field_changed and kwargs.get("update_fields") is not None:
+            kwargs["update_fields"] = set(kwargs["update_fields"]) | {"published_at"}
+        super().save(*args, **kwargs)
 
     def __str__(self) : 
         return f'{self.title} - {self.date}'
@@ -52,13 +119,78 @@ class Manual(models.Model) :
 
 
 class Suggestion(models.Model) :
+    class Category(models.TextChoices):
+        ERROR = "error", "오류 신고"
+        FEATURE = "feature", "기능 제안"
+        DATA = "data", "자료 수정"
+        OTHER = "other", "기타"
+
+    class Status(models.TextChoices):
+        RECEIVED = "received", "접수"
+        REVIEWING = "reviewing", "확인 중"
+        COMPLETED = "completed", "처리 완료"
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    category = models.CharField(
+        max_length=20,
+        choices=Category.choices,
+        default=Category.OTHER,
+    )
+    title = models.CharField(max_length=200, default="기존 건의")
     content = models.TextField(default='')
-    file = models.FileField(upload_to='suggestion/', null=True, blank=True)
+    file = models.FileField(
+        upload_to='suggestion/',
+        null=True,
+        blank=True,
+        validators=[validate_suggestion_file],
+    )
+    source_path = models.CharField(max_length=255, blank=True, default="")
+    region = models.CharField(max_length=30, blank=True, default="")
+    admin_memo = models.TextField(blank=True, default="")
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.RECEIVED,
+    )
     date = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self) : 
         return f'{self.user} - {self.content}, {self.date}'
+
+
+class AccessLog(models.Model):
+    class DeviceType(models.TextChoices):
+        DESKTOP = "desktop", "데스크톱"
+        MOBILE = "mobile", "모바일"
+        TABLET = "tablet", "태블릿"
+        OTHER = "other", "기타"
+
+    user = models.ForeignKey(
+        User,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="access_logs",
+    )
+    is_authenticated = models.BooleanField(default=False)
+    route_name = models.CharField(max_length=150, blank=True, default="")
+    region = models.CharField(max_length=30, blank=True, default="")
+    device_type = models.CharField(
+        max_length=12,
+        choices=DeviceType.choices,
+        default=DeviceType.OTHER,
+    )
+    status_code = models.PositiveSmallIntegerField(default=200)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["route_name", "created_at"]),
+            models.Index(fields=["status_code", "created_at"]),
+        ]
 
 
 class Common_Career(models.Model) :

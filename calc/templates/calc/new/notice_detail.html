@@ -1,0 +1,11 @@
+{% extends 'calc/new/base.html' %}
+{% block title %}{{ notice.title }} · 공지·업데이트{% endblock %}
+{% block content %}
+  <a class="back-link" href="{% url 'calc:notices' %}">← 공지·업데이트로 돌아가기</a>
+  <article class="notice-detail-card">
+    <div class="notice-badge-row"><span class="notice-badge notice-badge-{{ notice.category }}">{{ notice.get_category_display }}</span>{% if notice.is_pinned %}<span class="notice-badge notice-badge-pinned">고정</span>{% endif %}</div>
+    <h1>{{ notice.title }}</h1>
+    <p class="notice-date">{{ notice.published_at|default:notice.date|date:'Y.m.d H:i' }}</p>
+    <div class="notice-content">{{ notice.content|linebreaksbr }}</div>
+  </article>
+{% endblock %}

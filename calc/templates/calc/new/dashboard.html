@@ -34,4 +34,12 @@
       </div>
     </section>
   </div>
+  <section class="panel dashboard-notices-panel">
+    <div class="panel-heading"><div><span class="eyebrow">소식</span><h2>공지·업데이트</h2></div><a href="{% url 'calc:notices' %}">모두 보기</a></div>
+    <div class="recent-list">
+      {% for notice in latest_notices %}
+        <a href="{% url 'calc:notice_detail' notice.id %}"><span><strong><span class="notice-badge notice-badge-{{ notice.category }}">{{ notice.get_category_display }}</span> {{ notice.title }}</strong><small>{{ notice.date|date:'Y.m.d' }}</small></span><b>→</b></a>
+      {% empty %}<div class="empty-compact">등록된 공개 공지가 없습니다.</div>{% endfor %}
+    </div>
+  </section>
 {% endblock %}

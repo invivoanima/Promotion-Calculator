@@ -1,0 +1,23 @@
+{% extends 'calc/new/base.html' %}
+{% block title %}공지·업데이트 · 승진점수 계산기{% endblock %}
+{% block content %}
+  <header class="page-heading split">
+    <div><span class="eyebrow">서비스 소식</span><h1>공지·업데이트</h1><p>서비스의 주요 안내와 업데이트 소식을 확인하세요.</p></div>
+  </header>
+  <form class="filter-bar" method="get">
+    <label for="notice-category">유형</label>
+    <select id="notice-category" name="category">
+      <option value="">전체</option>
+      {% for value, label in notice_categories %}<option value="{{ value }}" {% if selected_category == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <button class="button secondary small" type="submit">필터 적용</button>
+  </form>
+  <div class="notice-list">
+    {% for notice in notices %}
+      <a class="notice-card notice-list-card" href="{% url 'calc:notice_detail' notice.id %}">
+        <span class="notice-icon">{% if notice.is_pinned %}★{% else %}i{% endif %}</span>
+        <div><div class="notice-badge-row"><span class="notice-badge notice-badge-{{ notice.category }}">{{ notice.get_category_display }}</span>{% if notice.is_pinned %}<span class="notice-badge notice-badge-pinned">고정</span>{% endif %}</div><h2>{{ notice.title }}</h2><p>{{ notice.content|truncatechars:180 }}</p><small class="notice-date">{{ notice.published_at|default:notice.date|date:'Y.m.d H:i' }}</small></div>
+      </a>
+    {% empty %}<div class="empty-state"><strong>공개된 공지가 없습니다.</strong><p>새 소식이 등록되면 이곳에서 안내합니다.</p></div>{% endfor %}
+  </div>
+{% endblock %}

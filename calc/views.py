@@ -1,16 +1,21 @@
 import json
-from datetime import date
+import os
+from datetime import date, timedelta
 from decimal import Decimal
+from functools import wraps
 from uuid import uuid4
 
 from django.contrib import auth, messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.db.models import Q
-from django.http import Http404, JsonResponse
+from django.core.exceptions import PermissionDenied
+from django.db.models import Count, Q
+from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.text import get_valid_filename
 from django.views.decorators.http import require_POST
 
 from .catalog import (
@@ -25,17 +30,22 @@ from .catalog import (
 from .forms import (
     KoreanHistoryForm,
     LoginForm,
+    NoticeForm,
     ProfileForm,
     RegisterForm,
     ScoreRecordInputForm,
+    SuggestionForm,
 )
 from .models import (
+    AccessLog,
     ItemStatus,
     KoreanHistoryQualification,
+    Notice,
     Profile,
     RegionPortfolio,
     ScoreChange,
     ScoreRecord,
+    Suggestion,
 )
 from .services import (
     calculate_item_score,
@@ -286,7 +296,12 @@ def welcome(request):
     return render(
         request,
         "calc/new/welcome.html",
-        {"implemented_regions": [r for r in REGIONS if r["implemented"]]},
+        {
+            "implemented_regions": [r for r in REGIONS if r["implemented"]],
+            "latest_notices": Notice.objects.filter(is_published=True).order_by(
+                "-is_pinned", "-published_at", "-date"
+            )[:3],
+        },
     )
 
 
@@ -619,6 +634,9 @@ def dashboard(request):
             "qualification": qualification,
             "total_max": total_max,
             "rule_year": CURRENT_RULE_YEAR,
+            "latest_notices": Notice.objects.filter(is_published=True).order_by(
+                "-is_pinned", "-published_at", "-date"
+            )[:3],
         },
     )
 
@@ -975,3 +993,446 @@ def legacy_common(request):
 
 def legacy_area(request, *args, **kwargs):
     return redirect("calc:score_index_category", category_code="regional_bonus")
+
+
+# ---------------------------------------------------------------------------
+# Public notices and member suggestions
+# ---------------------------------------------------------------------------
+
+
+def notice_list(request):
+    notices = Notice.objects.filter(is_published=True)
+    category = request.GET.get("category", "")
+    if category in Notice.Category.values:
+        notices = notices.filter(category=category)
+    return render(
+        request,
+        "calc/new/notices.html",
+        {
+            "notices": notices.order_by("-is_pinned", "-published_at", "-date"),
+            "selected_category": category,
+            "notice_categories": Notice.Category.choices,
+        },
+    )
+
+
+def notice_detail(request, notice_id):
+    notice = get_object_or_404(Notice, id=notice_id, is_published=True)
+    return render(request, "calc/new/notice_detail.html", {"notice": notice})
+
+
+@login_required
+def suggestion_list(request):
+    form = SuggestionForm(request.POST or None, request.FILES or None)
+    if request.method == "POST" and form.is_valid():
+        suggestion = form.save(commit=False)
+        profile = _profile_for(request.user)
+        suggestion.user = request.user
+        suggestion.source_path = request.path[:255]
+        suggestion.region = (profile.region or "")[:30]
+        suggestion.save()
+        messages.success(request, "건의가 접수되었습니다.")
+        return redirect("calc:suggestions")
+
+    suggestions = Suggestion.objects.filter(user=request.user).order_by("-date")[:20]
+    return render(
+        request,
+        "calc/new/suggestions.html",
+        {"form": form, "suggestions": suggestions},
+    )
+
+
+@login_required
+def suggestion_detail(request, suggestion_id):
+    suggestion = get_object_or_404(Suggestion, id=suggestion_id, user=request.user)
+    return render(
+        request,
+        "calc/new/suggestion_detail.html",
+        {"suggestion": suggestion},
+    )
+
+
+@login_required
+def suggestion_file(request, suggestion_id):
+    suggestion = get_object_or_404(Suggestion, id=suggestion_id)
+    if not request.user.is_staff and suggestion.user_id != request.user.id:
+        raise Http404
+    if not suggestion.file:
+        raise Http404
+    try:
+        file_handle = suggestion.file.open("rb")
+    except (FileNotFoundError, OSError):
+        raise Http404
+    extension = os.path.splitext(suggestion.file.name)[1].lower()
+    content_types = {
+        ".jpg": "image/jpeg",
+        ".jpeg": "image/jpeg",
+        ".png": "image/png",
+        ".webp": "image/webp",
+        ".pdf": "application/pdf",
+    }
+    response = FileResponse(
+        file_handle,
+        content_type=content_types.get(extension, "application/octet-stream"),
+    )
+    filename = get_valid_filename(os.path.basename(suggestion.file.name)) or "attachment"
+    response["Content-Disposition"] = f'inline; filename="{filename}"'
+    return response
+
+
+# ---------------------------------------------------------------------------
+# Staff-only dashboard and administration screens
+# ---------------------------------------------------------------------------
+
+
+def staff_required(view_func):
+    """Require authentication and reject authenticated non-staff users."""
+
+    @wraps(view_func)
+    @login_required
+    def wrapped(request, *args, **kwargs):
+        if not request.user.is_staff:
+            raise PermissionDenied
+        return view_func(request, *args, **kwargs)
+
+    return wrapped
+
+
+def _daily_trend(queryset, field_name, days=30):
+    start = timezone.localdate() - timedelta(days=days - 1)
+    date_key = f"{field_name}__date"
+    rows = (
+        queryset.filter(**{f"{field_name}__date__gte": start})
+        .values(date_key)
+        .annotate(count=Count("id"))
+    )
+    counts = {row[date_key]: row["count"] for row in rows}
+    trend = []
+    for offset in range(days):
+        current = start + timedelta(days=offset)
+        trend.append(
+            {
+                "date": current,
+                "label": current.strftime("%m.%d"),
+                "count": counts.get(current, 0),
+            }
+        )
+    maximum = max((item["count"] for item in trend), default=0)
+    for item in trend:
+        item["percent"] = round(item["count"] / maximum * 100, 1) if maximum else 0
+    return trend, maximum
+
+
+def _dated_queryset_filter(request, queryset, field_name):
+    start_value = request.GET.get("start_date", "")
+    end_value = request.GET.get("end_date", "")
+    try:
+        start_date = date.fromisoformat(start_value) if start_value else None
+    except ValueError:
+        start_date = None
+    try:
+        end_date = date.fromisoformat(end_value) if end_value else None
+    except ValueError:
+        end_date = None
+    if start_date:
+        queryset = queryset.filter(**{f"{field_name}__date__gte": start_date})
+    if end_date:
+        queryset = queryset.filter(**{f"{field_name}__date__lte": end_date})
+    return queryset
+
+
+@staff_required
+def staff_dashboard(request):
+    now = timezone.now()
+    general_users = User.objects.filter(is_staff=False)
+    recent_cutoff = now - timedelta(days=7)
+    recent_access_cutoff = now - timedelta(days=30)
+    general_profiles = Profile.objects.filter(user__is_staff=False)
+    score_records = ScoreRecord.objects.filter(user__is_staff=False)
+
+    signup_trend, signup_max = _daily_trend(general_users, "date_joined", days=30)
+    access_queryset = AccessLog.objects.filter(created_at__gte=recent_access_cutoff)
+    access_trend, access_max = _daily_trend(access_queryset, "created_at", days=30)
+
+    region_counts = {}
+    for profile in general_profiles.values("primary_region", "area"):
+        region_code = profile["primary_region"] or profile["area"]
+        if region_code:
+            region_counts[region_code] = region_counts.get(region_code, 0) + 1
+    region_distribution = [
+        {
+            "code": code,
+            "name": REGION_BY_CODE.get(code, {}).get("name", code),
+            "count": count,
+        }
+        for code, count in sorted(
+            region_counts.items(), key=lambda item: (-item[1], item[0])
+        )
+    ]
+    region_max = max((item["count"] for item in region_distribution), default=0)
+    for item in region_distribution:
+        item["percent"] = round(item["count"] / region_max * 100, 1) if region_max else 0
+
+    category_stats = []
+    for category in ScoreRecord.Category:
+        category_records = score_records.filter(category=category.value)
+        record_count = category_records.count()
+        evidence_count = category_records.filter(evidence_available=True).count()
+        category_stats.append(
+            {
+                "code": category.value,
+                "name": category.label,
+                "record_count": record_count,
+                "member_count": category_records.values("user_id").distinct().count(),
+                "evidence_count": evidence_count,
+                "evidence_percent": round(evidence_count / record_count * 100, 1)
+                if record_count
+                else 0,
+                "needs_review_count": category_records.filter(
+                    status=ScoreRecord.Status.NEEDS_REVIEW
+                ).count(),
+            }
+        )
+
+    qualifications = KoreanHistoryQualification.objects.filter(user__is_staff=False)
+    qualification_counts = {
+        "input": 0,
+        "not_input": max(general_users.count() - qualifications.filter(~Q(method="")).count(), 0),
+        "satisfied": 0,
+        "not_satisfied": 0,
+        "needs_review": 0,
+    }
+    for qualification in qualifications:
+        if qualification.method:
+            qualification_counts["input"] += 1
+        status = qualification.qualification_status
+        qualification_counts[status] += 1
+
+    popular_pages = list(
+        access_queryset.exclude(route_name="")
+        .values("route_name")
+        .annotate(count=Count("id"))
+        .order_by("-count", "route_name")[:10]
+    )
+    auth_visits = access_queryset.filter(is_authenticated=True).count()
+    guest_visits = access_queryset.filter(is_authenticated=False).count()
+    total_visits = auth_visits + guest_visits
+    visitor_ratio = {
+        "authenticated": auth_visits,
+        "guest": guest_visits,
+        "authenticated_percent": round(auth_visits / total_visits * 100, 1)
+        if total_visits
+        else 0,
+        "guest_percent": round(guest_visits / total_visits * 100, 1) if total_visits else 0,
+    }
+
+    conversion = {
+        "total_members": general_users.count(),
+        "primary_region": general_profiles.exclude(primary_region="").count(),
+        "first_record": general_users.filter(score_records__isnull=False).distinct().count(),
+        "five_records": general_users.annotate(
+            record_count=Count("score_records")
+        ).filter(record_count__gte=5).count(),
+    }
+    context = {
+        "summary": {
+            "member_count": conversion["total_members"],
+            "scored_member_count": conversion["first_record"],
+            "new_member_count": general_users.filter(date_joined__gte=recent_cutoff).count(),
+            "active_score_member_count": score_records.filter(
+                updated_at__gte=recent_cutoff
+            ).values("user_id").distinct().count(),
+            "record_count": score_records.count(),
+            "pending_suggestion_count": Suggestion.objects.filter(
+                status__in=[Suggestion.Status.RECEIVED, Suggestion.Status.REVIEWING]
+            ).count(),
+            "published_notice_count": Notice.objects.filter(is_published=True).count(),
+        },
+        "signup_trend": signup_trend,
+        "signup_max": signup_max,
+        "access_trend": access_trend,
+        "access_max": access_max,
+        "conversion": conversion,
+        "region_distribution": region_distribution,
+        "category_stats": category_stats,
+        "qualification_counts": qualification_counts,
+        "recent_suggestions": Suggestion.objects.select_related("user").order_by("-date")[:5],
+        "recent_users": general_users.order_by("-date_joined")[:5],
+        "recent_notices": Notice.objects.order_by("-date")[:5],
+        "popular_pages": popular_pages,
+        "visitor_ratio": visitor_ratio,
+        "recent_error_count": access_queryset.filter(status_code__gte=400).count(),
+    }
+    return render(request, "calc/new/staff/dashboard.html", context)
+
+
+@staff_required
+def staff_suggestions(request):
+    suggestions = Suggestion.objects.select_related("user").all()
+    category = request.GET.get("category", "")
+    status = request.GET.get("status", "")
+    query = request.GET.get("q", "").strip()
+    if category in Suggestion.Category.values:
+        suggestions = suggestions.filter(category=category)
+    if status in Suggestion.Status.values:
+        suggestions = suggestions.filter(status=status)
+    if query:
+        suggestions = suggestions.filter(
+            Q(title__icontains=query) | Q(user__username__icontains=query)
+        )
+    suggestions = _dated_queryset_filter(request, suggestions, "date").order_by("-date")[:100]
+    return render(
+        request,
+        "calc/new/staff/suggestions.html",
+        {
+            "suggestions": suggestions,
+            "selected_category": category,
+            "selected_status": status,
+            "query": query,
+            "start_date": request.GET.get("start_date", ""),
+            "end_date": request.GET.get("end_date", ""),
+            "suggestion_categories": Suggestion.Category.choices,
+            "suggestion_statuses": Suggestion.Status.choices,
+        },
+    )
+
+
+@staff_required
+def staff_suggestion_detail(request, suggestion_id):
+    suggestion = get_object_or_404(
+        Suggestion.objects.select_related("user"), id=suggestion_id
+    )
+    if request.method == "POST":
+        status = request.POST.get("status", "")
+        if status not in Suggestion.Status.values:
+            messages.error(request, "유효하지 않은 처리 상태입니다.")
+        else:
+            suggestion.status = status
+            suggestion.admin_memo = request.POST.get("admin_memo", "")[:20000]
+            suggestion.resolved_at = timezone.now() if status == Suggestion.Status.COMPLETED else None
+            suggestion.save(update_fields=["status", "admin_memo", "resolved_at", "updated_at"])
+            messages.success(request, "건의 처리 상태를 저장했습니다.")
+            return redirect("calc:staff_suggestion_detail", suggestion_id=suggestion.id)
+    return render(
+        request,
+        "calc/new/staff/suggestion_detail.html",
+        {"suggestion": suggestion, "suggestion_statuses": Suggestion.Status.choices},
+    )
+
+
+@staff_required
+def staff_notices(request):
+    notices = Notice.objects.all()
+    category = request.GET.get("category", "")
+    published = request.GET.get("published", "")
+    if category in Notice.Category.values:
+        notices = notices.filter(category=category)
+    if published in {"published", "unpublished"}:
+        notices = notices.filter(is_published=published == "published")
+    return render(
+        request,
+        "calc/new/staff/notices.html",
+        {
+            "notices": notices.order_by("-is_pinned", "-date"),
+            "selected_category": category,
+            "selected_published": published,
+            "notice_categories": Notice.Category.choices,
+        },
+    )
+
+
+@staff_required
+def staff_notice_create(request):
+    form = NoticeForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "공지를 작성했습니다.")
+        return redirect("calc:staff_notices")
+    return render(
+        request,
+        "calc/new/staff/notice_form.html",
+        {"form": form, "is_edit": False},
+    )
+
+
+@staff_required
+def staff_notice_edit(request, notice_id):
+    notice = get_object_or_404(Notice, id=notice_id)
+    form = NoticeForm(request.POST or None, instance=notice)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "공지를 수정했습니다.")
+        return redirect("calc:staff_notices")
+    return render(
+        request,
+        "calc/new/staff/notice_form.html",
+        {"form": form, "is_edit": True, "notice": notice},
+    )
+
+
+@staff_required
+@require_POST
+def staff_notice_toggle(request, notice_id):
+    notice = get_object_or_404(Notice, id=notice_id)
+    action = request.POST.get("action", "")
+    if action == "publish":
+        notice.is_published = True
+        notice.save()
+        messages.success(request, "공지를 공개했습니다.")
+    elif action == "unpublish":
+        notice.is_published = False
+        notice.save()
+        messages.success(request, "공개를 중지했습니다.")
+    elif action == "pin":
+        notice.is_pinned = True
+        notice.save(update_fields=["is_pinned", "updated_at"])
+        messages.success(request, "공지를 상단에 고정했습니다.")
+    elif action == "unpin":
+        notice.is_pinned = False
+        notice.save(update_fields=["is_pinned", "updated_at"])
+        messages.success(request, "공지 고정을 해제했습니다.")
+    else:
+        messages.error(request, "유효하지 않은 공지 작업입니다.")
+    return redirect("calc:staff_notices")
+
+
+@staff_required
+def staff_access_logs(request):
+    logs = _dated_queryset_filter(request, AccessLog.objects.all(), "created_at")
+    auth_filter = request.GET.get("auth", "")
+    status_code = request.GET.get("status_code", "")
+    if auth_filter == "authenticated":
+        logs = logs.filter(is_authenticated=True)
+    elif auth_filter == "guest":
+        logs = logs.filter(is_authenticated=False)
+    try:
+        status_value = int(status_code) if status_code else None
+    except ValueError:
+        status_value = None
+    if status_value is not None:
+        logs = logs.filter(status_code=status_value)
+
+    page_counts = list(
+        logs.exclude(route_name="")
+        .values("route_name")
+        .annotate(count=Count("id"))
+        .order_by("-count", "route_name")[:20]
+    )
+    date_key = "created_at__date"
+    daily_counts = list(
+        logs.values(date_key).annotate(count=Count("id")).order_by("-" + date_key)[:90]
+    )
+    recent_logs = logs.order_by("-created_at")[:100]
+    return render(
+        request,
+        "calc/new/staff/access_logs.html",
+        {
+            "access_logs": recent_logs,
+            "page_counts": page_counts,
+            "daily_counts": daily_counts,
+            "auth_filter": auth_filter,
+            "status_code": status_code,
+            "start_date": request.GET.get("start_date", ""),
+            "end_date": request.GET.get("end_date", ""),
+        },
+    )

@@ -1,0 +1,7 @@
+{% extends 'calc/new/base.html' %}
+{% block title %}{% if is_edit %}공지 수정{% else %}공지 작성{% endif %} · 관리자 대시보드{% endblock %}
+{% block content %}
+  <a class="back-link" href="{% url 'calc:staff_notices' %}">← 공지 관리로 돌아가기</a>
+  <header class="page-heading"><span class="eyebrow">STAFF · 콘텐츠 관리</span><h1>{% if is_edit %}공지 수정{% else %}공지 작성{% endif %}</h1><p>일반 텍스트로 작성되며 사용자 입력 HTML은 출력하지 않습니다.</p></header>
+  <section class="form-card"><form method="post">{% csrf_token %}{{ form.non_field_errors }}<div class="form-grid">{% for field in form %}<div class="form-field {% if field.name == 'content' %}full-span{% endif %} {% if field.field.widget.input_type == 'checkbox' %}checkbox-field{% endif %}">{% if field.field.widget.input_type == 'checkbox' %}{{ field }}<label for="{{ field.id_for_label }}">{{ field.label }}</label>{% else %}<label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<em>*</em>{% endif %}</label>{{ field }}{% endif %}{{ field.errors }}</div>{% endfor %}</div><div class="form-actions"><button class="button" type="submit">{% if is_edit %}수정 내용 저장{% else %}공지 작성{% endif %}</button></div></form></section>
+{% endblock %}

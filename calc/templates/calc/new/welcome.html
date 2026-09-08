@@ -26,4 +26,12 @@
       </div>
     </div>
   </section>
+  <section class="welcome-notices">
+    <div class="panel-heading"><div><span class="eyebrow">새 소식</span><h2>공지·업데이트</h2></div><a href="{% url 'calc:notices' %}">모두 보기</a></div>
+    <div class="welcome-notice-grid">
+      {% for notice in latest_notices %}
+        <a class="notice-card" href="{% url 'calc:notice_detail' notice.id %}"><span class="notice-icon">i</span><div><span class="notice-badge notice-badge-{{ notice.category }}">{{ notice.get_category_display }}</span><h2>{{ notice.title }}</h2><p>{{ notice.content|truncatechars:100 }}</p></div></a>
+      {% empty %}<div class="empty-state"><strong>등록된 공개 공지가 없습니다.</strong></div>{% endfor %}
+    </div>
+  </section>
 {% endblock %}

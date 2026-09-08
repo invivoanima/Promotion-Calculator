@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 
-from .models import KoreanHistoryQualification, Profile, ScoreRecord
+from .models import KoreanHistoryQualification, Notice, Profile, ScoreRecord, Suggestion
 
 
 class RegisterForm(forms.Form):
@@ -212,3 +212,37 @@ class KoreanHistoryForm(forms.ModelForm):
             if not cleaned.get("employment_type"):
                 self.add_error("employment_type", "근무 형태를 선택해주세요.")
         return cleaned
+
+
+class SuggestionForm(forms.ModelForm):
+    class Meta:
+        model = Suggestion
+        fields = ["category", "title", "content", "file"]
+        labels = {
+            "category": "유형",
+            "title": "제목",
+            "content": "내용",
+            "file": "첨부파일",
+        }
+        widgets = {
+            "content": forms.Textarea(attrs={"rows": 8}),
+        }
+        help_texts = {
+            "file": "JPG, JPEG, PNG, WEBP, PDF만 가능하며 최대 100MB입니다.",
+        }
+
+
+class NoticeForm(forms.ModelForm):
+    class Meta:
+        model = Notice
+        fields = ["category", "title", "content", "is_published", "is_pinned"]
+        labels = {
+            "category": "유형",
+            "title": "제목",
+            "content": "내용",
+            "is_published": "공개하기",
+            "is_pinned": "상단 고정",
+        }
+        widgets = {
+            "content": forms.Textarea(attrs={"rows": 12}),
+        }

@@ -1,0 +1,9 @@
+{% extends 'calc/new/base.html' %}
+{% block title %}건의 상세 · 관리자 대시보드{% endblock %}
+{% block content %}
+  <a class="back-link" href="{% url 'calc:staff_suggestions' %}">← 건의 목록으로 돌아가기</a>
+  <div class="staff-detail-grid">
+    <article class="panel suggestion-detail-card"><div class="notice-badge-row"><span class="notice-badge notice-badge-neutral">{{ suggestion.get_category_display }}</span><span class="suggestion-status suggestion-status-{{ suggestion.status }}">{{ suggestion.get_status_display }}</span></div><h1>{{ suggestion.title }}</h1><dl class="meta-list"><div><dt>회원</dt><dd>{{ suggestion.user.username }}</dd></div><div><dt>접수일</dt><dd>{{ suggestion.date|date:'Y.m.d H:i' }}</dd></div><div><dt>제출 당시 화면</dt><dd>{{ suggestion.source_path|default:'-' }}</dd></div><div><dt>대표 지역</dt><dd>{{ suggestion.region|default:'미선택' }}</dd></div><div><dt>완료 시각</dt><dd>{{ suggestion.resolved_at|date:'Y.m.d H:i'|default:'-' }}</dd></div></dl><div class="suggestion-content">{{ suggestion.content|linebreaksbr }}</div>{% if suggestion.file %}<p class="attachment-link"><a href="{% url 'calc:suggestion_file' suggestion.id %}">첨부파일 확인</a></p>{% endif %}</article>
+    <section class="form-card"><div class="section-heading"><div><span class="eyebrow">처리</span><h2>상태·내부 메모</h2></div></div><form method="post">{% csrf_token %}<div class="form-field"><label for="staff-status">상태</label><select id="staff-status" name="status">{% for value,label in suggestion_statuses %}<option value="{{ value }}" {% if suggestion.status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div><div class="form-field"><label for="admin-memo">관리자 내부 메모</label><textarea id="admin-memo" name="admin_memo" rows="10">{{ suggestion.admin_memo }}</textarea><small>회원에게 공개되지 않습니다.</small></div><div class="form-actions"><button class="button" type="submit">저장하기</button></div></form></section>
+  </div>
+{% endblock %}
