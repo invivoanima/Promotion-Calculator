@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#173828">
     <title>{% block title %}승진점수 계산기{% endblock %}</title>
     <link rel="icon" href="{% static 'calc/images/promotion-mark.svg' %}" type="image/svg+xml">
-    <link rel="stylesheet" href="{% static 'calc/app.css' %}?v=20260831-score-total-1">
+    <link rel="stylesheet" href="{% static 'calc/app.css' %}?v=20260910-legal-links-1">
     <script src="{% static 'calc/app.js' %}?v=20260830-local-storage-2" defer></script>
   </head>
   <body>
@@ -31,7 +31,9 @@
             <a href="{% url 'calc:account_settings' %}" {% if request.resolver_match.url_name == 'account_settings' %}class="active"{% endif %}>계정 설정</a>
           </nav>
           <div class="sidebar-quick-links">
-            {% if request.user.is_staff %}<a href="{% url 'calc:staff_dashboard' %}">관리자 대시보드</a>{% endif %}
+            {% if request.user.is_superuser %}<a href="{% url 'calc:manage_dashboard' %}">관리자 대시보드</a>{% elif perms.calc.view_accesslog and perms.calc.view_suggestion and perms.calc.view_notice %}<a href="{% url 'calc:manage_dashboard' %}">관리자 대시보드</a>{% endif %}
+            {% if perms.calc.view_operation_logs %}<a href="{% url 'calc:manage_operations' %}">운영 기록</a>{% endif %}
+            {% if perms.calc.view_user_action_logs %}<a href="{% url 'calc:manage_user_actions' %}">이용자 행동 로그</a>{% endif %}
             <a href="{% url 'calc:suggestions' %}">관리자에게 건의하기</a>
           </div>
           <div class="sidebar-user">
@@ -42,6 +44,10 @@
             {% csrf_token %}
             <button class="sidebar-logout" type="submit">로그아웃</button>
           </form>
+          <nav class="sidebar-legal-links" aria-label="법률 안내">
+            <a href="{% url 'calc:terms' %}">이용약관</a>
+            <a href="{% url 'calc:privacy' %}">개인정보처리방침</a>
+          </nav>
         </aside>
       {% endif %}
 
@@ -82,6 +88,9 @@
         <main class="page-content">
           {% block content %}{% endblock %}
         </main>
+        {% if not request.user.is_authenticated %}
+          <footer class="site-footer" aria-label="법률 안내"><a href="{% url 'calc:terms' %}">이용약관</a><a href="{% url 'calc:privacy' %}">개인정보처리방침</a></footer>
+        {% endif %}
       </div>
     </div>
   </body>

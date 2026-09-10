@@ -2,7 +2,6 @@ import json
 from datetime import date
 from decimal import Decimal
 
-from django.core import mail
 from django.contrib.auth.models import User
 from django.contrib.sessions.models import Session
 from django.test import TestCase
@@ -213,14 +212,17 @@ class FlowTests(TestCase):
         response = self.client.post(
             reverse("calc:register"),
             {
-                "email": "new@example.com",
+                "username": "new_user",
                 "display_name": "새 사용자",
                 "password1": "Strong-pass-2026",
                 "password2": "Strong-pass-2026",
+                "agree_terms": "on",
+                "agree_privacy": "on",
             },
         )
         self.assertRedirects(response, reverse("calc:region_select"))
-        user = User.objects.get(username="new@example.com")
+        user = User.objects.get(username="new_user")
+        self.assertEqual(user.email, "")
         self.assertEqual(user.profile.primary_region, "")
 
         response = self.client.post(
@@ -455,7 +457,6 @@ class FlowTests(TestCase):
             "calc:resources",
             "calc:region_select",
             "calc:account_settings",
-            "calc:password_reset",
         ]
         for route_name in route_names:
             with self.subTest(route=route_name):
@@ -465,16 +466,6 @@ class FlowTests(TestCase):
         manual_path = settings.BASE_DIR / "calc" / "static" / "calc" / "manuals" / "jeonnam-2026.pdf"
         self.assertTrue(manual_path.is_file())
         self.assertGreater(manual_path.stat().st_size, 0)
-
-    def test_password_reset_sends_email_for_existing_account(self):
-        self.client.logout()
-        response = self.client.post(
-            reverse("calc:password_reset"),
-            {"email": self.user.email},
-        )
-        self.assertRedirects(response, reverse("calc:password_reset_done"))
-        self.assertEqual(len(mail.outbox), 1)
-        self.assertIn("reset/", mail.outbox[0].body)
 
     def test_account_deletion_requires_confirmation_phrase(self):
         response = self.client.post(

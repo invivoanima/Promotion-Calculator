@@ -53,6 +53,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "calc.middleware.RequestAuditContextMiddleware",
     "calc.middleware.AccessLogMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -117,21 +118,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 LOGIN_URL = "calc:login"
 LOGIN_REDIRECT_URL = "calc:dashboard"
 LOGOUT_REDIRECT_URL = "calc:welcome"
-EMAIL_BACKEND = os.environ.get(
-    "DJANGO_EMAIL_BACKEND",
-    "django.core.mail.backends.console.EmailBackend",
-)
-EMAIL_HOST = os.environ.get("DJANGO_EMAIL_HOST", "")
-EMAIL_PORT = int(os.environ.get("DJANGO_EMAIL_PORT", "587"))
-EMAIL_HOST_USER = os.environ.get("DJANGO_EMAIL_HOST_USER", "")
-EMAIL_HOST_PASSWORD = os.environ.get("DJANGO_EMAIL_HOST_PASSWORD", "")
-EMAIL_USE_TLS = env_bool("DJANGO_EMAIL_USE_TLS", True)
-EMAIL_USE_SSL = env_bool("DJANGO_EMAIL_USE_SSL", False)
-DEFAULT_FROM_EMAIL = os.environ.get(
-    "DJANGO_DEFAULT_FROM_EMAIL",
-    "승진점수 기록장 <noreply@localhost>",
-)
-
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
 SECURE_REFERRER_POLICY = "same-origin"
@@ -152,3 +138,16 @@ CSRF_TRUSTED_ORIGINS = [
 
 if env_bool("DJANGO_USE_X_FORWARDED_PROTO", False):
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+APP_ENV = os.environ.get("PROMOCALC_ENV", "development").strip().lower()
+USER_ACTION_LOG_ENABLED = env_bool("USER_ACTION_LOG_ENABLED", False)
+USER_ACTION_LOG_DIR = os.environ.get("USER_ACTION_LOG_DIR", "")
+USER_ACTION_LOG_RETENTION_MONTHS = int(os.environ.get("USER_ACTION_LOG_RETENTION_MONTHS", "3"))
+USER_ACTION_LOG_MAX_QUERY_DAYS = 7
+USER_ACTION_LOG_PAGE_SIZE = 50
+# Keep false until the deployment proves the direct peer is the real client.
+TRUST_DIRECT_CLIENT_IP = env_bool("TRUST_DIRECT_CLIENT_IP", False)
+LEGAL_TERMS_VERSION = "2026-09-10"
+LEGAL_PRIVACY_VERSION = "2026-09-10"
+LEGAL_OPERATOR_NAME = os.environ.get("LEGAL_OPERATOR_NAME", "").strip()
+LEGAL_CONTACT = os.environ.get("LEGAL_CONTACT", "").strip()

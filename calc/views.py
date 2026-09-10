@@ -6,10 +6,13 @@ from functools import wraps
 from uuid import uuid4
 
 from django.contrib import auth, messages
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
 from django.db.models import Count, Q
+from django.core.paginator import Paginator
 from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -46,7 +49,11 @@ from .models import (
     ScoreChange,
     ScoreRecord,
     Suggestion,
+    LegalConsent,
+    OperationLog,
 )
+from .audit import audit_event
+from .audit.reader import read_events
 from .services import (
     calculate_item_score,
     calculate_item_score_from_records,
@@ -311,6 +318,7 @@ def login_view(request):
     form = LoginForm(request, request.POST or None)
     if request.method == "POST" and form.is_valid():
         auth.login(request, form.get_user())
+        audit_event(request, "auth.login", user_id=form.get_user().pk)
         profile = _profile_for(form.get_user())
         messages.success(request, "로그인했습니다.")
         if profile.region not in REGION_BY_CODE:
@@ -324,6 +332,8 @@ def login_view(request):
         ):
             return redirect(next_url)
         return redirect("calc:dashboard")
+    if request.method == "POST" and not form.is_valid():
+        audit_event(request, "auth.login", outcome="failure", user_id=None, reason_code="invalid_credentials")
     return render(request, "calc/new/login.html", {"form": form})
 
 
@@ -332,7 +342,15 @@ def register_view(request):
         return redirect("calc:welcome")
     form = RegisterForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
-        user = form.save()
+        with transaction.atomic():
+            user = form.save()
+            LegalConsent.objects.create(
+                user=user,
+                terms_version=settings.LEGAL_TERMS_VERSION,
+                privacy_version=settings.LEGAL_PRIVACY_VERSION,
+            )
+            transaction.on_commit(lambda: audit_event(request, "account.signup", user_id=user.pk,
+                                                        object_type="user", object_id=user.pk))
         auth.login(request, user)
         messages.success(request, "가입이 완료되었습니다. 먼저 내 지역을 선택해주세요.")
         return redirect("calc:region_select")
@@ -341,7 +359,10 @@ def register_view(request):
 
 @require_POST
 def logout_view(request):
+    user_id = request.user.pk if request.user.is_authenticated else None
     auth.logout(request)
+    audit_event(request, "auth.logout", user_id=user_id,
+                outcome="success" if user_id else "noop", reason_code="" if user_id else "not_authenticated")
     messages.success(request, "로그아웃했습니다.")
     return redirect("calc:welcome")
 
@@ -776,6 +797,11 @@ def score_item(request, item_code, record_id=None):
                 previous_total=before["total"],
                 new_total=after["total"],
             )
+            action_name = "score_record.update" if record_id else "score_record.create"
+            transaction.on_commit(lambda: audit_event(
+                request, action_name, object_type="score_record", object_id=record.pk,
+                metadata={"item_code": item_code},
+            ))
             messages.success(request, "기록을 저장했습니다.")
             return redirect("calc:score_item", item_code=item_code)
 
@@ -864,6 +890,10 @@ def delete_score_record(request, record_id):
         previous_total=before["total"],
         new_total=after["total"],
     )
+    transaction.on_commit(lambda: audit_event(
+        request, "score_record.delete", object_type="score_record", object_id=record_id,
+        metadata={"item_code": item_code},
+    ))
     messages.success(request, "기록을 삭제하고 점수를 다시 계산했습니다.")
     return redirect("calc:score_item", item_code=item_code)
 
@@ -981,8 +1011,12 @@ def delete_account(request):
         messages.error(request, "확인 문구가 일치하지 않아 삭제하지 않았습니다.")
         return redirect("calc:account_settings")
     user = get_object_or_404(User, id=request.user.id)
+    user_id = user.id
     auth.logout(request)
-    user.delete()
+    with transaction.atomic():
+        user.delete()
+        transaction.on_commit(lambda: audit_event(request, "account.delete", user_id=user_id,
+                                                    object_type="user", object_id=user_id))
     messages.success(request, "계정과 개인 기록을 삭제했습니다.")
     return redirect("calc:welcome")
 
@@ -1031,6 +1065,9 @@ def suggestion_list(request):
         suggestion.source_path = request.path[:255]
         suggestion.region = (profile.region or "")[:30]
         suggestion.save()
+        transaction.on_commit(lambda: audit_event(
+            request, "suggestion.create", object_type="suggestion", object_id=suggestion.pk
+        ))
         messages.success(request, "건의가 접수되었습니다.")
         return redirect("calc:suggestions")
 
@@ -1055,7 +1092,8 @@ def suggestion_detail(request, suggestion_id):
 @login_required
 def suggestion_file(request, suggestion_id):
     suggestion = get_object_or_404(Suggestion, id=suggestion_id)
-    if not request.user.is_staff and suggestion.user_id != request.user.id:
+    can_manage = request.user.has_perm("calc.view_suggestion")
+    if not can_manage and suggestion.user_id != request.user.id:
         raise Http404
     if not suggestion.file:
         raise Http404
@@ -1092,6 +1130,19 @@ def staff_required(view_func):
     @login_required
     def wrapped(request, *args, **kwargs):
         if not request.user.is_staff:
+            raise PermissionDenied
+        permission_map = {
+            "staff_dashboard": ("calc.view_accesslog", "calc.view_suggestion", "calc.view_notice"),
+            "staff_suggestions": ("calc.view_suggestion",),
+            "staff_suggestion_detail": ("calc.change_suggestion",),
+            "staff_notices": ("calc.view_notice",),
+            "staff_notice_create": ("calc.add_notice",),
+            "staff_notice_edit": ("calc.change_notice",),
+            "staff_notice_toggle": ("calc.change_notice",),
+            "staff_access_logs": ("calc.view_accesslog",),
+        }
+        required = permission_map.get(view_func.__name__, ())
+        if required and not request.user.is_superuser and not all(request.user.has_perm(p) for p in required):
             raise PermissionDenied
         return view_func(request, *args, **kwargs)
 
@@ -1307,10 +1358,17 @@ def staff_suggestion_detail(request, suggestion_id):
         if status not in Suggestion.Status.values:
             messages.error(request, "유효하지 않은 처리 상태입니다.")
         else:
+            previous_status = suggestion.status
             suggestion.status = status
             suggestion.admin_memo = request.POST.get("admin_memo", "")[:20000]
             suggestion.resolved_at = timezone.now() if status == Suggestion.Status.COMPLETED else None
             suggestion.save(update_fields=["status", "admin_memo", "resolved_at", "updated_at"])
+            OperationLog.objects.create(
+                actor_id_snapshot=str(request.user.pk), action="suggestion.status_change",
+                object_type="suggestion", object_id=str(suggestion.pk),
+                previous_status=previous_status, new_status=status,
+                request_id=request.request_id,
+            )
             messages.success(request, "건의 처리 상태를 저장했습니다.")
             return redirect("calc:staff_suggestion_detail", suggestion_id=suggestion.id)
     return render(
@@ -1345,7 +1403,11 @@ def staff_notices(request):
 def staff_notice_create(request):
     form = NoticeForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
-        form.save()
+        notice = form.save()
+        OperationLog.objects.create(
+            actor_id_snapshot=str(request.user.pk), action="notice.create",
+            object_type="notice", object_id=str(notice.pk), request_id=request.request_id,
+        )
         messages.success(request, "공지를 작성했습니다.")
         return redirect("calc:staff_notices")
     return render(
@@ -1361,6 +1423,10 @@ def staff_notice_edit(request, notice_id):
     form = NoticeForm(request.POST or None, instance=notice)
     if request.method == "POST" and form.is_valid():
         form.save()
+        OperationLog.objects.create(
+            actor_id_snapshot=str(request.user.pk), action="notice.update",
+            object_type="notice", object_id=str(notice.pk), request_id=request.request_id,
+        )
         messages.success(request, "공지를 수정했습니다.")
         return redirect("calc:staff_notices")
     return render(
@@ -1393,7 +1459,93 @@ def staff_notice_toggle(request, notice_id):
         messages.success(request, "공지 고정을 해제했습니다.")
     else:
         messages.error(request, "유효하지 않은 공지 작업입니다.")
+    if action in {"publish", "unpublish", "pin", "unpin"}:
+        OperationLog.objects.create(
+            actor_id_snapshot=str(request.user.pk), action=f"notice.{action}",
+            object_type="notice", object_id=str(notice.pk), request_id=request.request_id,
+        )
     return redirect("calc:staff_notices")
+
+
+def terms(request):
+    return render(request, "calc/new/legal/terms.html", {
+        "version": settings.LEGAL_TERMS_VERSION, "operator_name": settings.LEGAL_OPERATOR_NAME,
+        "legal_draft": not bool(settings.LEGAL_OPERATOR_NAME and settings.LEGAL_CONTACT),
+    })
+
+
+def privacy(request):
+    return render(request, "calc/new/legal/privacy.html", {
+        "version": settings.LEGAL_PRIVACY_VERSION, "operator_name": settings.LEGAL_OPERATOR_NAME,
+        "legal_contact": settings.LEGAL_CONTACT,
+        "legal_draft": not bool(settings.LEGAL_OPERATOR_NAME and settings.LEGAL_CONTACT),
+    })
+
+
+def _audit_permission_required(permission):
+    def decorator(view_func):
+        @wraps(view_func)
+        @login_required
+        def wrapped(request, *args, **kwargs):
+            if not request.user.is_active or not request.user.has_perm(permission):
+                raise PermissionDenied
+            return view_func(request, *args, **kwargs)
+        return wrapped
+    return decorator
+
+
+@_audit_permission_required("calc.view_user_action_logs")
+def manage_user_actions(request):
+    now = timezone.now()
+    start = now - timedelta(hours=24)
+    end = now
+    error = ""
+    try:
+        if request.GET.get("start"):
+            start = timezone.datetime.fromisoformat(request.GET["start"])
+            if timezone.is_naive(start):
+                start = timezone.make_aware(start)
+        if request.GET.get("end"):
+            end = timezone.datetime.fromisoformat(request.GET["end"])
+            if timezone.is_naive(end):
+                end = timezone.make_aware(end)
+        if end < start or end - start > timedelta(days=settings.USER_ACTION_LOG_MAX_QUERY_DAYS):
+            raise ValueError
+    except ValueError:
+        start, end = now - timedelta(hours=24), now
+        error = "조회 기간은 최대 7일이며 종료 시각이 시작 시각보다 늦어야 합니다."
+    events, damaged = read_events(start, end)
+    filters = {key: request.GET.get(key, "").strip() for key in
+               ("user_id", "action", "object_type", "object_id", "outcome", "request_id")}
+    for key, value in filters.items():
+        if value:
+            events = [event for event in events if str(event.get(key, "")) == value]
+    can_network = request.user.has_perm("calc.view_user_action_network")
+    for event in events:
+        ip = event.get("client_ip")
+        if not can_network:
+            event["client_ip"] = (ip.rsplit(".", 1)[0] + ".*" if ip and "." in ip else "마스킹") if ip else "-"
+            event["cf_ray"] = None
+    paginator = Paginator(events, settings.USER_ACTION_LOG_PAGE_SIZE)
+    page = paginator.get_page(request.GET.get("page"))
+    page_query = request.GET.copy()
+    page_query.pop("page", None)
+    response = render(request, "calc/new/staff/user_actions.html", {
+        "page": page, "start": timezone.localtime(start), "end": timezone.localtime(end),
+        "filters": filters, "damaged": damaged, "error": error,
+        "enabled": settings.USER_ACTION_LOG_ENABLED, "can_network": can_network,
+        "page_query": page_query.urlencode(),
+    })
+    response["Cache-Control"] = "no-store"
+    return response
+
+
+@_audit_permission_required("calc.view_operation_logs")
+def manage_operations(request):
+    page = Paginator(OperationLog.objects.all(), 50).get_page(request.GET.get("page"))
+    response = render(request, "calc/new/staff/operation_logs.html", {"page": page})
+    response["Cache-Control"] = "no-store"
+    return response
 
 
 @staff_required

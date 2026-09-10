@@ -9,3 +9,4 @@ staticfiles/
 *.sqlite3-journal
 *.sqlite3-shm
 *.sqlite3-wal
+.runtime/

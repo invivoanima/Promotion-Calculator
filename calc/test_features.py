@@ -1,7 +1,7 @@
 import os
 import tempfile
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Permission, User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
 from django.urls import reverse
@@ -28,6 +28,9 @@ class StaffAndPublicFeatureTests(TestCase):
             is_staff=True,
         )
         Profile.objects.create(user=self.staff, primary_region="jeonnam", area="jeonnam")
+        self.staff.user_permissions.add(*Permission.objects.filter(
+            codename__in=["view_accesslog", "view_suggestion", "change_suggestion", "view_notice", "add_notice", "change_notice"]
+        ))
 
     def test_staff_permission_and_sidebar_link(self):
         self.assertEqual(self.client.get(reverse("calc:staff_dashboard")).status_code, 302)

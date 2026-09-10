@@ -1,3 +1,27 @@
+from uuid import uuid4
+
+from django.conf import settings
+
+
+class RequestAuditContextMiddleware:
+    """Create a server-owned correlation id and conservative network context."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        request.request_id = uuid4()
+        request.client_ip = None
+        request.ip_source = "unknown"
+        request.cf_ray = None
+        if getattr(settings, "TRUST_DIRECT_CLIENT_IP", False):
+            request.client_ip = request.META.get("REMOTE_ADDR")
+            request.ip_source = "direct"
+        response = self.get_response(request)
+        response["X-Request-ID"] = str(request.request_id)
+        return response
+
+
 class AccessLogMiddleware:
     """Record privacy-minimized page views after a response is rendered."""
 

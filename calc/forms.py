@@ -9,16 +9,29 @@ from .models import KoreanHistoryQualification, Notice, Profile, ScoreRecord, Su
 
 
 class RegisterForm(forms.Form):
-    email = forms.EmailField(label="이메일")
+    username = forms.RegexField(
+        label="아이디",
+        regex=r"^[A-Za-z0-9_]+$",
+        min_length=4,
+        max_length=20,
+        error_messages={
+            "invalid": "아이디는 영문, 숫자, 밑줄(_)만 사용할 수 있습니다.",
+            "min_length": "아이디는 4자 이상 입력해주세요.",
+            "max_length": "아이디는 20자 이하로 입력해주세요.",
+        },
+        help_text="영문, 숫자, 밑줄(_)을 사용해 4~20자로 입력해주세요.",
+    )
     display_name = forms.CharField(label="표시 이름", max_length=40)
     password1 = forms.CharField(label="비밀번호", widget=forms.PasswordInput)
     password2 = forms.CharField(label="비밀번호 확인", widget=forms.PasswordInput)
+    agree_terms = forms.BooleanField(label="이용약관에 동의합니다")
+    agree_privacy = forms.BooleanField(label="개인정보 수집 및 이용에 동의합니다")
 
-    def clean_email(self):
-        email = self.cleaned_data["email"].strip().lower()
-        if User.objects.filter(username__iexact=email).exists():
-            raise forms.ValidationError("이미 가입된 이메일입니다.")
-        return email
+    def clean_username(self):
+        username = self.cleaned_data["username"].strip().lower()
+        if User.objects.filter(username__iexact=username).exists():
+            raise forms.ValidationError("이미 사용 중인 아이디입니다.")
+        return username
 
     def clean(self):
         cleaned = super().clean()
@@ -31,10 +44,9 @@ class RegisterForm(forms.Form):
         return cleaned
 
     def save(self):
-        email = self.cleaned_data["email"]
+        username = self.cleaned_data["username"]
         user = User.objects.create_user(
-            username=email,
-            email=email,
+            username=username,
             password=self.cleaned_data["password1"],
         )
         Profile.objects.create(
@@ -45,7 +57,7 @@ class RegisterForm(forms.Form):
 
 
 class LoginForm(forms.Form):
-    email = forms.CharField(label="이메일 또는 기존 아이디")
+    username = forms.CharField(label="아이디")
     password = forms.CharField(label="비밀번호", widget=forms.PasswordInput)
 
     def __init__(self, request=None, *args, **kwargs):
@@ -55,14 +67,14 @@ class LoginForm(forms.Form):
 
     def clean(self):
         cleaned = super().clean()
-        identifier = cleaned.get("email", "").strip()
+        identifier = cleaned.get("username", "").strip()
         password = cleaned.get("password")
         if identifier and password:
-            matched = User.objects.filter(email__iexact=identifier).first()
-            username = matched.username if matched else identifier.lower()
+            matched = User.objects.filter(username__iexact=identifier).first()
+            username = matched.username if matched else identifier
             self.user_cache = authenticate(self.request, username=username, password=password)
             if self.user_cache is None:
-                raise forms.ValidationError("이메일 또는 비밀번호를 확인해주세요.")
+                raise forms.ValidationError("아이디 또는 비밀번호를 확인해주세요.")
         return cleaned
 
     def get_user(self):

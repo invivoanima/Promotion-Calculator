@@ -6,7 +6,7 @@
 
 ## 현재 구현 범위
 
-- 이메일 기반 회원가입·로그인과 개인 기록 저장
+- 아이디 기반 회원가입·로그인과 개인 기록 저장
 - 비로그인 사용자의 브라우저 localStorage 기반 점수 계산(서버·계정 기록에는 저장하지 않음)
 - 첫 로그인 시 내 지역 선택, 계정별 대표 지역 1개 유지
 - 전라남도 2026년 기준 경력평정, 근무성적평정, 연수성적평정, 공통가산점, 선택가산점
@@ -53,13 +53,33 @@ DJANGO_ALLOWED_HOSTS=example.com,www.example.com
 DJANGO_CSRF_TRUSTED_ORIGINS=https://example.com,https://www.example.com
 ```
 
-전체 설정 예시는 [`.env.example`](.env.example)에 있습니다. 이 프로젝트가 `.env` 파일을 자동으로 읽지는 않으므로 배포 서비스의 환경변수 설정 화면이나 운영체제 환경변수로 값을 주입하세요.
+전체 설정 예시는 [`.env.example`](.env.example)에 있습니다. 프로젝트 루트의 `.env`도 읽지만 Git에 포함되지 않으며, 운영에서는 배포 서비스나 운영체제의 보호된 환경변수 저장소를 사용하세요.
 
-기본 비밀번호 재설정 메일은 개발용 콘솔 출력 방식입니다. 운영 환경에서는 `DJANGO_EMAIL_BACKEND`와 SMTP 관련 환경변수를 설정해야 합니다. 정적 파일 수집과 HTTPS 설정도 배포 환경에 맞게 추가하세요.
+정적 파일 수집과 HTTPS 설정도 배포 환경에 맞게 추가하세요.
 
 HSTS 관련 옵션은 HTTPS 구성이 완전히 확인된 뒤에만 활성화하세요. 특히 `DJANGO_SECURE_HSTS_PRELOAD=1`은 브라우저 사전등록 정책을 이해하고 되돌리기 어려운 영향을 검토한 경우에만 사용해야 합니다.
 
 개인 기록은 기본적으로 프로젝트 루트의 `db.sqlite3`에 저장되지만 Git에는 포함되지 않습니다. 운영에서는 `DJANGO_DB_PATH`로 소스 코드 밖의 영구 저장 경로를 지정하고, 데이터베이스 백업과 접근 권한 정책을 별도로 마련하는 것을 권장합니다.
+
+## 약관·관리자·감사로그
+
+운영 전 `LEGAL_OPERATOR_NAME`과 `LEGAL_CONTACT`를 설정하고 이용약관·개인정보처리방침의 실제 운영 사실을 검토하세요. 값이 없으면 법률 화면은 개발용 초안 경고를 표시하며 production 배포 점검이 실패합니다. 신규 가입은 약관·개인정보 동의 버전과 시각을 별도 기록합니다.
+
+마이그레이션 뒤 관리자 역할은 먼저 미리보고 적용합니다.
+
+```powershell
+python manage.py setup_governance_roles
+python manage.py setup_governance_roles --apply
+```
+
+이용자 행동 로그는 기본적으로 꺼져 있습니다. 실제 저장 경로의 접근권한, 프록시 신뢰, 달력 기준 3개월 보존 근거와 정기 실행을 확인한 뒤 `USER_ACTION_LOG_ENABLED=1`로 활성화하세요. 파기 명령도 기본은 미리보기입니다.
+
+```powershell
+python manage.py prune_user_action_logs
+python manage.py prune_user_action_logs --apply
+```
+
+운영 기록과 이용자 행동 로그는 각각 `/manage/operations/`, `/manage/user-actions/`에서 별도 권한으로 조회합니다. 앱 설정과 서버 적용의 상세 점검표는 `docs/governance/SERVER-REVIEW.md`를 따릅니다.
 
 ## 규정 자료
 

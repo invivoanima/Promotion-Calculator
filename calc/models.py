@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.db.models.signals import post_delete, post_save, pre_save
+from django.dispatch import receiver
 
 from .catalog import REGIONS
 
@@ -191,6 +193,66 @@ class AccessLog(models.Model):
             models.Index(fields=["route_name", "created_at"]),
             models.Index(fields=["status_code", "created_at"]),
         ]
+
+
+class LegalConsent(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="legal_consents")
+    terms_version = models.CharField(max_length=30)
+    privacy_version = models.CharField(max_length=30)
+    agreed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-agreed_at"]
+
+
+class OperationLog(models.Model):
+    actor_id_snapshot = models.CharField(max_length=128)
+    action = models.CharField(max_length=80)
+    object_type = models.CharField(max_length=64)
+    object_id = models.CharField(max_length=128, blank=True)
+    previous_status = models.CharField(max_length=40, blank=True)
+    new_status = models.CharField(max_length=40, blank=True)
+    request_id = models.UUIDField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        permissions = [("view_operation_logs", "Can view operation logs")]
+
+
+class AuditPermission(models.Model):
+    """Permission anchor; user-action records live in JSONL, not the database."""
+
+    class Meta:
+        managed = False
+        default_permissions = ()
+        permissions = [
+            ("view_user_action_logs", "Can view user action logs"),
+            ("view_user_action_network", "Can view user action network fields"),
+        ]
+
+
+@receiver(pre_save, sender=Suggestion)
+def remember_replaced_suggestion_file(sender, instance, **kwargs):
+    instance._replaced_file_name = ""
+    if instance.pk:
+        old_name = sender.objects.filter(pk=instance.pk).values_list("file", flat=True).first() or ""
+        new_name = instance.file.name if instance.file else ""
+        if old_name and old_name != new_name:
+            instance._replaced_file_name = old_name
+
+
+@receiver(post_delete, sender=Suggestion)
+def delete_suggestion_file(sender, instance, **kwargs):
+    if instance.file:
+        instance.file.storage.delete(instance.file.name)
+
+
+@receiver(post_save, sender=Suggestion)
+def delete_replaced_suggestion_file(sender, instance, **kwargs):
+    old_name = getattr(instance, "_replaced_file_name", "")
+    if old_name:
+        instance.file.storage.delete(old_name)
 
 
 class Common_Career(models.Model) :

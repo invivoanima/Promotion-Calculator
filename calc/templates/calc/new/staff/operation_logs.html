@@ -1,0 +1,6 @@
+{% extends 'calc/new/base.html' %}
+{% block title %}운영 기록 · 관리자{% endblock %}
+{% block content %}
+<header class="page-heading"><span class="eyebrow">감사 · 읽기 전용</span><h1>운영 기록</h1><p>공지와 문의 등 관리자의 변경 이력입니다.</p></header>
+<section class="panel staff-table-section"><div class="table-scroll"><table class="data-table"><thead><tr><th>시각</th><th>관리자 ID</th><th>행동</th><th>대상</th><th>이전 상태</th><th>새 상태</th><th>요청 ID</th></tr></thead><tbody>{% for item in page %}<tr><td>{{ item.created_at|date:'Y.m.d H:i:s' }}</td><td>{{ item.actor_id_snapshot }}</td><td>{{ item.action }}</td><td>{{ item.object_type }} {{ item.object_id }}</td><td>{{ item.previous_status|default:'-' }}</td><td>{{ item.new_status|default:'-' }}</td><td><code>{{ item.request_id }}</code></td></tr>{% empty %}<tr><td colspan="7">운영 기록이 없습니다.</td></tr>{% endfor %}</tbody></table></div></section>
+{% endblock %}

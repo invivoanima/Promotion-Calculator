@@ -10,7 +10,7 @@
         {% csrf_token %}
         {{ form.non_field_errors }}
         {% for field in form %}
-          <div class="form-field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.help_text %}<small>{{ field.help_text|safe }}</small>{% endif %}{{ field.errors }}</div>
+          <div class="form-field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.name == 'agree_terms' %}<small><a href="{% url 'calc:terms' %}" target="_blank" rel="noopener">이용약관 보기</a></small>{% elif field.name == 'agree_privacy' %}<small><a href="{% url 'calc:privacy' %}" target="_blank" rel="noopener">개인정보처리방침 보기</a></small>{% elif field.help_text %}<small>{{ field.help_text|safe }}</small>{% endif %}{{ field.errors }}</div>
         {% endfor %}
         <button class="button full" type="submit">가입하고 지역 선택하기</button>
       </form>

@@ -1,0 +1,14 @@
+{% extends 'calc/new/base.html' %}
+{% block title %}이용자 행동 로그 · 관리자{% endblock %}
+{% block content %}
+<header class="page-heading"><span class="eyebrow">감사 · 읽기 전용</span><h1>이용자 행동 로그</h1><p>{{ start|date:'Y.m.d H:i' }} ~ {{ end|date:'Y.m.d H:i' }} KST · 기본 최근 24시간, 최대 7일, 50건</p></header>
+{% if error %}<div class="message error">{{ error }}</div>{% endif %}
+<section class="panel"><p><strong>기록 상태:</strong> {% if enabled %}활성{% else %}비활성{% endif %} · 손상된 줄 {{ damaged }}건</p><p>데이터가 없으면 행동이 없었거나 해당 기간에 수집되지 않았을 수 있습니다.</p></section>
+<form class="filter-bar staff-filter-bar" method="get">
+  <label>시작<input type="datetime-local" name="start" value="{{ start|date:'Y-m-d\TH:i' }}"></label><label>종료<input type="datetime-local" name="end" value="{{ end|date:'Y-m-d\TH:i' }}"></label>
+  <label>회원 ID<input name="user_id" value="{{ filters.user_id }}"></label><label>행동<input name="action" value="{{ filters.action }}"></label><label>대상 종류<input name="object_type" value="{{ filters.object_type }}"></label><label>대상 ID<input name="object_id" value="{{ filters.object_id }}"></label><label>결과<input name="outcome" value="{{ filters.outcome }}"></label><label>요청 ID<input name="request_id" value="{{ filters.request_id }}"></label><button class="button secondary small">조회</button><a href="{% url 'calc:manage_user_actions' %}">초기화</a>
+</form>
+<section class="panel staff-table-section"><div class="table-scroll"><table class="data-table"><thead><tr><th>시각(KST)</th><th>회원</th><th>행동</th><th>대상</th><th>결과</th><th>IP</th><th>요청 ID</th></tr></thead><tbody>
+{% for event in page %}<tr><td>{{ event.timestamp }}</td><td>{{ event.user_id|default:'-' }}</td><td>{{ event.action }}</td><td>{{ event.object_type|default:'-' }} {{ event.object_id|default:'' }}</td><td>{{ event.outcome }}</td><td>{{ event.client_ip }}</td><td><code>{{ event.request_id }}</code></td></tr>{% empty %}<tr><td colspan="7">조회 가능한 기록이 없습니다.</td></tr>{% endfor %}
+</tbody></table></div>{% if page.has_previous %}<a href="?{% if page_query %}{{ page_query }}&amp;{% endif %}page={{ page.previous_page_number }}">이전</a>{% endif %} <span>{{ page.number }} / {{ page.paginator.num_pages }}</span> {% if page.has_next %}<a href="?{% if page_query %}{{ page_query }}&amp;{% endif %}page={{ page.next_page_number }}">다음</a>{% endif %}</section>
+{% endblock %}
