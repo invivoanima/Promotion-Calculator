@@ -29,7 +29,7 @@
       <div class="panel-heading"><div><span class="eyebrow">최근 기록</span><h2>마지막으로 수정한 항목</h2></div><a href="{% url 'calc:records' %}">모두 보기</a></div>
       <div class="recent-list">
         {% for record in recent_records %}
-          <a href="{% url 'calc:edit_score_record' record.item_code record.id %}"><span><strong>{{ record.item_code|item_name }}</strong><small>{{ record.label|default:record.institution|default:'입력 기록' }}</small></span><b>{{ record.calculated_score|floatformat:3 }}</b></a>
+          <a href="{% url 'calc:edit_score_record' record.item_code record.id %}"><span><strong>{{ record.item_code|item_name:primary_region.code }}</strong><small>{{ record.label|default:record.institution|default:'입력 기록' }}</small></span><b>{{ record.calculated_score|floatformat:3 }}</b></a>
         {% empty %}<div class="empty-compact">아직 저장한 기록이 없습니다.</div>{% endfor %}
       </div>
     </section>

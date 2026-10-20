@@ -1,6 +1,7 @@
 from django import template
 
-from calc.catalog import ITEM_BY_CODE, REGION_BY_CODE
+from calc.regions import REGION_BY_CODE
+from calc.scoring.registry import RulesUnavailable, get_ruleset
 
 
 register = template.Library()
@@ -14,8 +15,11 @@ def dict_get(mapping, key):
 
 
 @register.filter
-def item_name(item_code):
-    item = ITEM_BY_CODE.get(item_code)
+def item_name(item_code, region_code=None):
+    try:
+        item = get_ruleset(region_code).ITEM_BY_CODE.get(item_code)
+    except RulesUnavailable:
+        item = None
     return item["name"] if item else item_code
 
 
@@ -29,7 +33,16 @@ def region_name(region_code):
 def input_summary(record):
     data = record.input_data or {}
     parts = []
-    item = ITEM_BY_CODE.get(record.item_code, {})
+    region_code = getattr(record, "rule_region_code", None)
+    if not region_code and record.portfolio_id:
+        region_code = record.portfolio.region
+    if not region_code and record.user_id:
+        profile = getattr(record.user, "profile", None)
+        region_code = profile.region if profile else None
+    try:
+        item = get_ruleset(region_code).ITEM_BY_CODE.get(record.item_code, {})
+    except RulesUnavailable:
+        item = {}
     variant = data.get("variant")
     choices = item.get("fields", {}).get("variant", {}).get("choices", [])
     choice_map = dict(choices)

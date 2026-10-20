@@ -1,0 +1,306 @@
+[
+  {
+    "case": "C01",
+    "manual_printed_pages": "19",
+    "description": "기본 가경력 정확히 15년",
+    "actual": "63.990000",
+    "expected": "64",
+    "matches": false
+  },
+  {
+    "case": "C02",
+    "manual_printed_pages": "19",
+    "description": "초과 나경력 정확히 5년",
+    "actual": "4.998000",
+    "expected": "5",
+    "matches": false
+  },
+  {
+    "case": "C03",
+    "manual_printed_pages": "32",
+    "description": "같은 학년도 연구대회 1.5점과 0.75점",
+    "actual": "2.250000",
+    "expected": "1.5",
+    "matches": false
+  },
+  {
+    "case": "C04",
+    "manual_printed_pages": "33-34",
+    "description": "2005년 1학기 이전 입학 특례에 해당하지 않는 서로 다른 석사 2개",
+    "actual": "2.500000",
+    "expected": "1.5",
+    "matches": false
+  },
+  {
+    "case": "C05",
+    "manual_printed_pages": "11,40",
+    "description": "기간이 겹치지 않는 교육부+교육감 연구학교 합산 상한",
+    "actual": "2.250000",
+    "expected": "1.25",
+    "matches": false
+  },
+  {
+    "case": "C06",
+    "manual_printed_pages": "39",
+    "description": "2013년 3월 이전 농어촌 1년, 현재 3급지 선택",
+    "actual": "0.072000",
+    "expected": "0.1428",
+    "matches": false
+  },
+  {
+    "case": "C07",
+    "manual_printed_pages": "41",
+    "description": "2010년 청소년단체 담당 1년",
+    "actual": "0.063600",
+    "expected": "0.126",
+    "matches": false
+  },
+  {
+    "case": "C08",
+    "manual_printed_pages": "42",
+    "description": "학교교육력 증진 유공 6년",
+    "actual": "0.216000",
+    "expected": "0.2",
+    "matches": false
+  },
+  {
+    "case": "C09",
+    "manual_printed_pages": "42",
+    "description": "적격 보직교사 추가경력 90개월의 머목 상한",
+    "actual": "0.270000",
+    "expected": "0.25",
+    "matches": false
+  },
+  {
+    "case": "C10",
+    "manual_printed_pages": "43",
+    "description": "다른 분야 국가기술자격 0.3점+0.2점의 거목 합산 상한",
+    "actual": "0.500000",
+    "expected": "0.3",
+    "matches": false
+  },
+  {
+    "case": "C11",
+    "manual_printed_pages": "12",
+    "description": "학급경영 우수교사 실적을 두 번 등록",
+    "actual": "0.500000",
+    "expected": "0.25",
+    "matches": false
+  },
+  {
+    "case": "C12",
+    "manual_printed_pages": "41",
+    "description": "타목에서 서로 다른 연도 금상 2회+은상 1회",
+    "actual": "0.687500",
+    "expected": "0.5",
+    "matches": false
+  },
+  {
+    "case": "C13",
+    "manual_printed_pages": "41",
+    "description": "같은 연도 전국대회 금상 2회",
+    "actual": "0.500000",
+    "expected": "0.25",
+    "matches": false
+  },
+  {
+    "case": "C14",
+    "manual_printed_pages": "41-42",
+    "description": "서로 겹치지 않는 하목의 학교+학급+통합학급 경력",
+    "actual": "0.506100",
+    "expected": "0.5",
+    "matches": false
+  },
+  {
+    "case": "C15",
+    "manual_printed_pages": "41",
+    "description": "별개 목인 다목 사이버 5년+라목 영재 5년, 비중복",
+    "actual": "0.500000",
+    "expected": "1",
+    "matches": false
+  },
+  {
+    "case": "C16",
+    "manual_printed_pages": "41",
+    "description": "인정기간 종료 후 2025년 학급경영 우수교사",
+    "actual": "0.250000",
+    "expected": "0",
+    "matches": false
+  },
+  {
+    "case": "C17",
+    "manual_printed_pages": "45",
+    "description": "전남 거주 인정 시작 전인 2011년 전가족 거주",
+    "actual": "0.030000",
+    "expected": "0",
+    "matches": false
+  },
+  {
+    "case": "C18",
+    "manual_printed_pages": "44",
+    "description": "일반 교사의 같은 학년도 좋은수업 3회, 간격 1개월 초과",
+    "actual": "0.240000",
+    "expected": "0.16",
+    "matches": false
+  },
+  {
+    "case": "C19",
+    "manual_printed_pages": "44",
+    "description": "1개월 이내 좋은수업 2회",
+    "actual": "0.160000",
+    "expected": "0.08",
+    "matches": false
+  },
+  {
+    "case": "C20",
+    "manual_printed_pages": "45",
+    "description": "좋은수업 1.5점 도달 전 추가실적만 2회",
+    "actual": "0.040000",
+    "expected": "0",
+    "matches": false
+  },
+  {
+    "case": "C21",
+    "manual_printed_pages": "39",
+    "description": "농어촌 기본점 없이 추가경력만 1년",
+    "actual": "0.024000",
+    "expected": "0",
+    "matches": false
+  },
+  {
+    "case": "C22",
+    "manual_printed_pages": "39",
+    "description": "보직교사 기본점 없이 보완경력만 1년",
+    "actual": "0.036000",
+    "expected": "0",
+    "matches": false
+  },
+  {
+    "case": "C23",
+    "manual_printed_pages": "38-39",
+    "description": "동일 기간 벽지 라급지와 농어촌 1급지 동시 등록",
+    "actual": "0.648000",
+    "expected": "0.504",
+    "matches": false
+  },
+  {
+    "case": "C24",
+    "manual_printed_pages": "41",
+    "description": "2009년 이전 영재 전담 취득점의 종전점수 상한",
+    "actual": "0.378000",
+    "expected": "0.25",
+    "matches": false
+  },
+  {
+    "case": "C25",
+    "manual_printed_pages": "26",
+    "description": "유리한 3년: 단순 최고 3개와 최대 가중합의 차이",
+    "actual": "99.660000",
+    "expected": "99.66670000",
+    "matches": false
+  },
+  {
+    "case": "C26",
+    "manual_printed_pages": "8,28,36,68",
+    "description": "서로 다른 적격 직무연수 1건: 성적 1건+별도 이수실적 최대 2건",
+    "actual": "11.700000",
+    "expected": "5.7",
+    "matches": false
+  },
+  {
+    "case": "C27",
+    "manual_printed_pages": "8,28,36,68",
+    "description": "서로 다른 적격 직무연수 2건: 성적 1건+별도 이수실적 최대 2건",
+    "actual": "17.700000",
+    "expected": "11.7",
+    "matches": false
+  },
+  {
+    "case": "C28",
+    "manual_printed_pages": "8,28,36,68",
+    "description": "서로 다른 적격 직무연수 3건: 성적 1건+별도 이수실적 최대 2건",
+    "actual": "17.700000",
+    "expected": "17.7",
+    "matches": true
+  },
+  {
+    "case": "SCOPE-PROMOTION",
+    "manual_printed_pages": "27,68,70",
+    "description": "교감 승진 대상자의 교감 자격연수 90점(현 앱은 1정·자격연수 대상 모드만 제공)",
+    "actual": "8.750000",
+    "expected": "8.5",
+    "matches": false
+  },
+  {
+    "case": "C29",
+    "manual_printed_pages": "28",
+    "description": "자격연수 원점수 70점: 60점 이상 80점 미만의 80점 간주 미반영",
+    "actual": "8.250000",
+    "expected": "8.5",
+    "matches": false
+  },
+  {
+    "case": "C30",
+    "manual_printed_pages": "28",
+    "description": "자격연수 원점수 50점: 60점 미만 비평정 미반영",
+    "actual": "7.750000",
+    "expected": "0",
+    "matches": false
+  },
+  {
+    "case": "OK-JOB-95",
+    "manual_printed_pages": "28",
+    "description": "직무연수 환산 경계값 95",
+    "actual": "95",
+    "expected": "95",
+    "matches": true
+  },
+  {
+    "case": "OK-JOB-95.01",
+    "manual_printed_pages": "28",
+    "description": "직무연수 환산 경계값 95.01",
+    "actual": "100",
+    "expected": "100",
+    "matches": true
+  },
+  {
+    "case": "OK-JOB-90",
+    "manual_printed_pages": "28",
+    "description": "직무연수 환산 경계값 90",
+    "actual": "90",
+    "expected": "90",
+    "matches": true
+  },
+  {
+    "case": "OK-JOB-85",
+    "manual_printed_pages": "28",
+    "description": "직무연수 환산 경계값 85",
+    "actual": "85",
+    "expected": "85",
+    "matches": true
+  },
+  {
+    "case": "OK-QUAL",
+    "manual_printed_pages": "27",
+    "description": "교감 자격연수 대상 1정 성적 90점",
+    "actual": "8.750000",
+    "expected": "8.75",
+    "matches": true
+  },
+  {
+    "case": "OK-CREDIT",
+    "manual_printed_pages": "35",
+    "description": "같은 연도 2학점 3건의 연도별 상한",
+    "actual": "0.080000",
+    "expected": "0.08",
+    "matches": true
+  },
+  {
+    "case": "INPUT-NEGATIVE",
+    "manual_printed_pages": "해당 없음",
+    "description": "서버 입력검증: 음수 횟수 허용 여부(1=허용)",
+    "actual": "1",
+    "expected": "0",
+    "matches": false
+  }
+]

@@ -5,9 +5,10 @@
   <header class="page-heading"><span class="eyebrow">{{ region.name }} · 초등교사</span><h1>평정업무 자료</h1><p>현재 계산기에 적용한 규정 기준과 주요 변경사항을 확인하세요.</p></header>
   {% if region_implemented %}<section class="rule-summary-card">
     <div><span class="eyebrow">현재 적용 기준</span><h2>{{ rule_year }}년 {{ region.name }} 교육공무원 승진후보자 평정업무</h2><dl><div><dt>평정 기준일</dt><dd>{{ rule_date }}</dd></div><div><dt>순위명부 기준일</dt><dd>{{ roster_date }}</dd></div><div><dt>대상</dt><dd>초등교사 · 교감 자격연수 및 승진 준비</dd></div></dl></div>
-    <a class="button" href="{% static 'calc/manuals/jeonnam-2026.pdf' %}" target="_blank" rel="noopener">공식 매뉴얼 보기</a>
+    {% if manual_static_path %}<a class="button" href="{% static manual_static_path %}" target="_blank" rel="noopener">공식 매뉴얼 보기</a>{% endif %}
   </section>
-  <section class="change-cards"><article><span>삭제</span><h2>선택가산점 5번</h2><p>2018.9.1. 삭제되어 6번 기타 교육활동 항목으로 이동한 흔적만 표시합니다.</p></article><article><span>초등 제외</span><h2>선택가산점 9·10번</h2><p>학급 담임 경력과 도서·벽지 대체 가산점은 초등 계산 대상이 아닙니다.</p></article><article><span>자격요건</span><h2>한국사 능력 검정·연수</h2><p>총점이 아닌 교감 자격연수 응시요건으로 별도 관리합니다.</p></article></section>
-  {% else %}<section class="notice-card muted-card"><span class="notice-icon">i</span><div><h2>{{ region.name }} 지역 자료 준비 중</h2><p>전국 공통 점수 항목은 계산할 수 있습니다. 이 지역의 선택가산점 기준과 공식 매뉴얼은 준비가 끝난 뒤 제공됩니다.</p></div></section>{% endif %}
+  {% if source_links %}<section class="rule-notes"><ul>{% for source in source_links %}<li><a href="{{ source.url }}" target="_blank" rel="noopener">{{ source.title }}</a></li>{% endfor %}</ul></section>{% endif %}
+  <section class="change-cards">{% for note in resource_notes %}<article><span>{{ note.badge }}</span><h2>{{ note.title }}</h2><p>{{ note.description }}</p></article>{% endfor %}</section>
+  {% else %}<section class="notice-card muted-card"><span class="notice-icon">i</span><div><h2>{{ region.name }} 지역 자료 준비 중</h2><p>경력·근무성적·연수·공통가산점·선택가산점을 포함한 지역별 계산 기준과 공식 매뉴얼을 준비 중입니다.</p></div></section>{% endif %}
   <section class="disclaimer-card"><strong>이 계산기는 참고용입니다.</strong><p>대략적인 점수 확인과 개인 기록 관리를 위한 도구이며 실제 승진후보자 평정 결과와 다를 수 있습니다. 공식 제출 전에는 교육청 자료와 담당 기관의 확인을 거쳐야 합니다.</p></section>
 {% endblock %}

@@ -21,15 +21,11 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.text import get_valid_filename
 from django.views.decorators.http import require_POST
 
-from .catalog import (
-    CATEGORIES,
-    CATEGORY_BY_CODE,
-    CURRENT_RULE_YEAR,
-    IMPLEMENTED_REGION_CODES,
-    ITEM_BY_CODE,
+from .regions import (
     REGIONS,
     REGION_BY_CODE,
 )
+from .scoring.registry import get_ruleset, rules_available
 from .forms import (
     KoreanHistoryForm,
     LoginForm,
@@ -58,18 +54,13 @@ from .services import (
     calculate_item_score,
     calculate_item_score_from_records,
     calculate_record_score,
-    common_training_credit_contributions,
+    mark_selected_records,
     records_for_item,
     score_summary,
     score_summary_from_records,
-    selected_training_job_records,
-    selected_work_performance_records,
-    training_job_record_score,
 )
 
 
-CURRENT_RULE_DATE = "2026. 2. 28."
-CURRENT_ROSTER_DATE = "2026. 3. 31."
 GUEST_SCORE_LOCAL_KEY = "promotionCalculator.guestRecords.v1"
 MAX_GUEST_PAYLOAD_SIZE = 500_000
 
@@ -97,21 +88,13 @@ def _viewed_region(request, profile):
 
 
 def _region_bonus_disabled(region_code):
-    return region_code not in IMPLEMENTED_REGION_CODES
+    return not rules_available(region_code) or not getattr(
+        get_ruleset(region_code), "REGIONAL_BONUS_AVAILABLE", True
+    )
 
 
 def _total_max_for_region(region_code):
-    return sum(
-        (
-            category["max_score"]
-            for category in CATEGORIES
-            if not (
-                category["code"] == "regional_bonus"
-                and _region_bonus_disabled(region_code)
-            )
-        ),
-        Decimal("0"),
-    )
+    return sum((category["max_score"] for category in get_ruleset(region_code).CATEGORIES), Decimal("0"))
 
 
 def _category_for_region(category, region_code):
@@ -131,7 +114,7 @@ def _portfolio_for(user, region):
 
 def _category_cards(summary, region_code):
     cards = []
-    for category in CATEGORIES:
+    for category in get_ruleset(region_code).CATEGORIES:
         score = summary["categories"][category["code"]]
         maximum = category["max_score"]
         category_view = _category_for_region(category, region_code)
@@ -158,7 +141,7 @@ def _date_from_session(value):
         return None
 
 
-def _guest_record_from_entry(item, entry):
+def _guest_record_from_entry(item, entry, *, region_code):
     record = ScoreRecord(
         scope=item["scope"],
         category=item["category"],
@@ -174,7 +157,7 @@ def _guest_record_from_entry(item, entry):
         calculated_score=Decimal("0"),
     )
     record.guest_key = entry.get("key", "")
-    record.calculated_score = calculate_record_score(record)
+    record.calculated_score = calculate_record_score(record, region_code=region_code)
     return record
 
 
@@ -193,7 +176,7 @@ def _guest_record_to_entry(record, record_key=None):
     }
 
 
-def _guest_storage_from_payload(raw_payload):
+def _guest_storage_from_payload(raw_payload, *, region_code):
     if not raw_payload or len(raw_payload) > MAX_GUEST_PAYLOAD_SIZE:
         return {}
     try:
@@ -204,9 +187,10 @@ def _guest_storage_from_payload(raw_payload):
         return {}
 
     storage = {}
+    rules = get_ruleset(region_code)
     allowed_input_keys = {"year", "variant", "value", "extra_value"}
     for item_code, submitted_entries in submitted.items():
-        item = ITEM_BY_CODE.get(item_code)
+        item = rules.ITEM_BY_CODE.get(item_code)
         if not item or not isinstance(submitted_entries, list):
             continue
         entries = []
@@ -233,50 +217,38 @@ def _guest_storage_from_payload(raw_payload):
                 in {True, 1, "1", "true", "True"},
                 "calculated_score": "0",
             }
-            record = _guest_record_from_entry(item, entry)
+            if getattr(rules, "VALIDATE_GUEST_STORAGE", False):
+                form = ScoreRecordInputForm(item, data={
+                    **entry, **entry["input_data"],
+                })
+                if not form.is_valid():
+                    continue
+                record = form.apply_to_record(ScoreRecord(
+                    item_code=item_code, category=item["category"], scope=item["scope"],
+                ))
+                record.calculated_score = calculate_record_score(record, region_code=region_code)
+                entry = _guest_record_to_entry(record, entry["key"])
+            else:
+                record = _guest_record_from_entry(item, entry, region_code=region_code)
             entry["calculated_score"] = str(record.calculated_score)
             entries.append(entry)
         storage[item_code] = entries
     return storage
 
 
-def _guest_record_map(storage):
+def _guest_record_map(storage, *, region_code):
     record_map = {}
     for item_code, entries in storage.items():
-        item = ITEM_BY_CODE.get(item_code)
+        item = get_ruleset(region_code).ITEM_BY_CODE.get(item_code)
         if item:
             record_map[item_code] = [
-                _guest_record_from_entry(item, entry) for entry in entries
+                _guest_record_from_entry(item, entry, region_code=region_code) for entry in entries
             ]
     return record_map
 
 
-def _mark_selected_records(records, item_code):
-    records = list(records)
-    for record in records:
-        record.is_score_selected = False
-        record.is_completion_selected = False
-        record.score_weight_percent = None
-        record.applied_score = Decimal("0")
-        record.display_calculated_score = record.calculated_score
-    if item_code == "work_performance":
-        weights = (34, 33, 33)
-        for index, record in enumerate(selected_work_performance_records(records)):
-            record.is_score_selected = True
-            record.score_weight_percent = weights[index]
-    elif item_code == "training_job":
-        selected = selected_training_job_records(records)
-        for record in records:
-            record.display_calculated_score = training_job_record_score(record)
-        for record in selected:
-            record.is_completion_selected = True
-        if selected:
-            selected[0].is_score_selected = True
-    elif item_code == "common_training_credit":
-        for record, contribution in common_training_credit_contributions(records):
-            record.applied_score = contribution
-            record.is_score_selected = contribution > 0
-    return records
+def _mark_selected_records(records, item_code, region_code):
+    return mark_selected_records(records, item_code, region_code=region_code)
 
 
 def _guest_region(request):
@@ -285,13 +257,20 @@ def _guest_region(request):
 
 
 def _records_for_available_region(record_map, region_code):
-    if not _region_bonus_disabled(region_code):
-        return record_map
-    return {
-        item_code: records
-        for item_code, records in record_map.items()
-        if ITEM_BY_CODE[item_code]["category"] != "regional_bonus"
-    }
+    rules = get_ruleset(region_code)
+    return {code: records for code, records in record_map.items() if code in rules.ITEM_BY_CODE}
+
+
+
+def _guest_storage_key(region_code):
+    return f"{GUEST_SCORE_LOCAL_KEY}.{region_code}.{get_ruleset(region_code).RULE_YEAR}"
+
+
+def _rules_pending_response(request, region_code):
+    return render(request, "calc/new/rules_pending.html", {
+        "region": REGION_BY_CODE[region_code],
+        "is_guest": not request.user.is_authenticated,
+    }, status=403 if request.method == "POST" else 200)
 
 
 def welcome(request):
@@ -378,8 +357,8 @@ def region_select(request):
 
         request.session["view_region"] = region
         if not request.user.is_authenticated:
-            if _region_bonus_disabled(region):
-                messages.info(request, "전국 공통 항목은 계산할 수 있지만 이 지역의 선택가산점은 아직 준비 중입니다.")
+            if not rules_available(region):
+                messages.info(request, "이 지역의 전체 점수 계산 기준은 준비 중입니다.")
             return redirect("calc:guest_score_index")
 
         if action == "set_primary" or not profile.region:
@@ -392,16 +371,16 @@ def region_select(request):
                 messages.success(request, "내 지역을 변경했습니다. 기존 기록은 참고 계산으로 보관됩니다.")
             else:
                 messages.success(request, "내 지역을 설정했습니다.")
-            if _region_bonus_disabled(region):
-                messages.info(request, "이 지역의 선택가산점은 준비 중이어서 입력·편집할 수 없습니다.")
+            if not rules_available(region):
+                messages.info(request, "이 지역의 전체 점수 계산 기준은 준비 중이어서 입력·편집할 수 없습니다.")
             return redirect("calc:dashboard")
 
         if profile.region == region:
             return redirect("calc:dashboard")
 
         _portfolio_for(request.user, region)
-        if _region_bonus_disabled(region):
-            messages.info(request, f"{REGION_BY_CODE[region]['name']} 참고 계산을 열었습니다. 선택가산점은 준비 중입니다.")
+        if not rules_available(region):
+            messages.info(request, f"{REGION_BY_CODE[region]['name']} 점수 계산 기준은 준비 중입니다.")
         else:
             messages.info(request, f"{REGION_BY_CODE[region]['name']} 참고 계산을 열었습니다.")
         return redirect("calc:score_index")
@@ -423,20 +402,23 @@ def guest_score_index(request, category_code=None):
             return redirect("calc:score_index_category", category_code=category_code)
         return redirect("calc:score_index")
 
+    region_code = _guest_region(request)
+    if not rules_available(region_code):
+        return _rules_pending_response(request, region_code)
+    rules = get_ruleset(region_code)
     storage = (
-        _guest_storage_from_payload(request.POST.get("guest_payload", ""))
+        _guest_storage_from_payload(request.POST.get("guest_payload", ""), region_code=region_code)
         if request.method == "POST"
         else {}
     )
-    region_code = _guest_region(request)
     record_map = _records_for_available_region(
-        _guest_record_map(storage),
+        _guest_record_map(storage, region_code=region_code),
         region_code,
     )
-    summary = score_summary_from_records(record_map)
+    summary = score_summary_from_records(record_map, region_code=region_code)
     selected_category = None
     if category_code:
-        selected_category = CATEGORY_BY_CODE.get(category_code)
+        selected_category = rules.CATEGORY_BY_CODE.get(category_code)
         if not selected_category:
             raise Http404("점수 영역을 찾을 수 없습니다.")
         selected_category = _category_for_region(selected_category, region_code)
@@ -467,7 +449,8 @@ def guest_score_index(request, category_code=None):
             "selected_item_rows": selected_item_rows,
             "guest_storage": storage,
             "guest_hydrated": request.method == "POST",
-            "guest_local_key": GUEST_SCORE_LOCAL_KEY,
+            "guest_local_key": _guest_storage_key(region_code),
+            "guest_legacy_key": GUEST_SCORE_LOCAL_KEY if region_code == "jeonnam" else "",
         },
     )
 
@@ -478,17 +461,20 @@ def guest_score_item(request, item_code, record_key=None):
             return redirect("calc:score_item", item_code=item_code)
         return redirect("calc:score_item", item_code=item_code)
 
-    item = ITEM_BY_CODE.get(item_code)
+    region_code = _guest_region(request)
+    if not rules_available(region_code):
+        return _rules_pending_response(request, region_code)
+    rules = get_ruleset(region_code)
+    item = rules.ITEM_BY_CODE.get(item_code)
     if not item:
         raise Http404("점수 항목을 찾을 수 없습니다.")
-    region_code = _guest_region(request)
     regional_bonus_disabled = (
         item["category"] == "regional_bonus"
         and _region_bonus_disabled(region_code)
     )
     action = request.POST.get("action", "") if request.method == "POST" else ""
     storage = (
-        _guest_storage_from_payload(request.POST.get("guest_payload", ""))
+        _guest_storage_from_payload(request.POST.get("guest_payload", ""), region_code=region_code)
         if request.method == "POST"
         else {}
     )
@@ -503,7 +489,7 @@ def guest_score_item(request, item_code, record_key=None):
             raise Http404("임시 계산 항목을 찾을 수 없습니다.")
 
     editing_record = (
-        _guest_record_from_entry(item, editing_entry) if editing_entry else None
+        _guest_record_from_entry(item, editing_entry, region_code=region_code) if editing_entry else None
     )
     form = None
     if not item.get("input_disabled") and not regional_bonus_disabled:
@@ -519,7 +505,7 @@ def guest_score_item(request, item_code, record_key=None):
                 item_code=item_code,
             )
             form.apply_to_record(transient_record)
-            transient_record.calculated_score = calculate_record_score(transient_record)
+            transient_record.calculated_score = calculate_record_score(transient_record, region_code=region_code)
             new_entry = _guest_record_to_entry(transient_record, record_key)
             if editing_entry:
                 entries = [
@@ -540,32 +526,25 @@ def guest_score_item(request, item_code, record_key=None):
             )
 
     record_map = _records_for_available_region(
-        _guest_record_map(storage),
+        _guest_record_map(storage, region_code=region_code),
         region_code,
     )
     records = _mark_selected_records(
         record_map.get(item_code, []),
-        item_code,
+        item_code, region_code,
     )
-    item_score = calculate_item_score_from_records(item_code, records)
-    category = _category_for_region(CATEGORY_BY_CODE[item["category"]], region_code)
+    item_score = calculate_item_score_from_records(item_code, records, region_code=region_code)
+    category = _category_for_region(rules.CATEGORY_BY_CODE[item["category"]], region_code)
     category_items = category["items"]
     index = category_items.index(item)
     previous_item = category_items[index - 1] if index > 0 else None
     next_item = category_items[index + 1] if index + 1 < len(category_items) else None
 
-    qualification_score = None
-    qualification_gap = None
-    if item_code in {"training_qualification", "jeonnam_leadership"} and not regional_bonus_disabled:
-        qualification_score = calculate_item_score_from_records(
-            "training_qualification",
-            record_map.get("training_qualification", []),
-        )
-        qualification_gap = max(Decimal("9") - qualification_score, Decimal("0"))
+    display_context = rules.item_context(item_code, lambda code: calculate_item_score_from_records(code, record_map.get(code, []), region_code=region_code))
 
     return render(
         request,
-        "calc/new/score_item.html",
+        getattr(rules, "SCORE_ITEM_TEMPLATE", "calc/new/score_item.html"),
         {
             "is_guest": True,
             "region": REGION_BY_CODE[region_code],
@@ -579,18 +558,19 @@ def guest_score_item(request, item_code, record_key=None):
             "status_object": None,
             "previous_item": previous_item,
             "next_item": next_item,
-            "qualification_score": qualification_score,
-            "qualification_gap": qualification_gap,
+            "qualification_score": display_context.get("qualification_score"),
+            "qualification_gap": display_context.get("qualification_gap"),
             "input_disabled": item.get("input_disabled", False) or regional_bonus_disabled,
             "input_disabled_reason": (
-                f"{REGION_BY_CODE[region_code]['name']} 선택가산점 기준은 아직 준비 중입니다. 전국 공통 항목은 계속 계산할 수 있습니다."
+                f"{REGION_BY_CODE[region_code]['name']} 점수 계산 기준은 아직 준비 중입니다."
                 if regional_bonus_disabled
                 else item.get("description", "")
             ),
             "regional_bonus_disabled": regional_bonus_disabled,
             "guest_storage": storage,
             "guest_hydrated": request.method == "POST",
-            "guest_local_key": GUEST_SCORE_LOCAL_KEY,
+            "guest_local_key": _guest_storage_key(region_code),
+            "guest_legacy_key": GUEST_SCORE_LOCAL_KEY if region_code == "jeonnam" else "",
         },
     )
 
@@ -599,15 +579,19 @@ def guest_score_item(request, item_code, record_key=None):
 def guest_delete_score_record(request, item_code, record_key):
     if request.user.is_authenticated:
         return redirect("calc:score_item", item_code=item_code)
-    if item_code not in ITEM_BY_CODE:
+    region_code = _guest_region(request)
+    if not rules_available(region_code):
+        return JsonResponse({"error": "이 지역의 점수 계산 기준은 준비 중입니다."}, status=403)
+    rules = get_ruleset(region_code)
+    if item_code not in rules.ITEM_BY_CODE:
         raise Http404("점수 항목을 찾을 수 없습니다.")
-    item = ITEM_BY_CODE[item_code]
+    item = rules.ITEM_BY_CODE[item_code]
     if item["category"] == "regional_bonus" and _region_bonus_disabled(_guest_region(request)):
         return JsonResponse(
             {"error": "이 지역의 선택가산점은 아직 편집할 수 없습니다."},
             status=403,
         )
-    storage = _guest_storage_from_payload(request.POST.get("guest_payload", ""))
+    storage = _guest_storage_from_payload(request.POST.get("guest_payload", ""), region_code=region_code)
     entries = storage.get(item_code, [])
     storage[item_code] = [
         entry for entry in entries if entry.get("key") != record_key
@@ -636,6 +620,9 @@ def dashboard(request):
     if redirect_response:
         return redirect_response
     request.session["view_region"] = region
+    if not rules_available(region):
+        return _rules_pending_response(request, region)
+    rules = get_ruleset(region)
     portfolio = _portfolio_for(request.user, region)
     summary = score_summary(request.user, portfolio)
     recent_records = ScoreRecord.objects.filter(user=request.user).filter(
@@ -654,7 +641,7 @@ def dashboard(request):
             "recent_records": recent_records,
             "qualification": qualification,
             "total_max": total_max,
-            "rule_year": CURRENT_RULE_YEAR,
+            "rule_year": rules.RULE_YEAR,
             "latest_notices": Notice.objects.filter(is_published=True).order_by(
                 "-is_pinned", "-published_at", "-date"
             )[:3],
@@ -668,11 +655,14 @@ def score_index(request, category_code=None):
     if redirect_response:
         return redirect_response
     region = _viewed_region(request, profile)
+    if not rules_available(region):
+        return _rules_pending_response(request, region)
+    rules = get_ruleset(region)
     portfolio = _portfolio_for(request.user, region)
     summary = score_summary(request.user, portfolio)
     selected_category = None
     if category_code:
-        category = CATEGORY_BY_CODE.get(category_code)
+        category = rules.CATEGORY_BY_CODE.get(category_code)
         if not category:
             raise Http404("점수 영역을 찾을 수 없습니다.")
         selected_category = _category_for_region(category, region)
@@ -715,14 +705,16 @@ def _status_for_item(user, item, portfolio):
 
 @login_required
 def score_item(request, item_code, record_id=None):
-    item = ITEM_BY_CODE.get(item_code)
-    if not item:
-        raise Http404("점수 항목을 찾을 수 없습니다.")
-
     profile, _, redirect_response = _primary_region_or_redirect(request)
     if redirect_response:
         return redirect_response
     region = _viewed_region(request, profile)
+    if not rules_available(region):
+        return _rules_pending_response(request, region)
+    rules = get_ruleset(region)
+    item = rules.ITEM_BY_CODE.get(item_code)
+    if not item:
+        raise Http404("점수 항목을 찾을 수 없습니다.")
     portfolio = _portfolio_for(request.user, region)
     item_portfolio = portfolio if item["scope"] == "regional" else None
     regional_bonus_disabled = (
@@ -779,7 +771,7 @@ def score_item(request, item_code, record_id=None):
                     portfolio=item_portfolio,
                 )
             form.apply_to_record(record)
-            record.calculated_score = calculate_record_score(record)
+            record.calculated_score = calculate_record_score(record, region_code=region)
             record.full_clean()
             record.save()
             ItemStatus.objects.filter(
@@ -807,7 +799,7 @@ def score_item(request, item_code, record_id=None):
 
     records = _mark_selected_records(
         [] if regional_bonus_disabled else records_for_item(request.user, item, portfolio),
-        item_code,
+        item_code, region,
     )
     item_score = (
         Decimal("0")
@@ -815,21 +807,17 @@ def score_item(request, item_code, record_id=None):
         else calculate_item_score(request.user, item_code, portfolio)
     )
     status_object = None if regional_bonus_disabled else _status_for_item(request.user, item, portfolio)
-    category = _category_for_region(CATEGORY_BY_CODE[item["category"]], region)
+    category = _category_for_region(rules.CATEGORY_BY_CODE[item["category"]], region)
     category_items = category["items"]
     index = category_items.index(item)
     previous_item = category_items[index - 1] if index > 0 else None
     next_item = category_items[index + 1] if index + 1 < len(category_items) else None
 
-    qualification_score = None
-    qualification_gap = None
-    if item_code in {"training_qualification", "jeonnam_leadership"} and not regional_bonus_disabled:
-        qualification_score = calculate_item_score(request.user, "training_qualification", portfolio)
-        qualification_gap = max(Decimal("9") - qualification_score, Decimal("0"))
+    display_context = rules.item_context(item_code, lambda code: calculate_item_score(request.user, code, portfolio))
 
     return render(
         request,
-        "calc/new/score_item.html",
+        getattr(rules, "SCORE_ITEM_TEMPLATE", "calc/new/score_item.html"),
         {
             "profile": profile,
             "portfolio": portfolio,
@@ -844,11 +832,11 @@ def score_item(request, item_code, record_id=None):
             "status_object": status_object,
             "previous_item": previous_item,
             "next_item": next_item,
-            "qualification_score": qualification_score,
-            "qualification_gap": qualification_gap,
+            "qualification_score": display_context.get("qualification_score"),
+            "qualification_gap": display_context.get("qualification_gap"),
             "input_disabled": item.get("input_disabled", False) or regional_bonus_disabled,
             "input_disabled_reason": (
-                f"{REGION_BY_CODE[region]['name']} 선택가산점 기준은 아직 준비 중입니다. 전국 공통 항목은 계속 입력·저장할 수 있습니다."
+                f"{REGION_BY_CODE[region]['name']} 점수 계산 기준은 아직 준비 중입니다."
                 if regional_bonus_disabled
                 else item.get("description", "")
             ),
@@ -861,12 +849,9 @@ def score_item(request, item_code, record_id=None):
 @require_POST
 def delete_score_record(request, record_id):
     record = get_object_or_404(ScoreRecord, id=record_id, user=request.user)
-    item = ITEM_BY_CODE.get(record.item_code)
-    if not item:
-        raise Http404("점수 항목을 찾을 수 없습니다.")
     if (
-        item["category"] == "regional_bonus"
-        and record.portfolio
+        record.portfolio
+        and record.category == "regional_bonus"
         and _region_bonus_disabled(record.portfolio.region)
     ):
         messages.info(request, "이 지역의 선택가산점은 아직 편집할 수 없습니다.")
@@ -875,6 +860,10 @@ def delete_score_record(request, record_id):
     if redirect_response:
         return redirect_response
     region = record.portfolio.region if record.portfolio else _viewed_region(request, profile)
+    if not rules_available(region):
+        return _rules_pending_response(request, region)
+    if record.item_code not in get_ruleset(region).ITEM_BY_CODE:
+        raise Http404("점수 항목을 찾을 수 없습니다.")
     portfolio = _portfolio_for(request.user, region)
     before = score_summary(request.user, portfolio)
     item_code = record.item_code
@@ -921,13 +910,16 @@ def records_overview(request):
     profile, region, redirect_response = _primary_region_or_redirect(request)
     if redirect_response:
         return redirect_response
+    if not rules_available(region):
+        return _rules_pending_response(request, region)
+    rules = get_ruleset(region)
     portfolio = _portfolio_for(request.user, region)
     summary = score_summary(request.user, portfolio)
     groups = []
-    for category in CATEGORIES:
+    for category in rules.CATEGORIES:
         item_groups = []
         for item in category["items"]:
-            records = list(records_for_item(request.user, item, portfolio))
+            records = _mark_selected_records(records_for_item(request.user, item, portfolio), item["code"], region)
             item_groups.append(
                 {
                     "item": item,
@@ -974,16 +966,20 @@ def resources(request):
         region_code = request.GET.get("region") or request.session.get("view_region")
     if region_code not in REGION_BY_CODE:
         return redirect("calc:region_select")
+    rules = get_ruleset(region_code) if rules_available(region_code) else None
     return render(
         request,
         "calc/new/resources.html",
         {
             "profile": profile,
             "region": REGION_BY_CODE[region_code],
-            "rule_year": CURRENT_RULE_YEAR,
-            "rule_date": CURRENT_RULE_DATE,
-            "roster_date": CURRENT_ROSTER_DATE,
-            "region_implemented": region_code in IMPLEMENTED_REGION_CODES,
+            "rule_year": rules.RULE_YEAR if rules else None,
+            "rule_date": rules.RULE_DATE if rules else None,
+            "roster_date": rules.ROSTER_DATE if rules else None,
+            "region_implemented": rules is not None,
+            "manual_static_path": getattr(rules, "MANUAL_STATIC_PATH", ""),
+            "resource_notes": getattr(rules, "RESOURCE_NOTES", []),
+            "source_links": getattr(rules, "SOURCE_LINKS", []),
         },
     )
 

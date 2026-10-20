@@ -1,11 +1,10 @@
-from datetime import date
-
 from django import forms
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 
 from .models import KoreanHistoryQualification, Notice, Profile, ScoreRecord, Suggestion
+from .scoring.registry import get_ruleset
 
 
 class RegisterForm(forms.Form):
@@ -158,18 +157,9 @@ class ScoreRecordInputForm(forms.Form):
         end = cleaned.get("end_date")
         if start and end and end < start:
             self.add_error("end_date", "종료일은 시작일보다 빠를 수 없습니다.")
-        if self.item.get("code") == "training_job":
-            completion_date = cleaned.get("event_date")
-            hours = cleaned.get("extra_value")
-            if completion_date and not (
-                date(2016, 1, 1) <= completion_date <= date(2026, 2, 28)
-            ):
-                self.add_error(
-                    "event_date",
-                    "2026년 평정에서는 2016.1.1.부터 2026.2.28.까지 수료한 연수만 인정됩니다.",
-                )
-            if hours is not None and hours < 60:
-                self.add_error("extra_value", "60시간 이상 직무연수만 인정됩니다.")
+        rules = get_ruleset(self.item["rule_region"], self.item["rule_year"])
+        for field_name, message in rules.validate_input(self.item, cleaned):
+            self.add_error(field_name, message)
         return cleaned
 
     def apply_to_record(self, record):

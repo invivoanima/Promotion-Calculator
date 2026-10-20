@@ -9,7 +9,7 @@
     <title>{% block title %}승진점수 계산기{% endblock %}</title>
     <link rel="icon" href="{% static 'calc/images/promotion-mark.svg' %}" type="image/svg+xml">
     <link rel="stylesheet" href="{% static 'calc/app.css' %}?v=20260910-legal-links-1">
-    <script src="{% static 'calc/app.js' %}?v=20260830-local-storage-2" defer></script>
+    <script src="{% static 'calc/app.js' %}?v=20261019-regional-rules-1" defer></script>
   </head>
   <body>
     <div class="app-shell">
@@ -86,6 +86,7 @@
         {% endif %}
 
         <main class="page-content">
+          {% if scoring_rule_notice %}<section class="notice-card muted-card" role="note"><div><strong>{{ viewed_region.name }} · 기본 계산 기준</strong><p>{{ scoring_rule_notice }}</p></div></section>{% endif %}
           {% block content %}{% endblock %}
         </main>
         {% if not request.user.is_authenticated %}

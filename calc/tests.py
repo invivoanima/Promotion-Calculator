@@ -9,7 +9,7 @@ from django.urls import reverse
 
 from django.conf import settings
 
-from .catalog import CATEGORIES, ITEMS, ITEM_BY_CODE
+from .scoring.regions.jeonnam.v2026.catalog import CATEGORIES, ITEMS, ITEM_BY_CODE
 from .models import (
     ItemStatus,
     KoreanHistoryQualification,
@@ -234,7 +234,7 @@ class FlowTests(TestCase):
         self.assertEqual(user.profile.primary_region, "jeonnam")
         self.assertTrue(RegionPortfolio.objects.filter(user=user, region="jeonnam").exists())
 
-    def test_unimplemented_region_can_be_primary_with_regional_bonus_disabled(self):
+    def test_other_region_can_be_primary_with_non_optional_scoring_enabled(self):
         response = self.client.post(
             reverse("calc:region_select"),
             {"region": "seoul", "action": "set_primary"},
@@ -245,8 +245,8 @@ class FlowTests(TestCase):
         self.assertTrue(RegionPortfolio.objects.filter(user=self.user, region="seoul").exists())
 
         response = self.client.get(reverse("calc:dashboard"))
-        self.assertContains(response, "서울특별시 선택가산점")
-        self.assertContains(response, "입력·편집 비활성화")
+        self.assertContains(response, "교육청 원문 대조 전 기본 계산")
+        self.assertContains(response, "현재 예상 총점")
         self.assertNotContains(
             response,
             f'href="{reverse("calc:score_index_category", args=["regional_bonus"])}"',
@@ -255,16 +255,12 @@ class FlowTests(TestCase):
         response = self.client.get(
             reverse("calc:score_item", args=["jeonnam_good_lesson"])
         )
-        self.assertContains(response, "서울특별시 선택가산점 기준은 아직 준비 중입니다.")
-        self.assertNotContains(response, "data-record-form")
+        self.assertEqual(response.status_code, 404)
         response = self.client.post(
             reverse("calc:score_item", args=["jeonnam_good_lesson"]),
             {"action": "record_form", "year": "2025", "value": "1"},
         )
-        self.assertRedirects(
-            response,
-            reverse("calc:score_item", args=["jeonnam_good_lesson"]),
-        )
+        self.assertEqual(response.status_code, 404)
         self.assertFalse(
             ScoreRecord.objects.filter(
                 user=self.user,
@@ -574,21 +570,20 @@ class GuestCalculatorTests(TestCase):
                 )
                 self.assertEqual(response.status_code, 200)
 
-    def test_guest_can_select_unimplemented_region_with_regional_bonus_disabled(self):
+    def test_guest_can_select_other_region_with_non_optional_scoring_enabled(self):
         response = self.client.post(
             reverse("calc:region_select"),
             {"region": "seoul", "action": "view"},
         )
         self.assertRedirects(response, reverse("calc:guest_score_index"))
         response = self.client.get(reverse("calc:guest_score_index"))
-        self.assertContains(response, "서울특별시 선택가산점")
-        self.assertContains(response, "입력·편집 비활성화")
+        self.assertContains(response, "교육청 원문 대조 전 기본 계산")
+        self.assertContains(response, "현재 점수 / 총점")
 
         response = self.client.get(
             reverse("calc:guest_score_item", args=["jeonnam_good_lesson"])
         )
-        self.assertContains(response, "서울특별시 선택가산점 기준은 아직 준비 중입니다.")
-        self.assertNotContains(response, "data-record-form")
+        self.assertEqual(response.status_code, 404)
 
         response = self.client.get(
             reverse("calc:guest_score_item", args=["career_history"])

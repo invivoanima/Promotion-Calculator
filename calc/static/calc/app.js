@@ -54,10 +54,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const guestRoot = document.querySelector("[data-guest-calculator]");
   if (guestRoot) {
     const storageKey = guestRoot.dataset.guestLocalKey;
+    const legacyStorageKey = guestRoot.dataset.guestLegacyKey;
 
     const readGuestState = () => {
       try {
-        const raw = window.localStorage.getItem(storageKey);
+        const raw = window.localStorage.getItem(storageKey) ?? (legacyStorageKey ? window.localStorage.getItem(legacyStorageKey) : null);
         const parsed = raw ? JSON.parse(raw) : {};
         return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
       } catch (error) {
@@ -119,6 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
     resetButton?.addEventListener("click", () => {
       if (!window.confirm("이 브라우저에 저장된 계산값을 모두 삭제할까요?")) return;
       window.localStorage.removeItem(storageKey);
+      if (legacyStorageKey) window.localStorage.removeItem(legacyStorageKey);
       window.location.assign(resetButton.dataset.resetUrl);
     });
 

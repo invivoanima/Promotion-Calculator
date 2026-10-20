@@ -4,17 +4,17 @@
   <header class="page-heading centered">
     <span class="eyebrow">지역별 평정 기준</span>
     <h1>어느 지역의 기준을 확인할까요?</h1>
-    <p>모든 지역을 선택할 수 있습니다. 준비 중인 지역은 전국 공통 항목을 이용할 수 있고 선택가산점 입력은 비활성화됩니다.</p>
+    <p>내 지역을 선택하면 해당 지역의 입력·계산 모듈을 사용합니다. 전남 외 지역은 선택가산점을 제외한 기본 계산을 제공하며, 교육청 원문 대조 여부는 각 지역 안내에서 확인할 수 있습니다.</p>
   </header>
   <div class="region-grid">
     {% for region in regions %}
       <article class="region-card {% if not region.implemented %}pending{% endif %} {% if profile.region == region.code %}primary{% endif %}">
         <div class="region-card-top">
           <span class="region-symbol">{{ region.name|slice:':1' }}</span>
-          {% if profile.region == region.code %}<span class="badge success">내 지역</span>{% elif selected_region == region.code %}<span class="badge">선택한 지역</span>{% elif region.implemented %}<span class="badge">전체 이용 가능</span>{% else %}<span class="badge muted">선택가산점 준비 중</span>{% endif %}
+          {% if profile.region == region.code %}<span class="badge success">내 지역</span>{% elif selected_region == region.code %}<span class="badge">선택한 지역</span>{% elif region.regional_bonus_available %}<span class="badge">전체 이용 가능</span>{% elif region.implemented %}<span class="badge">선택가산점 제외 이용 가능</span>{% else %}<span class="badge muted">전체 계산 기준 준비 중</span>{% endif %}
         </div>
         <h2>{{ region.name }}</h2>
-        <p>{% if region.implemented %}초등교사 · 2026년 전체 기준 이용 가능{% else %}전국 공통 항목 이용 가능 · 선택가산점 준비 중{% endif %}</p>
+        <p>{% if region.regional_bonus_available %}초등교사 · {{ region.rule_year }}년 전체 기준 이용 가능{% elif region.implemented %}초등교사 · {{ region.rule_year }}년 경력·근무성적·연수·공통가산점 기본 계산<br>교육청 원문 대조 전 · 선택가산점 준비 중{% else %}지역별 전체 계산 기준 준비 중{% endif %}</p>
         <form method="post">
           {% csrf_token %}<input type="hidden" name="region" value="{{ region.code }}">
           {% if request.user.is_authenticated and not profile.region %}

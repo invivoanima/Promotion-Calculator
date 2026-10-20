@@ -2,7 +2,7 @@
 {% load calc_extras %}
 {% block title %}{% if is_guest %}점수 계산해보기{% else %}점수 입력{% endif %} · 승진점수 계산기{% endblock %}
 {% block content %}
-  <div{% if is_guest %} data-guest-calculator data-guest-hydrated="{{ guest_hydrated|yesno:'true,false' }}" data-guest-local-key="{{ guest_local_key }}"{% endif %}>
+  <div{% if is_guest %} data-guest-calculator data-guest-hydrated="{{ guest_hydrated|yesno:'true,false' }}" data-guest-local-key="{{ guest_local_key }}" data-guest-legacy-key="{{ guest_legacy_key }}"{% endif %}>
   <header class="page-heading score-index-heading">
     <div>
       <span class="eyebrow">{{ region.name }}</span>
@@ -21,6 +21,7 @@
     </section>
   {% endif %}
   {% if selected_category %}
+    {% if selected_category.input_disabled %}<section class="notice-card muted-card"><div><h2>선택가산점 준비 중</h2><p>경력·근무성적·연수·공통가산점은 각 입력 메뉴에서 계산할 수 있습니다. 선택가산점은 현재 총점에 포함되지 않습니다.</p></div></section>{% endif %}
     <div class="item-list">
       {% for row in selected_item_rows %}
         {% with item=row.item %}
